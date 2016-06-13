@@ -1,0 +1,14 @@
+html {
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	padding: 0;
+	margin: 0;
+}
+
+#content {
+	padding-left: 10em;
+	padding-right: 10em;
+}

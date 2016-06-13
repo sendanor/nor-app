@@ -1,0 +1,29 @@
+{
+  "name": "nor-app",
+  "version": "0.0.1",
+  "description": "Sendanor Application Module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://jhh@bitbucket.sendanor.fi/scm/nor/nor-app.git"
+  },
+  "author": "Jaakko-Heikki Heusala <jhh@sendanor.com>",
+  "license": "MIT",
+  "dependencies": {
+    "angular": "^1.5.6",
+    "angular-sanitize": "^1.5.6",
+    "angular-ui-router": "^0.3.1",
+    "express": "^4.13.4",
+    "font-awesome": "^4.6.3",
+    "moment": "^2.13.0",
+    "nor-debug": "^0.2.0",
+    "nor-is": "^0.1.18",
+    "nor-nopg": "^0.1.123",
+    "pg": "^4.5.6",
+    "purecss": "^0.6.0",
+    "q": "^1.4.1"
+  }
+}
