@@ -2,6 +2,7 @@
 <html ng-app="norApp" lang="en" ng-controller="norCtrl">
 <head>
   <meta charset="utf-8">
+  <base href="/">
   <title>{{title}}</title>
   <link rel="stylesheet" href="/_libs/font-awesome/css/font-awesome.min.css">
   <link rel="stylesheet" href="/_libs/purecss/pure-min.css">
@@ -19,11 +20,28 @@
 	</div>
 </div>
 
-<div id="content">
+<div id="content" ng-if="content && content.$type === 'form'">
+    <h1>{{title}}</h1>
 
-  <h1>{{title}}</h1>
+	<form class="pure-form pure-form-aligned">
+	    <fieldset>
+	        <div class="pure-control-group" ng-repeat="field in content.$fields">
+	            <label for="field-{{field.name}}">{{field.label||field.name}}</label>
+	            <input id="field-{{field.name}}" name="{{field.name}}" type="{{field.type}}" placeholder="{{field.placeholder||''}}">
+	        </div>
 
-  <p>{{content}}</p>
+	        <div class="pure-controls">
+	            <button type="submit" class="pure-button pure-button-primary">Submit</button>
+	        </div>
+	    </fieldset>
+	</form>
+
+</div>
+
+<div id="content" ng-if="content && content.$type !== 'form'">
+    <h1>{{title}}</h1>
+    <p>{{content}}</p>
+</div>
 
 </div>
 

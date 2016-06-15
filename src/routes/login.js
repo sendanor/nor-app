@@ -13,7 +13,13 @@ function api_builder(opts) {
 	return function(req, res) {
 		return {
 			'title': 'Login',
-			'content': ''
+			'content': {
+				'$type': 'form',
+				'$fields': [
+					{'type':'text','name':'username'},
+					{'type':'password','name':'password'}
+				]
+			}
 		};
 	};
 }
