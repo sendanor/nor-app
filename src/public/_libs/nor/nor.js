@@ -1,10 +1,11 @@
 angular.module('norApp', []).controller('norCtrl', function($scope, $http, $log) {
 
 	$scope.app = {
-		name: 'UnnamedApp'
+		name: 'Unnamed-App',
+		menu: []
 	};
 
-	$scope.title = 'Index';
+	$scope.title = 'Undefined Title';
 
 	$http({
 		method: 'GET',
