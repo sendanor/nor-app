@@ -26,4 +26,8 @@ angular.module('norApp', [
 		$log.error("error: ", response);
 	});
 
+}).controller('formCtrl', function($scope, $log) {
+	$scope.submit = function() {
+		$log.debug("form submit called");
+	};
 });

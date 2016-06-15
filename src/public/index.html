@@ -23,7 +23,7 @@
 <div id="content" ng-if="content && content.$type === 'form'">
     <h1>{{title}}</h1>
 
-	<form class="pure-form pure-form-aligned">
+	<form name="form" class="pure-form pure-form-aligned" ng-controller="formCtrl" ng-submit="submit()">
 	    <fieldset>
 	        <div class="pure-control-group" ng-repeat="field in content.$fields">
 	            <label for="field-{{field.name}}">{{field.label||field.name}}</label>
@@ -31,7 +31,7 @@
 	        </div>
 
 	        <div class="pure-controls">
-	            <button type="submit" class="pure-button pure-button-primary">Submit</button>
+	            <button name="submit" type="submit" class="pure-button pure-button-primary">Submit</button>
 	        </div>
 	    </fieldset>
 	</form>
