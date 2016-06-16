@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <base href="/">
   <title>{{title}}</title>
+  <link rel="stylesheet" href="/_libs/datatables.net/css/jquery.dataTables.css">
   <link rel="stylesheet" href="/_libs/font-awesome/css/font-awesome.min.css">
   <link rel="stylesheet" href="/_libs/purecss/pure-min.css">
   <link rel="stylesheet" href="/_libs/nor/nor.css">
@@ -13,20 +14,20 @@
 
 <div id="header">
 	<div class="main-menu pure-menu pure-menu-horizontal">
-	    <a href="/" class="pure-menu-heading pure-menu-link">{{app.name}}</a>
+	    <a href="/" class="pure-menu-heading pure-menu-link">{{$app.name}}</a>
 	    <ul class="pure-menu-list">
-	        <li class="pure-menu-item" ng-repeat="link in app.menu"><a href="{{link.href}}" class="pure-menu-link">{{link.title}}</a></li>
+	        <li class="pure-menu-item" ng-repeat="link in $app.menu"><a href="{{link.href}}" class="pure-menu-link">{{link.title}}</a></li>
 	    </ul>
 	</div>
 </div>
 
-<div id="content" ng-if="content && content.$type === 'form'">
+<div id="content" ng-if="$type === 'form'">
 
     <h1>{{title}}</h1>
 
 	<form name="form" class="pure-form pure-form-aligned" ng-controller="formCtrl" ng-submit="submit(form)">
 	    <fieldset>
-	        <div class="pure-control-group" ng-repeat="field in content.$fields">
+	        <div class="pure-control-group" ng-repeat="field in content">
 	            <label for="field-{{field.name}}">{{field.label||field.name}}</label>
 	            <input id="field-{{field.name}}" ng-model="data[field.name]" name="{{field.name}}" type="{{field.type}}" placeholder="{{field.placeholder||''}}">
 	        </div>
@@ -39,7 +40,28 @@
 
 </div>
 
-<div id="content" ng-if="content && content.$type !== 'form'">
+<div id="content" ng-if="$type === 'table'">
+
+    <h1>{{title}}</h1>
+
+	<table datatable="" class="row-border hover">
+    <thead>
+    <tr>
+        <th ng-repeat="cell in $columns">{{$labels[cell] || cell}}</th>
+		<th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="row in content">
+        <td ng-repeat="cell in $columns">{{row[cell]}}</td>
+		<td><a href="{{$ref+"/"+row.$id}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a></td>
+    </tr>
+    </tbody>
+	</table>
+
+</div>
+
+<div id="content" ng-if="($type !== 'form') && ($type !== 'table')">
     <h1>{{title}}</h1>
     <p>{{content}}</p>
 </div>
@@ -50,9 +72,12 @@
 </div>
 
 <!-- Scripts -->
+<script src="/_libs/jquery/jquery.min.js"></script>
+<script src="/_libs/datatables.net/js/jquery.dataTables.js"></script>
 <script src="/_libs/angular/angular.min.js"></script>
 <script src="/_libs/angular-sanitize/angular-sanitize.min.js"></script>
 <script src="/_libs/angular-ui-router/angular-ui-router.min.js"></script>
+<script src="/_libs/angular-datatables/angular-datatables.min.js"></script>
 <script src="/_libs/nor/nor.js"></script>
 
 </body>

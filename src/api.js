@@ -8,6 +8,7 @@ var express = require('express');
 var merge = require('merge');
 var FS = require('fs');
 var _Q = require('q');
+var HTTPError = require('./HTTPError.js');
 var bodyParser = require('body-parser');
 
 /** Handle promise based functions */
@@ -22,9 +23,28 @@ function route_builder(f) {
 			debug.assert(body).is('object');
 			res.json(body);
 		}).fail(function(err) {
-			res.json({
-				'error': 'Internal API Error'
-			});
+
+			if(err instanceof HTTPError) {
+				res.status(err.code);
+				res.json({
+					'error': ''+err.message,
+					'code': err.code
+				});
+				return;
+			} else {
+				res.status(500);
+			}
+
+			if(process.env.NODE_ENV === 'production') {
+				res.json({
+					'error': 'Internal API Error'
+				});
+			} else {
+				res.json({
+					'error': ''+err,
+					'stack': err.stack
+				});
+			}
 			debug.error(err);
 		}).done();
 	};
@@ -46,7 +66,13 @@ function merge_settled_results(results) {
 			debug.assert(result.value).is('object');
 			Object.keys(result.value).forEach(function(key) {
 				if(body.hasOwnProperty(key)) {
-					if(is.object(result.value[key])) {
+					if(is.array(result.value[key])) {
+						if(is.array(body[key])) {
+							body[key] = body[key].concat(result.value[key]);
+						} else {
+							body[key] = result.value[key];
+						}
+					} else if(is.object(result.value[key])) {
 						body[key] = merge(body[key], result.value[key]);
 					} else {
 						body[key] = result.value[key];

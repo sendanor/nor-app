@@ -16,13 +16,11 @@ function get_handler(opts) {
 	return function(req, res) {
 		return {
 			'title': 'Login',
-			'content': {
-				'$type': 'form',
-				'$fields': [
-					{'type':'text','name':'username', 'label':'Username'},
-					{'type':'password','name':'password', 'label':'Password'}
-				]
-			}
+			'$type': 'form',
+			'content': [
+				{'type':'text','name':'username', 'label':'Username'},
+				{'type':'password','name':'password', 'label':'Password'}
+			]
 		};
 	};
 }

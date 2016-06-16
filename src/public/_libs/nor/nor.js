@@ -1,4 +1,5 @@
 angular.module('norApp', [
+	'datatables'
 ]).config(function($locationProvider) {
 	$locationProvider.html5Mode(true);
 }).controller('norCtrl', function($scope, $http, $log, $location) {
@@ -22,7 +23,7 @@ angular.module('norApp', [
 		});
 	}
 
-	$scope.app = {
+	$scope.$app = {
 		name: 'Unnamed-App',
 		menu: []
 	};

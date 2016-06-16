@@ -26,10 +26,16 @@ function api_builder(opts) {
 			user = req.session.user;
 		}
 
+		var url = req.url;
+		if( (url.length >= 1) && (url[0]==='/')) {
+			url = url.slice(1);
+		}
+
 		return {
-			'$ref': ref(req, base_path),
+			'$ref': ref(req, base_path, url),
+			'$resource': url,
 			'$user': user,
-			'app': {
+			'$app': {
 				'name': opts && opts.$parent && opts.$parent.name || 'unnamed-app',
 				'menu': routes.filter(function(route) {
 
