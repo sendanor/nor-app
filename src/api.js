@@ -8,6 +8,7 @@ var express = require('express');
 var merge = require('merge');
 var FS = require('fs');
 var _Q = require('q');
+var bodyParser = require('body-parser');
 
 /** Handle promise based functions */
 function route_builder(f) {
@@ -75,7 +76,10 @@ function get_routes(routes, paths) {
 
 	debug.log('paths = ', paths, '\nroutes = ', routes);
 
-	var result = {};
+	var result = {
+		'$get': {},
+		'$post': {}
+	};
 
 	paths.forEach(function(path) {
 		var d = require_if_exists(path +'/_default.js');
@@ -95,11 +99,11 @@ function get_routes(routes, paths) {
 				return;
 			}
 
-			if(!result.hasOwnProperty(route)) {
-				result[route] = [];
+			if(!result.$get.hasOwnProperty(route)) {
+				result.$get[route] = [];
 			}
 
-			var result_route = result[route];
+			var result_route = result.$get[route];
 			if(d && result_route.indexOf(d) < 0) {
 				result_route.push(d);
 			}
@@ -110,16 +114,56 @@ function get_routes(routes, paths) {
 	});
 
 	routes.forEach(function(route) {
-		var funcs = result[route];
-		result[route] = function(opts) {
+		var funcs = result.$get[route];
 
+		result.$get[route] = function(opts) {
 			var handlers = funcs.map(function(func) {
+				if(is.func(func)) {
+					return func;
+				} else if(is.obj(func)) {
+					if(is.func(func.$get)) {
+						return func.$get;
+					}
+				}
+			}).filter(function(func) {
+				return is.func(func);
+			}).map(function(func) {
 				return func(opts);
 			});
 
 			return function(req, res) {
 
-				debug.log(route + ': Route has ' + handlers.length + ' functions');
+				debug.log(route + ': Route has ' + handlers.length + ' GET handlers');
+
+				var promises = handlers.map(function(handler) {
+					return _Q.when( handler(req, res) );
+				});
+
+				debug.log(route + ': Created ' + promises.length + ' promises for route.');
+				return _Q.allSettled(promises).then( merge_settled_results );
+
+			};
+		};
+
+		result.$post[route] = function(opts) {
+
+			var handlers = funcs.map(function(func) {
+				if(is.func(func)) {
+					return;
+				} else if(is.obj(func)) {
+					if(is.func(func.$post)) {
+						return func.$post;
+					}
+				}
+			}).filter(function(func) {
+				return is.func(func);
+			}).map(function(func) {
+				return func(opts);
+			});
+
+			return function(req, res) {
+
+				debug.log(route + ': Route has ' + handlers.length + ' GET handlers');
 
 				var promises = handlers.map(function(handler) {
 					return _Q.when( handler(req, res) );
@@ -150,20 +194,35 @@ function app_builder(opts) {
 	debug.log('opts.routes = ', opts.routes);
 	debug.log('opts.routePaths = ', opts.routePaths);
 
+	var urlencoded_parser = bodyParser.urlencoded({ extended: false });
+	var json_parser = bodyParser.json();
+
 	var app = express();
 	var routes = get_routes(opts.routes, opts.routePaths);
 
 	debug.assert(routes).is('object');
+	debug.assert(routes.$get).is('object');
+	debug.assert(routes.$post).is('object');
 
-	debug.log('routes = ', routes);
+	debug.log('routes.$get = ', routes.$get);
+	debug.log('routes.$post = ', routes.$post);
 
-	Object.keys(routes).forEach(function(route) {
+	Object.keys(routes.$get).forEach(function(route) {
 		var path = '/';
 		if(route !== "index") {
 			path += route;
 		}
 		debug.log('Added route for '+ path);
-		app.get(path, route_builder(routes[route](opts)) );
+		app.get(path, route_builder(routes.$get[route](opts)) );
+	});
+
+	Object.keys(routes.$post).forEach(function(route) {
+		var path = '/';
+		if(route !== "index") {
+			path += route;
+		}
+		debug.log('Added POST route for '+ path);
+		app.post(path, urlencoded_parser, json_parser, route_builder(routes.$post[route](opts)) );
 	});
 
 	return app;

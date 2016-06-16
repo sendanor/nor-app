@@ -11,9 +11,13 @@ function api_builder(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
 	return function(req, res) {
+		if(req.session) {
+			req.session.user = undefined;
+		}
 		return {
+			'$user': undefined,
 			'title': 'Logout',
-			'content': ''
+			'content': 'Successfully logged out.'
 		};
 	};
 }

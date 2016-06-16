@@ -21,13 +21,14 @@
 </div>
 
 <div id="content" ng-if="content && content.$type === 'form'">
+
     <h1>{{title}}</h1>
 
-	<form name="form" class="pure-form pure-form-aligned" ng-controller="formCtrl" ng-submit="submit()">
+	<form name="form" class="pure-form pure-form-aligned" ng-controller="formCtrl" ng-submit="submit(form)">
 	    <fieldset>
 	        <div class="pure-control-group" ng-repeat="field in content.$fields">
 	            <label for="field-{{field.name}}">{{field.label||field.name}}</label>
-	            <input id="field-{{field.name}}" name="{{field.name}}" type="{{field.type}}" placeholder="{{field.placeholder||''}}">
+	            <input id="field-{{field.name}}" ng-model="data[field.name]" name="{{field.name}}" type="{{field.type}}" placeholder="{{field.placeholder||''}}">
 	        </div>
 
 	        <div class="pure-controls">

@@ -20,14 +20,36 @@ function api_builder(opts) {
 	var routes = opts.routes || [];
 
 	return function(req, res) {
+
+		var user;
+		if(req.session && (req.session.user !== undefined)) {
+			user = req.session.user;
+		}
+
 		return {
 			'$ref': ref(req, base_path),
+			'$user': user,
 			'app': {
 				'name': opts && opts.$parent && opts.$parent.name || 'unnamed-app',
 				'menu': routes.filter(function(route) {
-					if(route !== "index") {
-						return true;
+
+					var logged_in = req.session && req.session.user ? true : false;
+
+					if(route === "index") {
+						return false;
 					}
+
+					if(logged_in) {
+						if(route === "login") {
+							return false;
+						}
+						return true;
+					} else {
+						if(route === "login") {
+							return true;
+						}
+					}
+
 				}).map(function(route) {
 					return {'$ref': ref(req, base_path, route), 'href':'/'+route, 'title': get_title(route)};
 				})
