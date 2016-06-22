@@ -6,6 +6,7 @@
   <title>{{title}}</title>
   <link rel="stylesheet" href="/_libs/datatables.net/css/jquery.dataTables.css">
   <link rel="stylesheet" href="/_libs/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/_libs/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/_libs/purecss/pure-min.css">
   <link rel="stylesheet" href="/_libs/nor/nor.css">
   <link rel="stylesheet" href="/style.css">
@@ -27,6 +28,14 @@
 
 	<form name="form" class="pure-form pure-form-aligned" ng-controller="formCtrl" ng-submit="submit(form)">
 	    <fieldset>
+
+			<div id="alerts">
+				<div class="alert alert-{{alert.type}}" ng-repeat="alert in alerts">
+					<a href="#" class="close" data-dismiss="alert" aria-label="close" ng-click="closeAlert(alert)">&times;</a>
+					<strong>{{alert.title}}</strong> {{alert.content}}
+				</div>
+			</div>
+
 	        <div class="pure-control-group" ng-repeat="field in content">
 	            <label for="field-{{field.name}}">{{field.label||field.name}}</label>
 	            <input id="field-{{field.name}}" ng-model="data[field.name]" name="{{field.name}}" type="{{field.type}}" placeholder="{{field.placeholder||''}}">
@@ -78,6 +87,7 @@
 <script src="/_libs/angular-sanitize/angular-sanitize.min.js"></script>
 <script src="/_libs/angular-ui-router/angular-ui-router.min.js"></script>
 <script src="/_libs/angular-datatables/angular-datatables.min.js"></script>
+<script src="/_libs/bootstrap/js/bootstrap.min.js"></script>
 <script src="/_libs/nor/nor.js"></script>
 
 </body>

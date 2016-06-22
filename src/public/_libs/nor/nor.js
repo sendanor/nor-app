@@ -1,8 +1,12 @@
-angular.module('norApp', [
+var norApp = angular.module('norApp', [
 	'datatables'
-]).config(function($locationProvider) {
+]);
+
+norApp.config(function($locationProvider) {
 	$locationProvider.html5Mode(true);
-}).controller('norCtrl', function($scope, $http, $log, $location) {
+});
+
+norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 
 	function change_scope_data(data) {
 		data = data || {};
@@ -40,7 +44,25 @@ angular.module('norApp', [
 	//$log.debug("path = " + path);
 	//get_path(path);
 
-}).controller('formCtrl', function($scope, $http, $log, $location) {
+});
+
+norApp.controller('formCtrl', function($scope, $http, $log, $location) {
+
+	$scope.alerts = [{"type":"danger", "title":"test", "content": "Content."}];
+
+	$scope.closeAlert = function(alert) {
+		$scope.alerts = $scope.alerts.filter(function(a) {
+			return a != alert;
+		});
+	};
+
+	$scope.openAlert = function(alert) {
+			alert = alert || {};
+			alert.type = alert.type || "danger";
+			alert.title = alert.title || "Unknown Alert";
+			alert.content = alert.content || "";
+			$scope.alerts.push( alert );
+	};
 
 	$scope.data = {};
 
@@ -58,6 +80,8 @@ angular.module('norApp', [
 			});
 		}, function errorCallback(response) {
 			$log.error("error: ", response);
+			$scope.openalert( {"type":"danger", title: "Error", content: ""+response} );
 		});
 	};
+
 });
