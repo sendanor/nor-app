@@ -67,4 +67,7 @@ function api_builder(opts) {
 }
 
 // Exports
-module.exports = api_builder;
+module.exports = {
+	'$get': api_builder,
+	'$post': api_builder
+};

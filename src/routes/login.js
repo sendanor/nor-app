@@ -14,6 +14,14 @@ function get_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
 	return function(req, res) {
+
+		if(req.session && req.session.user) {
+			return {
+				'title': 'Login',
+				'content': 'You are already logged in.'
+			};
+		}
+
 		return {
 			'title': 'Login',
 			'$type': 'form',

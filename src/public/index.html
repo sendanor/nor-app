@@ -22,8 +22,8 @@
 	</div>
 </div>
 
-<div id="content" ng-if="$type === 'form'">
-
+<div id="content" ng-switch="getContentType()">
+  <div ng-switch-when="form">
     <h1>{{title}}</h1>
 
 	<form name="form" class="pure-form pure-form-aligned" ng-controller="formCtrl" ng-submit="submit(form)">
@@ -46,10 +46,9 @@
 	        </div>
 	    </fieldset>
 	</form>
+  </div>
 
-</div>
-
-<div id="content" ng-if="$type === 'table'">
+  <div ng-switch-when="table">
 
     <h1>{{title}}</h1>
 
@@ -68,11 +67,13 @@
     </tbody>
 	</table>
 
-</div>
+  </div>
 
-<div id="content" ng-if="($type !== 'form') && ($type !== 'table')">
+  <div ng-switch-default>
     <h1>{{title}}</h1>
     <p>{{content}}</p>
+  </div>
+
 </div>
 
 </div>

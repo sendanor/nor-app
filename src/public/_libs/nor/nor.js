@@ -27,13 +27,6 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 		});
 	}
 
-	$scope.$app = {
-		name: 'Unnamed-App',
-		menu: []
-	};
-
-	$scope.title = 'Undefined Title';
-
 	$scope.$on('$locationChangeSuccess', function() {
 		var path = $location.path();
 		$log.debug("path = " + path);
@@ -44,18 +37,69 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 	//$log.debug("path = " + path);
 	//get_path(path);
 
-});
+	// Array of functions which to call when resetting
+	$scope._resets = [];
 
-norApp.controller('formCtrl', function($scope, $http, $log, $location) {
+	/** Reset content */
+	$scope.reset = function(data) {
+		$scope._resets.forEach(function(f) {
+			f($scope);
+		});
+		if(data) {
+			$log.debug("data = ", data);
+			Object.keys(data).forEach(function(key) {
+				$scope[key] = data[key];
+			});
+		}
+	};
 
-	$scope.alerts = [{"type":"danger", "title":"test", "content": "Content."}];
+	/** Append new action to reset scope */
+	$scope._addResetAction = function(f) {
+		$scope._resets.push(f);
+	};
 
+	// Implement action to reset default content
+	$scope._addResetAction(function() {
+		$scope.$ref = undefined;
+		$scope.$resource = undefined;
+		$scope.$user = undefined;
+		$scope.$app = {
+			name: 'Unnamed-App',
+			menu: []
+		};
+		$scope.title = 'Undefined Title';
+		$scope.$type = 'default';
+		$scope.content = '';
+	});
+
+	// Reset scope
+	$scope.reset();
+
+	/** @returns {string} Content display type */
+	$scope.getContentType = function() {
+
+		if($scope.$type === "form" && angular.isArray($scope.content)) {
+			return "form";
+		}
+
+		if($scope.$type === "table") {
+			return "table";
+		}
+
+		return "default";
+	};
+
+	// Alerts
+	$scope.alerts = [];
+
+	/** Close alert */
 	$scope.closeAlert = function(alert) {
 		$scope.alerts = $scope.alerts.filter(function(a) {
 			return a != alert;
 		});
 	};
 
+	/** Create an alert */
 	$scope.openAlert = function(alert) {
 			alert = alert || {};
 			alert.type = alert.type || "danger";
@@ -64,8 +108,17 @@ norApp.controller('formCtrl', function($scope, $http, $log, $location) {
 			$scope.alerts.push( alert );
 	};
 
+});
+
+norApp.controller('formCtrl', function($scope, $http, $log, $location) {
+
 	$scope.data = {};
 
+	$scope._addResetAction(function() {
+		$scope.data = {};
+	});
+
+	/** Submit a form with HTTP POST action to REST API */
 	$scope.submit = function() {
 		$log.debug("form submit called: ", $scope.data );
 
@@ -75,12 +128,10 @@ norApp.controller('formCtrl', function($scope, $http, $log, $location) {
 
 		$http.post('/api' + path, $scope.data).then(function successCallback(response) {
 			var data = response.data || {};
-			Object.keys(data).forEach(function(key) {
-				$scope[key] = data[key];
-			});
+			$scope.reset(data);
 		}, function errorCallback(response) {
 			$log.error("error: ", response);
-			$scope.openalert( {"type":"danger", title: "Error", content: ""+response} );
+			$scope.openalert( {"type":"danger", title: "Error!", content: ""+response} );
 		});
 	};
 
