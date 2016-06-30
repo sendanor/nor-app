@@ -210,12 +210,15 @@ function get_routes(routes, paths) {
 function app_builder(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
+
 	debug.assert(opts.routePaths).ignore(undefined).is('array');
 	debug.assert(opts.routes).ignore(undefined).is('array');
+	debug.assert(opts.documents).ignore(undefined).is('object');
+
 	opts.routePaths = opts.routePaths || [];
 	opts.routes = opts.routes || [];
-
 	opts.routePaths.unshift(__dirname + '/routes');
+	opts.documents = opts.documents || {};
 
 	debug.log('opts.routes = ', opts.routes);
 	debug.log('opts.routePaths = ', opts.routePaths);
