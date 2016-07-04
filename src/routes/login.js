@@ -4,8 +4,8 @@
 // Dependencies
 var HTTPError = require('nor-express/src/HTTPError.js');
 var debug = require('nor-debug');
-var express = require('express');
-var ref = require('nor-ref');
+//var express = require('express');
+//var ref = require('nor-ref');
 
 /** Get login form
  * @returns `function(req, res)` which uses promises

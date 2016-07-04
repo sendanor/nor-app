@@ -1,3 +1,5 @@
+"use strict";
+
 var norApp = angular.module('norApp', [
 	'datatables'
 ]);
@@ -95,7 +97,7 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 	/** Close alert */
 	$scope.closeAlert = function(alert) {
 		$scope.alerts = $scope.alerts.filter(function(a) {
-			return a != alert;
+			return a !== alert;
 		});
 	};
 

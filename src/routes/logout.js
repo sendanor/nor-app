@@ -3,8 +3,8 @@
 
 // Dependencies
 var debug = require('nor-debug');
-var express = require('express');
-var ref = require('nor-ref');
+//var express = require('express');
+//var ref = require('nor-ref');
 
 /** Returns `function(req, res)` which uses promises */
 function api_builder(opts) {

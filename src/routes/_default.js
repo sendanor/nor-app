@@ -3,7 +3,7 @@
 
 // Dependencies
 var debug = require('nor-debug');
-var express = require('express');
+//var express = require('express');
 var ref = require('nor-ref');
 
 /** Returns title of route */

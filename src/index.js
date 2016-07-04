@@ -4,7 +4,7 @@
 // Dependencies
 var debug = require('nor-debug');
 var express = require('express');
-var session = require('express-session')
+var session = require('express-session');
 var merge = require('merge');
 var api_builder = require('./api.js');
 
@@ -31,10 +31,13 @@ function app_builder(opts) {
 	api_opts.documents = opts.documents;
 	api_opts.pg = opts.pg;
 
+	var NoPgStore = require('nor-nopg-store');
+
 	var app = express();
 
 	var session_config = opts.session || {};
-	app.use(session(session_config))
+	session_config.store = new NoPgStore({"pg": opts.pg});
+	app.use(session(session_config));
 
 	var api = api_builder(api_opts);
 

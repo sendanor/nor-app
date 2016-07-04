@@ -4,7 +4,9 @@
   "description": "Sendanor Application Module",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "node-lint src/ --config=lint.json",
+    "jshint": "jshint src/"
   },
   "repository": {
     "type": "git",
@@ -30,5 +32,9 @@
     "purecss": "^0.6.0",
     "q": "^1.4.1",
     "jquery": "^2.2.4"
+  },
+  "devDependencies": {
+    "lint"         : "*",
+    "jshint"       : "*"
   }
 }
