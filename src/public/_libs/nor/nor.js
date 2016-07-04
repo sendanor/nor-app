@@ -209,13 +209,11 @@ norApp.directive('norRecord', function() {
 		//require: '^^norLink',
 		//transclude: true,
 		scope: {
-			keys: '=',
 			content: '='
 		},
-		controller: ['$scope', function($scope) {
+		controller: ['$scope', '$log', function($scope, $log) {
 
-			$scope.get_keys = Object.keys;
-
+			/** */
 			$scope.get_type = function(obj) {
 				if(obj && (typeof obj === 'object') && (obj instanceof Array)) {
 					return 'array';
@@ -224,6 +222,53 @@ norApp.directive('norRecord', function() {
 					return 'object';
 				}
 				return 'default';
+			};
+
+			/** */
+			$scope.keys = [];
+
+			/** Append keys from object to $scope.keys */
+			function _append_keys(parent, keys) {
+
+				if(!keys) {
+					keys = [];
+				}
+
+				Object.keys(parent).forEach(function(key) {
+					var data = parent[key];
+					if(data && (typeof data === 'object')) {
+						_append_keys(data, keys.concat([key]) );
+					} else {
+						$scope.keys.push(keys.concat([key]));
+					}
+
+				});
+			}
+
+			_append_keys($scope.content);
+
+			/**
+			 * @param key {string} The path to the value
+			 * @returns value at the place for key
+			 */
+			function _get_content(data, keys) {
+
+				if(keys.length === 1) {
+					return data && data[keys[0]];
+				}
+
+				if(keys.length >= 2) {
+					return data && _get_content(data[keys[0]], keys.slice(1) );
+				}
+
+			};
+
+			/**
+			 * @param key {string} The path to the value
+			 * @returns value at the place for key
+			 */
+			$scope.get_content = function(keys) {
+				return _get_content($scope.content, keys);
 			};
 
 		}],

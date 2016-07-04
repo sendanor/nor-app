@@ -1,13 +1,13 @@
 <table class="row-border hover nor-record">
 	<thead>
 	    <tr>
-	        <th class="key">Name</th>
+	        <th class="key">Property</th>
 			<th class="value">Value</th>
 	    </tr>
 	</thead>
 	<tbody>
-		<tr ng-repeat="key in keys" ng-init="value = content[key]">
-			<th class="key">{{key}}</th>
+		<tr ng-repeat="key in keys" ng-init="value = get_content(key)">
+			<th class="key">{{key.join('.')}}</th>
 	        <td class="value">
 				<div ng-switch="key">
 					<div ng-switch-when="$name"><nor-link ref="content.$ref">{{value}}</nor-link></div>
@@ -15,7 +15,7 @@
 					<div ng-switch-default>
 						<div ng-switch="get_type(value)">
 							<div ng-switch-when="object">
-								<nor-record keys="get_keys(value)" content="value"></nor-record>
+								<nor-record content="value"></nor-record>
 							</div>
 							<div ng-switch-default>
 								{{value}}
