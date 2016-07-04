@@ -18,7 +18,8 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 		});
 	}
 
-	function get_path(path) {
+	function initialize_page(path) {
+		$scope.reset();
 		$http({
 			method: 'GET',
 			url: '/api' + path
@@ -29,15 +30,34 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 		});
 	}
 
+	$scope.keys = Object.keys;
+
 	$scope.$on('$locationChangeSuccess', function() {
 		var path = $location.path();
 		$log.debug("path = " + path);
-		get_path(path);
+		initialize_page(path);
 	});
+
+	function parse_path_name(url) {
+		if(!url) {
+			return;
+		}
+		var tmp = url.split('/api/');
+		tmp.shift();
+		return '/' + tmp.join('/api/');
+	}
+	$scope.path = parse_path_name;
+
+	/** Go to another resource */
+	$scope.go = function(url) {
+		var path = parse_path_name(url);
+		$location.path(path);
+		initialize_path(path);
+	};
 
 	//var path = $location.path();
 	//$log.debug("path = " + path);
-	//get_path(path);
+	//initialize_page(path);
 
 	// Array of functions which to call when resetting
 	$scope._resets = [];
@@ -72,6 +92,7 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 		$scope.title = 'Undefined Title';
 		$scope.$type = 'default';
 		$scope.content = '';
+		$scope.links = undefined;
 	});
 
 	// Reset scope
@@ -86,6 +107,14 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 
 		if($scope.$type === "table") {
 			return "table";
+		}
+
+		if($scope.$type === "error") {
+			return "record";
+		}
+
+		if($scope.$type === "record") {
+			return "record";
 		}
 
 		return "default";
@@ -137,4 +166,67 @@ norApp.controller('formCtrl', function($scope, $http, $log, $location) {
 		});
 	};
 
+});
+
+/* Links */
+norApp.directive('norLink', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		transclude: true,
+		scope: {
+			ref: '=',
+			classes: '@?class'
+		},
+		controller: ['$scope', '$location', function($scope, $location) {
+
+			function parse_path_name(url) {
+				if(!url) {
+					return;
+				}
+				var tmp = url.split('/api/');
+				tmp.shift();
+				return '/' + tmp.join('/api/');
+			}
+			$scope.path = parse_path_name;
+
+			/** Go to another resource */
+			$scope.go = function(url) {
+				var path = parse_path_name(url);
+				$location.path(path);
+			};
+
+		}],
+		template: '<a href="{{path(ref)}}" ng-click="go(ref)" ng-class="classes" ng-transclude></a>'
+	};
+});
+
+/* Records */
+norApp.directive('norRecord', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		//require: '^^norLink',
+		//transclude: true,
+		scope: {
+			keys: '=',
+			content: '='
+		},
+		controller: ['$scope', function($scope) {
+
+			$scope.get_keys = Object.keys;
+
+			$scope.get_type = function(obj) {
+				if(obj && (typeof obj === 'object') && (obj instanceof Array)) {
+					return 'array';
+				}
+				if(obj && (typeof obj === 'object')) {
+					return 'object';
+				}
+				return 'default';
+			};
+
+		}],
+		templateUrl: '/_libs/nor/record.html'
+	};
 });

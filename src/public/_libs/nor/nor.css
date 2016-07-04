@@ -12,3 +12,38 @@ body {
 	padding-left: 10em;
 	padding-right: 10em;
 }
+
+/* .nor-record */
+
+#content .nor-record {
+	border: 1px solid #f0f0f0;
+}
+
+#content .nor-record thead .key,
+#content .nor-record thead .value {
+	background-color: #d0d0d0;
+}
+
+#content .nor-record thead tr {
+	border-bottom: 1px solid #d0d0d0;
+}
+
+#content .nor-record tbody tr {
+	border-bottom: 1px solid #f0f0f0;
+}
+
+#content .nor-record .key {
+	width: 20%;
+	vertical-align: top;
+	text-align: right;
+	padding: 0.2em 0.4em;
+	border-right: 1px solid #d0d0d0;
+	background-color: #f6f6f6;
+}
+
+#content .nor-record .value {
+	width: 80%;
+	padding: 0.2em 0.4em;
+	vertical-align: top;
+}
+

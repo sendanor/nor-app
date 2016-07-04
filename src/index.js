@@ -49,7 +49,7 @@ function app_builder(opts) {
 
 	// Enable serving our Angular App for each route
 	opts.routes.forEach(function(route) {
-		app.get('/'+route, function(req, res) {
+		app.use('/'+route, function(req, res) {
 			res.sendFile(__dirname + '/public/index.html');
 		});
 	});

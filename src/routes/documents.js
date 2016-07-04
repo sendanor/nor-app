@@ -51,15 +51,38 @@ function prepare_type(req, type) {
 	delete tmp.$meta;
 	// FIXME: This api/documents should use configuration paths
 	tmp.$ref = ref(req, 'api/documents', tmp.$name);
-	ARRAY(Object.keys(meta)).forEach(function(key) {
-		tmp[key] = meta[key];
-	});
+	if(meta) {
+		ARRAY(Object.keys(meta)).forEach(function(key) {
+			tmp[key] = meta[key];
+		});
+	}
 	return tmp;
 }
 
 /** Prepare types for publification */
 function prepare_types(req, types) {
 	return ARRAY(types).map(prepare_type.bind(undefined, req)).valueOf();
+}
+
+/** Prepare document for publification */
+function prepare_doc(req, doc) {
+	var tmp = JSON.parse(JSON.stringify(doc));
+	var content = tmp.$content;
+	delete tmp.$events;
+	delete tmp.$content;
+	// FIXME: This api/documents should use configuration paths
+	tmp.$ref = ref(req, 'api/documents', tmp.$type, 'documents', tmp.$id);
+	if(content) {
+		ARRAY(Object.keys(content)).forEach(function(key) {
+			tmp[key] = content[key];
+		});
+	}
+	return tmp;
+}
+
+/** Prepare docs for publification */
+function prepare_docs(req, docs) {
+	return ARRAY(docs).map(prepare_doc.bind(undefined, req)).valueOf();
 }
 
 /** Get document types
@@ -89,7 +112,7 @@ function get_types_handler(opts) {
 			return tr.searchTypes().then(function(tr) {
 				var types = tr.fetch();
 				return {
-					'title': 'Documents',
+					'title': 'Document Types',
 					'$type': 'table',
 					'$columns': ['$name', '$modified'],
 					'content': prepare_types(req, types)
@@ -144,12 +167,52 @@ function get_type_handler(opts) {
 				// FIXME: This api/documents/:name/items should use configuration paths
 
 				return {
-					'title': 'Documents',
+					'title': ''+type.$name,
 					'$type': 'record',
 					'content': prepare_type(req, type),
-					'documents': {
-						'$ref': ref(req, 'api/documents', type.$name, 'documents')
-					}
+					'links': [
+						{
+							'$ref': ref(req, 'api/documents', type.$name, 'documents'),
+							'title': 'Documents'
+						}
+					]
+				};
+			});
+		});
+	};
+}
+
+/** Get single document
+ * @returns `function(req, res)` which uses promises
+ */
+function get_doc_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+	return function(req, res) {
+
+		var logged_in = req.session && req.session.user ? true : false;
+		if(!logged_in) {
+			throw new HTTPError(403);
+		}
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+		var type = params.type;
+		var id = params.id;
+		debug.assert(type).is('string');
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.search(type)({'$id':id}).then(function(tr) {
+				var docs = tr.fetch();
+				var doc = docs.shift();
+
+				if(!doc) { throw new HTTPError(404); }
+
+				return {
+					'title': 'Document ' + doc.$id,
+					'$type': 'record',
+					'content': prepare_doc(req, doc),
 				};
 			});
 		});
@@ -177,7 +240,7 @@ function get_docs_handler(opts) {
 		debug.assert(type).is('string');
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.search(type).then(function(tr) {
+			return tr.search(type)().then(function(tr) {
 				var docs = tr.fetch();
 				return {
 					'title': 'Documents',
@@ -197,7 +260,10 @@ module.exports = {
 	':type': {
 		'$get': get_type_handler,
 		'documents': {
-			'$get': get_docs_handler
+			'$get': get_docs_handler,
+			':id': {
+				'$get': get_doc_handler
+			}
 		}
 	}
 };

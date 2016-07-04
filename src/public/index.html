@@ -17,14 +17,24 @@
 	<div class="main-menu pure-menu pure-menu-horizontal">
 	    <a href="/" class="pure-menu-heading pure-menu-link">{{$app.name}}</a>
 	    <ul class="pure-menu-list">
-	        <li class="pure-menu-item" ng-repeat="link in $app.menu"><a href="{{link.href}}" class="pure-menu-link">{{link.title}}</a></li>
+	        <li class="pure-menu-item" ng-repeat="link in $app.menu">
+				<nor-link ref="link.$ref" class="pure-menu-link">{{link.title}}</nor-link>
+			</li>
 	    </ul>
 	</div>
 </div>
 
-<div id="content" ng-switch="getContentType()">
+<div id="content">
+ <h1>{{title}}</h1>
+ <div class="links-menu pure-menu pure-menu-horizontal" ng-if="links && (links.length >= 1)">
+    <nor-link ref="link.$ref" class="pure-menu-heading pure-menu-link"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></nor-link>
+    <ul class="pure-menu-list">
+        <li class="pure-menu-item" ng-repeat="link in links"><nor-link ref="link.$ref" class="pure-menu-link">{{link.title}}</a></li>
+    </ul>
+ </div>
+
+ <div ng-switch="getContentType()">
   <div ng-switch-when="form">
-    <h1>{{title}}</h1>
 
 	<form name="form" class="pure-form pure-form-aligned" ng-controller="formCtrl" ng-submit="submit(form)">
 	    <fieldset>
@@ -49,32 +59,33 @@
   </div>
 
   <div ng-switch-when="table">
-
-    <h1>{{title}}</h1>
-
 	<table datatable="" class="row-border hover">
     <thead>
     <tr>
         <th ng-repeat="cell in $columns">{{$labels[cell] || cell}}</th>
-		<th>Actions</th>
     </tr>
     </thead>
     <tbody>
     <tr ng-repeat="row in content">
-        <td ng-repeat="cell in $columns">{{row[cell]}}</td>
-		<td><a href="{{$ref+"/"+row.$id}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a></td>
+        <td ng-repeat="cell in $columns">
+			<span ng-if="(cell === '$name') || (cell === '$id')"><nor-link ref="row.$ref">{{row[cell]}}</nor-link></span>
+			<span ng-if="!((cell === '$name') || (cell === '$id'))">{{row[cell]}}</span>
+		</td>
     </tr>
     </tbody>
 	</table>
 
   </div>
 
+  <div ng-switch-when="record">
+	<nor-record keys="keys(content)" content="content"></nor-record>
+  </div>
+
   <div ng-switch-default>
-    <h1>{{title}}</h1>
     <p>{{content}}</p>
   </div>
 
-</div>
+ </div>
 
 </div>
 

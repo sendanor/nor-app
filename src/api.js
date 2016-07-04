@@ -2,6 +2,8 @@
 "use strict";
 
 // Dependencies
+var is_production_mode = process.env.NODE_ENV === 'production';
+
 var is = require('nor-is');
 var ARRAY = require('nor-array');
 var debug = require('nor-debug');
@@ -11,6 +13,7 @@ var FS = require('fs');
 var _Q = require('q');
 var HTTPError = require('./HTTPError.js');
 var bodyParser = require('body-parser');
+var parseStack = require('parse-stack');
 
 /** Handle promise based functions */
 function route_builder(f) {
@@ -28,23 +31,52 @@ function route_builder(f) {
 			if(err instanceof HTTPError) {
 				res.status(err.code);
 				res.json({
-					'error': ''+err.message,
-					'code': err.code
+					'$type': 'error',
+					'title': ''+err.message,
+					'content': {
+						'name': 'HTTPError',
+						'message': ''+err.message,
+						'code': err.code,
+						'stack': (is_production_mode ? undefined : parseStack(err))
+					}
 				});
 				return;
 			} else {
-				res.status(500);
+				res.status(500); // Internal Server Error
 			}
 
-			if(process.env.NODE_ENV === 'production') {
+			if(is_production_mode) {
 				res.json({
-					'error': 'Internal API Error'
+					'$type': 'error',
+					'title': 'Internal Server Error',
+					'content': {
+						'name': 'APIError',
+						'message': 'There was an API error.'
+					}
 				});
 			} else {
-				res.json({
-					'error': ''+err,
-					'stack': err.stack
-				});
+				var tmp = JSON.parse(JSON.stringify(err));
+				tmp.$type = 'error';
+				tmp.title = ''+err;
+				tmp.content = {};
+				tmp.content.message = ''+err.message;
+				if(err.name) {
+					tmp.content.name = ''+err.name;
+				}
+				if(err.fileName) {
+					tmp.content.fileName = ''+err.fileName;
+				}
+				if(err.lineNumber) {
+					tmp.content.lineNumber = ''+err.lineNumber;
+				}
+				if(err.stack) {
+					try {
+						tmp.content.stack = parseStack(err);
+					} catch(error) {
+						tmp.content.stack = ''+err.stack;
+					}
+				}
+				res.json(tmp);
 			}
 			debug.error(err);
 		}).done();
@@ -90,8 +122,18 @@ function merge_settled_results(results) {
 		}
 	});
 	if(body.errors) {
-		debug.error("errors: ", body.errors);
-		throw new TypeError("Internal API Route Error");
+		if(is_production_mode) {
+			debug.error("There was internal error(s): ", body.errors);
+			throw new TypeError("Internal API Route Error");
+		} else {
+			if(body.errors.length === 1) {
+				debug.error("There was internal error: ", body.errors);
+				throw body.errors[0];
+			} else {
+				debug.error("There was internal errors: ", body.errors);
+				throw body;
+			}
+		}
 	}
 	return body;
 }
@@ -102,7 +144,7 @@ function other_than_methods(value) {
 }
 
 // Initialize route handler array if doesn't exist
-function register_raw_func(_raw, route, f) {
+function register_raw_func(_raw, route, f, d) {
 	debug.assert(_raw).is('object');
 	debug.assert(route).is('string');
 	debug.assert(f).is('defined');
@@ -118,7 +160,10 @@ function register_raw_func(_raw, route, f) {
 	if(is.obj(f)) {
 		ARRAY(Object.keys(f)).filter(other_than_methods).forEach(function(key) {
 			debug.log('key = ', key);
-			register_raw_func(_raw, route+'/'+key, f[key]);
+			if(d) {
+				register_raw_func(_raw, route+'/'+key, d);
+			}
+			register_raw_func(_raw, route+'/'+key, f[key], d);
 		});
 	}
 
@@ -159,7 +204,7 @@ function get_routes(routes, paths) {
 			}
 
 			if(d) { register_raw_func(_raw, route, d); }
-			if(r) { register_raw_func(_raw, route, r); }
+			if(r) { register_raw_func(_raw, route, r, d); }
 
 		});
 
