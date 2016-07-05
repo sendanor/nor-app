@@ -49,8 +49,8 @@ function prepare_type(req, type) {
 	var meta = tmp.$meta;
 	delete tmp.$events;
 	delete tmp.$meta;
-	// FIXME: This api/document/types should use configuration paths
-	tmp.$ref = ref(req, 'api/document/types', tmp.$name);
+	// FIXME: This api/database/types should use configuration paths
+	tmp.$ref = ref(req, 'api/database/types', tmp.$name);
 	if(meta) {
 		ARRAY(Object.keys(meta)).forEach(function(key) {
 			tmp[key] = meta[key];
@@ -70,8 +70,8 @@ function prepare_doc(req, doc) {
 	var content = tmp.$content;
 	delete tmp.$events;
 	delete tmp.$content;
-	// FIXME: This api/document/types should use configuration paths
-	tmp.$ref = ref(req, 'api/document/types', tmp.$type, 'documents', tmp.$id);
+	// FIXME: This api/database/types should use configuration paths
+	tmp.$ref = ref(req, 'api/database/types', tmp.$type, 'documents', tmp.$id);
 	if(content) {
 		ARRAY(Object.keys(content)).forEach(function(key) {
 			tmp[key] = content[key];
@@ -114,12 +114,42 @@ function get_types_handler(opts) {
 			return tr.searchTypes().then(function(tr) {
 				var types = tr.fetch();
 				return {
-					'title': 'Document Types',
+					'title': 'Types',
 					'$type': 'table',
 					'$columns': ['$name', '$modified'],
-					'content': prepare_types(req, types)
+					'content': prepare_types(req, types),
+					'links': [
+						{
+							'$ref': ref(req, 'api/database/createType'),
+							'title': 'Create new type',
+							'icon': 'plus'
+						}
+					]
 				};
 			});
+		});
+	};
+}
+
+/** Get a form to create type
+ * @returns `function(req, res)` which uses promises
+ */
+function get_create_type_form(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+
+	return function(req, res) {
+		assert_logged_in(req);
+		return nopg.transaction(opts.pg, function(tr) {
+			return {
+				'title': 'Create a new type',
+				'$type': 'form',
+				'$target': ref(req, 'api/database/createType'),
+				'content': [
+					{'type':'text','name':'$name', 'label':'Name'}
+				]
+			};
 		});
 	};
 }
@@ -146,7 +176,7 @@ function get_type_handler(opts) {
 
 				if(!type) { throw new HTTPError(404); }
 
-				// FIXME: This api/document/:name/items should use configuration paths
+				// FIXME: This api/database/:name/items should use configuration paths
 
 				return {
 					'title': 'Type '+type.$name,
@@ -154,9 +184,14 @@ function get_type_handler(opts) {
 					'content': prepare_type(req, type),
 					'links': [
 						{
-							'$ref': ref(req, 'api/document/types', type.$name, 'search'),
+							'$ref': ref(req, 'api/database/types', type.$name, 'search'),
 							'title': 'Search documents',
 							'icon': 'search'
+						},
+						{
+							'$ref': ref(req, 'api/database/types', type.$name, 'documents/create'),
+							'title': 'Create new document',
+							'icon': 'plus'
 						}
 					]
 				};
@@ -220,7 +255,7 @@ function get_docs_handler(opts) {
 			return tr.search(type)().then(function(tr) {
 				var docs = tr.fetch();
 				return {
-					'title': 'Documents',
+					'title': 'Documents for '+type,
 					'$type': 'table',
 					'$columns': ['$id', '$name', '$modified'],
 					'content': prepare_docs(req, docs)
@@ -229,7 +264,6 @@ function get_docs_handler(opts) {
 		});
 	};
 }
-
 
 /** Create a new document type
  * @returns `function(req, res)` which uses promises
@@ -245,11 +279,17 @@ function post_types_handler(opts) {
 		debug.log('data = ', data);
 
 		debug.assert(data).is('object');
-		debug.assert(data.content).is('object');
-		debug.assert(data.content.$name).is('string');
+		debug.assert(data.content).ignore(undefined).is('object');
+		if(data.content) {
+			debug.assert(data.content.$name).ignore(undefined).is('string');
+		}
+		debug.assert(data.$name).ignore(undefined).is('string');
 
-		var content = data.content;
-		var type = content.$name;
+		var content = data.content || {};
+		debug.assert(content).is('object');
+
+		var type = data.$name || content.$name;
+		debug.assert(type).is('string');
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.declareType(type)(content).then(function(tr) {
@@ -259,7 +299,7 @@ function post_types_handler(opts) {
 					'$code': 303,
 					'$type': 'redirect',
 					'content': prepare_type(req, obj),
-					'$ref': ref(req, 'api/document/types', obj.$name)
+					'$ref': ref(req, 'api/database/types', obj.$name)
 				};
 			});
 		});
@@ -303,11 +343,65 @@ function post_type_handler(opts) {
 					'$code': 303,
 					'$type': 'redirect',
 					'content': prepare_type(req, obj),
-					'$ref': ref(req, 'api/document/types', obj.$name)
+					'$ref': ref(req, 'api/database/types', obj.$name)
 				};
 			});
 		});
 
+	};
+}
+
+/** Returns form fields based on type object */
+function get_form_fields(type) {
+	debug.assert(type).is('object');
+	var schema = type.$schema || {};
+	var properties = schema.properties || {};
+
+	var fields = [
+	];
+
+	ARRAY(Object.keys(properties)).forEach(function(key) {
+		var prop = properties[key];
+
+		if(prop.type === 'string') {
+			fields.push({'type':'text','name':key, 'label':key});
+		}
+	});
+
+	return fields;
+}
+
+/** Get a form to create document
+ * @returns `function(req, res)` which uses promises
+ */
+function get_create_doc_form(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+
+	return function(req, res) {
+		assert_logged_in(req);
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchTypes({'$name':type}).then(function(tr) {
+				var obj = tr.fetchSingle();
+
+				var fields = get_form_fields(obj);
+
+				return {
+					'title': 'Create a new document',
+					'$type': 'form',
+					'$target': ref(req, 'api/database/types', type, 'documents/create'),
+					'content': fields
+				};
+			});
+		});
 	};
 }
 
@@ -330,20 +424,31 @@ function post_docs_handler(opts) {
 		debug.log('data = ', data);
 
 		debug.assert(data).is('object');
-		debug.assert(data.content).is('object');
+		debug.assert(data.content).ignore(undefined).is('object');
 
-		var content = data.content;
+		var content = data.content || {};
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.create(type)(content).then(function(tr) {
-				var obj = tr.fetch();
-				return {
-					'title': 'Created a document',
-					'$code': 303,
-					'$type': 'redirect',
-					'content': prepare_doc(req, obj),
-					'$ref': ref(req, 'api/document/types', obj.$type, 'documents', obj.$id)
-				};
+			return tr.searchTypes({'$name':type}).then(function(tr) {
+				var type_obj = tr.fetchSingle();
+				var schema = type_obj.$schema || {};
+				var properties = schema.properties || {};
+				ARRAY(Object.keys(properties)).forEach(function(key) {
+					if(data.hasOwnProperty(key)) {
+						content[key] = data[key];
+					}
+				});
+
+				return tr.create(type)(content).then(function(tr) {
+					var obj = tr.fetch();
+					return {
+						'title': 'Created a document',
+						'$code': 303,
+						'$type': 'redirect',
+						'content': prepare_doc(req, obj),
+						'$ref': ref(req, 'api/database/types', obj.$type, 'documents', obj.$id)
+					};
+				});
 			});
 		});
 
@@ -387,7 +492,7 @@ function post_doc_handler(opts) {
 					'$code': 303,
 					'$type': 'redirect',
 					'content': prepare_doc(req, obj),
-					'$ref': ref(req, 'api/document/types', obj.$type, 'documents', obj.$id)
+					'$ref': ref(req, 'api/database/types', obj.$type, 'documents', obj.$id)
 				};
 			});
 		});
@@ -398,6 +503,10 @@ function post_doc_handler(opts) {
 // Exports
 module.exports = {
 	'$get': get_types_handler,
+	'createType': {
+		'$get': get_create_type_form,
+		'$post': post_types_handler
+	},
 	'types': {
 		'$get': get_types_handler,
 		'$post': post_types_handler,
@@ -410,6 +519,10 @@ module.exports = {
 			'documents': {
 				'$get': get_docs_handler,
 				'$post': post_docs_handler,
+				'create': {
+					'$get': get_create_doc_form,
+					'$post': post_docs_handler
+				},
 				':id': {
 					'$get': get_doc_handler,
 					'$post': post_doc_handler

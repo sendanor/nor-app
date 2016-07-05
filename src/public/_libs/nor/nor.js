@@ -109,6 +109,10 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 			return "table";
 		}
 
+		if($scope.$type === "redirect") {
+			return "record";
+		}
+
 		if($scope.$type === "error") {
 			return "record";
 		}
