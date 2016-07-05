@@ -32,6 +32,7 @@ function route_builder(f) {
 				res.status(err.code);
 				res.json({
 					'$type': 'error',
+					'$status': err.code,
 					'title': ''+err.message,
 					'content': {
 						'name': 'HTTPError',
@@ -48,6 +49,7 @@ function route_builder(f) {
 			if(is_production_mode) {
 				res.json({
 					'$type': 'error',
+					'$status': 500,
 					'title': 'Internal Server Error',
 					'content': {
 						'name': 'APIError',
@@ -57,6 +59,7 @@ function route_builder(f) {
 			} else {
 				var tmp = JSON.parse(JSON.stringify(err));
 				tmp.$type = 'error';
+				tmp.$status = 500;
 				tmp.title = ''+err;
 				tmp.content = {};
 				tmp.content.message = ''+err.message;
@@ -259,7 +262,12 @@ function get_routes(routes, paths) {
 					});
 
 					debug.log(route + ': Created ' + promises.length + ' promises for route.');
-					return _Q.allSettled(promises).then( merge_settled_results );
+					return _Q.allSettled(promises).then( merge_settled_results ).then(function(obj) {
+						if(is.obj(obj) && obj.hasOwnProperty('$status')) {
+							res.status(obj.$status);
+						}
+						return obj;
+					});
 
 				};
 			};

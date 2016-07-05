@@ -18,7 +18,7 @@
 	    <a href="/" class="pure-menu-heading pure-menu-link">{{$app.name}}</a>
 	    <ul class="pure-menu-list">
 	        <li class="pure-menu-item" ng-repeat="link in $app.menu">
-				<nor-link ref="link.$ref" class="pure-menu-link">{{link.title}}</nor-link>
+				<nor-link link="link" class="pure-menu-link">{{link.title}}</nor-link>
 			</li>
 	    </ul>
 	</div>
@@ -27,9 +27,8 @@
 <div id="content">
  <h1>{{title}}</h1>
  <div class="links-menu pure-menu pure-menu-horizontal" ng-if="links && (links.length >= 1)">
-    <nor-link ref="link.$ref" class="pure-menu-heading pure-menu-link"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></nor-link>
     <ul class="pure-menu-list">
-        <li class="pure-menu-item" ng-repeat="link in links"><nor-link ref="link.$ref" class="pure-menu-link">{{link.title}}</a></li>
+        <li class="pure-menu-item" ng-repeat="link in links"><nor-link link="link" class="pure-menu-link">{{link.title}}</a></li>
     </ul>
  </div>
 
@@ -68,7 +67,7 @@
     <tbody>
     <tr ng-repeat="row in content">
         <td ng-repeat="cell in $columns">
-			<span ng-if="(cell === '$name') || (cell === '$id')"><nor-link ref="row.$ref">{{row[cell]}}</nor-link></span>
+			<span ng-if="(cell === '$name') || (cell === '$id')"><nor-link link="row">{{row[cell]}}</nor-link></span>
 			<span ng-if="!((cell === '$name') || (cell === '$id'))">{{row[cell]}}</span>
 		</td>
     </tr>

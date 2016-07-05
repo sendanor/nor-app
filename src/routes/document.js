@@ -49,8 +49,8 @@ function prepare_type(req, type) {
 	var meta = tmp.$meta;
 	delete tmp.$events;
 	delete tmp.$meta;
-	// FIXME: This api/documents should use configuration paths
-	tmp.$ref = ref(req, 'api/documents', tmp.$name);
+	// FIXME: This api/document/types should use configuration paths
+	tmp.$ref = ref(req, 'api/document/types', tmp.$name);
 	if(meta) {
 		ARRAY(Object.keys(meta)).forEach(function(key) {
 			tmp[key] = meta[key];
@@ -70,8 +70,8 @@ function prepare_doc(req, doc) {
 	var content = tmp.$content;
 	delete tmp.$events;
 	delete tmp.$content;
-	// FIXME: This api/documents should use configuration paths
-	tmp.$ref = ref(req, 'api/documents', tmp.$type, 'documents', tmp.$id);
+	// FIXME: This api/document/types should use configuration paths
+	tmp.$ref = ref(req, 'api/document/types', tmp.$type, 'documents', tmp.$id);
 	if(content) {
 		ARRAY(Object.keys(content)).forEach(function(key) {
 			tmp[key] = content[key];
@@ -83,6 +83,14 @@ function prepare_doc(req, doc) {
 /** Prepare docs for publification */
 function prepare_docs(req, docs) {
 	return ARRAY(docs).map(prepare_doc.bind(undefined, req)).valueOf();
+}
+
+/** Assert that we have logged in */
+function assert_logged_in(req) {
+	var logged_in = req.session && req.session.user ? true : false;
+	if(!logged_in) {
+		throw new HTTPError(403);
+	}
 }
 
 /** Get document types
@@ -101,13 +109,7 @@ function get_types_handler(opts) {
 	}).done();
 
 	return function(req, res) {
-
-		var logged_in = req.session && req.session.user ? true : false;
-
-		if(!logged_in) {
-			throw new HTTPError(403);
-		}
-
+		assert_logged_in(req);
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes().then(function(tr) {
 				var types = tr.fetch();
@@ -122,22 +124,6 @@ function get_types_handler(opts) {
 	};
 }
 
-/** Get login form
- * @returns `function(req, res)` which uses promises
- */
-function post_handler(opts) {
-	debug.assert(opts).ignore(undefined).is('object');
-	opts = opts || {};
-	return function(req, res) {
-
-		var data = req.body || {};
-		debug.log('data = ', data);
-
-		throw new HTTPError(501);
-
-	};
-}
-
 /** Get single document type
  * @returns `function(req, res)` which uses promises
  */
@@ -146,11 +132,7 @@ function get_type_handler(opts) {
 	opts = opts || {};
 	debug.assert(opts.pg).is('string');
 	return function(req, res) {
-
-		var logged_in = req.session && req.session.user ? true : false;
-		if(!logged_in) {
-			throw new HTTPError(403);
-		}
+		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
@@ -164,16 +146,17 @@ function get_type_handler(opts) {
 
 				if(!type) { throw new HTTPError(404); }
 
-				// FIXME: This api/documents/:name/items should use configuration paths
+				// FIXME: This api/document/:name/items should use configuration paths
 
 				return {
-					'title': ''+type.$name,
+					'title': 'Type '+type.$name,
 					'$type': 'record',
 					'content': prepare_type(req, type),
 					'links': [
 						{
-							'$ref': ref(req, 'api/documents', type.$name, 'documents'),
-							'title': 'Documents'
+							'$ref': ref(req, 'api/document/types', type.$name, 'search'),
+							'title': 'Search documents',
+							'icon': 'search'
 						}
 					]
 				};
@@ -191,10 +174,7 @@ function get_doc_handler(opts) {
 	debug.assert(opts.pg).is('string');
 	return function(req, res) {
 
-		var logged_in = req.session && req.session.user ? true : false;
-		if(!logged_in) {
-			throw new HTTPError(403);
-		}
+		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
@@ -229,10 +209,7 @@ function get_docs_handler(opts) {
 
 	return function(req, res) {
 
-		var logged_in = req.session && req.session.user ? true : false;
-		if(!logged_in) {
-			throw new HTTPError(403);
-		}
+		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
@@ -253,16 +230,190 @@ function get_docs_handler(opts) {
 	};
 }
 
+
+/** Create a new document type
+ * @returns `function(req, res)` which uses promises
+ */
+function post_types_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req, res) {
+
+		assert_logged_in(req);
+
+		var data = req.body || {};
+		debug.log('data = ', data);
+
+		debug.assert(data).is('object');
+		debug.assert(data.content).is('object');
+		debug.assert(data.content.$name).is('string');
+
+		var content = data.content;
+		var type = content.$name;
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.declareType(type)(content).then(function(tr) {
+				var obj = tr.fetch();
+				return {
+					'title': 'Declared a document type',
+					'$code': 303,
+					'$type': 'redirect',
+					'content': prepare_type(req, obj),
+					'$ref': ref(req, 'api/document/types', obj.$name)
+				};
+			});
+		});
+
+	};
+}
+
+/** Update document type
+ * @returns `function(req, res)` which uses promises
+ */
+function post_type_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req, res) {
+
+		assert_logged_in(req);
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		var data = req.body || {};
+		debug.log('data = ', data);
+
+		debug.assert(data).is('object');
+		debug.assert(data.content).is('object');
+		debug.assert(data.content.$name).is('string');
+
+		var content = data.content;
+		if(content.$name) {
+			delete content.$name;
+		}
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.declareType(type)(content).then(function(tr) {
+				var obj = tr.fetch();
+				return {
+					'title': 'Declared a document type',
+					'$code': 303,
+					'$type': 'redirect',
+					'content': prepare_type(req, obj),
+					'$ref': ref(req, 'api/document/types', obj.$name)
+				};
+			});
+		});
+
+	};
+}
+
+/** Create a new document
+ * @returns `function(req, res)` which uses promises
+ */
+function post_docs_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req, res) {
+		assert_logged_in(req);
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		var data = req.body || {};
+		debug.log('data = ', data);
+
+		debug.assert(data).is('object');
+		debug.assert(data.content).is('object');
+
+		var content = data.content;
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.create(type)(content).then(function(tr) {
+				var obj = tr.fetch();
+				return {
+					'title': 'Created a document',
+					'$code': 303,
+					'$type': 'redirect',
+					'content': prepare_doc(req, obj),
+					'$ref': ref(req, 'api/document/types', obj.$type, 'documents', obj.$id)
+				};
+			});
+		});
+
+	};
+}
+
+/** Update a document
+ * @returns `function(req, res)` which uses promises
+ */
+function post_doc_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req, res) {
+		assert_logged_in(req);
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		var id = params.id;
+		debug.assert(id).is('uuid');
+
+		var data = req.body || {};
+		debug.log('data = ', data);
+
+		debug.assert(data).is('object');
+		debug.assert(data.content).is('object');
+
+		var content = data.content;
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchSingle(type)({'$id':id}).then(function(tr) {
+				var obj = tr.fetch();
+				return tr.update(obj, content);
+			}).then(function(tr) {
+				var obj = tr.fetch();
+				return {
+					'title': 'Updated a document',
+					'$code': 303,
+					'$type': 'redirect',
+					'content': prepare_doc(req, obj),
+					'$ref': ref(req, 'api/document/types', obj.$type, 'documents', obj.$id)
+				};
+			});
+		});
+
+	};
+}
+
 // Exports
 module.exports = {
 	'$get': get_types_handler,
-	'$post': post_handler,
-	':type': {
-		'$get': get_type_handler,
-		'documents': {
-			'$get': get_docs_handler,
-			':id': {
-				'$get': get_doc_handler
+	'types': {
+		'$get': get_types_handler,
+		'$post': post_types_handler,
+		':type': {
+			'$get': get_type_handler,
+			'$post': post_type_handler,
+			'search': {
+				'$get': get_docs_handler
+			},
+			'documents': {
+				'$get': get_docs_handler,
+				'$post': post_docs_handler,
+				':id': {
+					'$get': get_doc_handler,
+					'$post': post_doc_handler
+				}
 			}
 		}
 	}

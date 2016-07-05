@@ -175,10 +175,21 @@ norApp.directive('norLink', function() {
 		replace: true,
 		transclude: true,
 		scope: {
-			ref: '=',
+			link: '=?',
+			ref: '=?',
+			icon: '=?',
 			classes: '@?class'
 		},
 		controller: ['$scope', '$location', function($scope, $location) {
+
+			if($scope.link) {
+				if($scope.link.$ref && (!$scope.ref)) {
+					$scope.ref = $scope.link.$ref;
+				}
+				if($scope.link.icon && (!$scope.icon)) {
+					$scope.icon = $scope.link.icon;
+				}
+			}
 
 			function parse_path_name(url) {
 				if(!url) {
@@ -188,6 +199,7 @@ norApp.directive('norLink', function() {
 				tmp.shift();
 				return '/' + tmp.join('/api/');
 			}
+
 			$scope.path = parse_path_name;
 
 			/** Go to another resource */
@@ -197,7 +209,7 @@ norApp.directive('norLink', function() {
 			};
 
 		}],
-		template: '<a href="{{path(ref)}}" ng-click="go(ref)" ng-class="classes" ng-transclude></a>'
+		template: '<a href="{{path(ref)}}" ng-click="go(ref)" ng-class="classes"><i class="fa fa-{{icon}}" aria-hidden="true" ng-if="icon"></i> <ng-transclude></ng-transclude></a>'
 	};
 });
 

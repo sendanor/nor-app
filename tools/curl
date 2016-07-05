@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Reset cookie:
+#
+#   npm config set nor-app:curl_cookie 'connect.sid=s%3AppG'
+#
+
+cookie="$(cat ~/.npmrc|grep '^nor-app:curl_cookie'|grep -oEi 'connect.sid[^"]*')"
+exec curl -H 'X-Pretty-JSON: true' -H "Accept: application/json" -H "Content-Type: application/json" -b "$cookie" "$@"
+
