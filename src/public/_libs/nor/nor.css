@@ -47,3 +47,27 @@ body {
 	vertical-align: top;
 }
 
+#content .nor-type .type-property {
+	border: 1px solid #e0e0e0;
+	background-color: #f0f0f0;
+	margin: 1em;
+}
+
+#content .nor-type .type-property .type-property-name {
+	background-color: #f0fff0;
+	border-right: 1px solid #e0e0e0;
+	padding: 1em;
+	text-align: center;
+}
+
+#content .nor-type .type-property .type-property-type {
+	background-color: #f0f0ff;
+	border-right: 1px solid #e0e0e0;
+	padding: 1em;
+	text-align: center;
+}
+
+#content .nor-type .type-property .type-property-format {
+	background-color: #f0ffff;
+	padding: 1em;
+}
