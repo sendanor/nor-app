@@ -25,7 +25,23 @@ function route_builder(f) {
 			return f(req, res);
 		}).then(function(body) {
 			debug.assert(body).is('object');
-			res.json(body);
+
+			if(body.hasOwnProperty('$status')) {
+				var status = parseInt(body && body.$status, 10);
+				var status_is_between_301_303 = (status >= 301) && (status <= 303);
+				var status_is_305 = status === 305;
+				var status_is_307 = status === 307;
+				var status_is_redirect = status_is_between_301_303 || status_is_305 || status_is_307;
+
+				if(!status_is_redirect) {
+					res.status(status);
+					res.json(body);
+				} else if(body.$ref) {
+					res.redirect(status, body.$ref);
+				}
+			} else {
+				res.json(body);
+			}
 		}).fail(function(err) {
 
 			if(err instanceof HTTPError) {
@@ -42,11 +58,10 @@ function route_builder(f) {
 					}
 				});
 				return;
-			} else {
-				res.status(500); // Internal Server Error
 			}
 
 			if(is_production_mode) {
+				res.status(500); // Internal Server Error
 				res.json({
 					'$type': 'error',
 					'$status': 500,
@@ -79,6 +94,7 @@ function route_builder(f) {
 						tmp.content.stack = ''+err.stack;
 					}
 				}
+				res.status(500); // Internal Server Error
 				res.json(tmp);
 			}
 			debug.error(err);
@@ -262,12 +278,7 @@ function get_routes(routes, paths) {
 					});
 
 					debug.log(route + ': Created ' + promises.length + ' promises for route.');
-					return _Q.allSettled(promises).then( merge_settled_results ).then(function(obj) {
-						if(is.obj(obj) && obj.hasOwnProperty('$status')) {
-							res.status(obj.$status);
-						}
-						return obj;
-					});
+					return _Q.allSettled(promises).then( merge_settled_results );
 
 				};
 			};

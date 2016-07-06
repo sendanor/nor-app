@@ -1,5 +1,15 @@
 "use strict";
 
+/** Returns the resource suffix part of an API URL */
+function parse_path_name(url) {
+	if(!url) {
+		return;
+	}
+	var tmp = url.split('/api/');
+	tmp.shift();
+	return '/' + tmp.join('/api/');
+}
+
 var norApp = angular.module('norApp', [
 	'datatables'
 ]);
@@ -8,116 +18,189 @@ norApp.config(function($locationProvider) {
 	$locationProvider.html5Mode(true);
 });
 
-norApp.controller('norCtrl', function($scope, $http, $log, $location) {
+/** */
+norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log, $location) {
 
-	function change_scope_data(data) {
+	/** Array of functions which to call when resetting */
+	//var _resets = [];
+
+	/** */
+	/*
+	function change_scope_data($scope, data) {
 		data = data || {};
 		$log.debug("new data = ", data);
 		Object.keys(data).forEach(function(key) {
 			$scope[key] = data[key];
 		});
 	}
+	*/
 
-	function initialize_page(path) {
-		$scope.reset();
-		$http({
+	/** Reset content */
+	//function reset_scopes() {
+	//	_resets.forEach(function(f) {
+	//		f();
+	//	});
+	//}
+
+	/** Append new action to reset scope */
+	//function add_reset_action(f) {
+	//	_resets.push(f);
+	//}
+
+	/** */
+	function do_get(path) {
+		//reset_scopes();
+		if(!path) { throw new TypeError("!path"); }
+		return $http({
 			method: 'GET',
 			url: '/api' + path
 		}).then(function successCallback(response) {
-			change_scope_data(response.data);
+			if($location.path() !== path) {
+				$location.path(path);
+			}
+			return response.data || {};
+		});
+	}
+
+	/** Go to page */
+	function do_go($scope, path) {
+		if(!$scope) { throw new TypeError("!$scope"); }
+		if(!path) { throw new TypeError("!path"); }
+		return do_get(path).then(function(data) {
+			//change_scope_data($scope, data);
+			reset_model($scope.model, data);
+			return data;
 		}, function errorCallback(response) {
 			$log.error("error: ", response);
 		});
 	}
 
-	$scope.keys = Object.keys;
+	/** */
+	function initialize($scope) {
+		if(!$scope) { throw new TypeError("!$scope"); }
 
-	$scope.$on('$locationChangeSuccess', function() {
-		var path = $location.path();
-		$log.debug("path = " + path);
-		initialize_page(path);
-	});
+		$scope.model = {};
 
-	function parse_path_name(url) {
-		if(!url) {
-			return;
-		}
-		var tmp = url.split('/api/');
-		tmp.shift();
-		return '/' + tmp.join('/api/');
+		$scope.$on('$locationChangeSuccess', function() {
+			var path = $location.path();
+			$log.debug("path = " + path);
+			do_go($scope, path);
+			//do_get(path).then(function(data) {
+			//	//change_scope_data($scope, data);
+			//	$scope.model = data;
+			//}, function errorCallback(response) {
+			//	$log.error("error: ", response);
+			//});
+		});
+
+		// Implement action to reset default content
+		/*
+		add_reset_action(function() {
+			$scope.model = {};
+			$scope.model.$app = {
+				name: 'Unnamed-App',
+				menu: []
+			};
+			$scope.model.title = 'Undefined Title';
+			$scope.model.$type = 'default';
+			$scope.model.content = '';
+		});
+		*/
+
+		// Reset scope
+		//reset_scopes();
+
 	}
+
+	/** */
+	function reset_model(model, new_model) {
+
+		if(!model) { throw new TypeError("!model"); }
+		if(!new_model) { throw new TypeError("!new_model"); }
+
+		$log.debug("Resetting model as new_model=", new_model);
+
+		model.$app = new_model.$app || {};
+		model.$app.name = new_model.$app.name || 'Unnamed-App';
+		model.$app.menu = new_model.$app.menu || [];
+
+		model.title = new_model.title || 'Undefined Title';
+		model.$type = new_model.$type || 'default';
+		model.content = new_model.content || '';
+
+		Object.keys(new_model).forEach(function(key) {
+			model[key] = new_model[key];
+		});
+
+		//$scope.model = model;
+	}
+
+	/** */
+	function do_post(path, data) {
+		$log.debug("POSTing: path = " + path);
+		return $http.post('/api' + path, data).then(function successCallback(response) {
+			return response.data || {};
+		});
+	}
+
+	// Return interface to access functions
+	return {
+		'initialize': initialize,
+		'go': do_go,
+		//'addResetAction': add_reset_action,
+		//'reset': reset_scopes,
+		'resetModel': reset_model,
+		'get': do_get,
+		'post': do_post
+	};
+
+}]);
+
+norApp.controller('norCtrl', function($scope, $http, $log, $location, norRouter) {
+
+	norRouter.initialize($scope);
+
+	$scope.keys = Object.keys;
 	$scope.path = parse_path_name;
 
 	/** Go to another resource */
 	$scope.go = function(url) {
 		var path = parse_path_name(url);
-		$location.path(path);
-		initialize_path(path);
+		return norRouter.go($scope, path);
 	};
-
-	//var path = $location.path();
-	//$log.debug("path = " + path);
-	//initialize_page(path);
-
-	// Array of functions which to call when resetting
-	$scope._resets = [];
-
-	/** Reset content */
-	$scope.reset = function(data) {
-		$scope._resets.forEach(function(f) {
-			f($scope);
-		});
-		if(data) {
-			$log.debug("data = ", data);
-			Object.keys(data).forEach(function(key) {
-				$scope[key] = data[key];
-			});
-		}
-	};
-
-	/** Append new action to reset scope */
-	$scope._addResetAction = function(f) {
-		$scope._resets.push(f);
-	};
-
-	// Implement action to reset default content
-	$scope._addResetAction(function() {
-		$scope.$ref = undefined;
-		$scope.$resource = undefined;
-		$scope.$user = undefined;
-		$scope.$app = {
-			name: 'Unnamed-App',
-			menu: []
-		};
-		$scope.title = 'Undefined Title';
-		$scope.$type = 'default';
-		$scope.content = '';
-		$scope.links = undefined;
-	});
-
-	// Reset scope
-	$scope.reset();
 
 	/** @returns {string} Content display type */
 	$scope.getContentType = function() {
 
-		if($scope.$type === "form" && angular.isArray($scope.content)) {
+		var model = $scope.model || {};
+		var content = model.content;
+		var type = model.$type;
+
+		if(type === "form" && angular.isArray(model.content)) {
 			return "form";
 		}
 
-		if($scope.$type === "table") {
+		if(type === "table") {
 			return "table";
 		}
 
-		if($scope.$type === "redirect") {
+		if(type === "Type") {
+			return "Type";
+		}
+
+		if(type === "Document") {
 			return "record";
 		}
 
-		if($scope.$type === "error") {
+		if(type === "redirect") {
 			return "record";
 		}
 
-		if($scope.$type === "record") {
+		if(type === "error") {
+			return "record";
+		}
+
+		if(type === "record") {
 			return "record";
 		}
 
@@ -145,33 +228,6 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location) {
 
 });
 
-norApp.controller('formCtrl', function($scope, $http, $log, $location) {
-
-	$scope.data = {};
-
-	$scope._addResetAction(function() {
-		$scope.data = {};
-	});
-
-	/** Submit a form with HTTP POST action to REST API */
-	$scope.submit = function() {
-		$log.debug("form submit called: ", $scope.data );
-
-		var path = $location.path();
-
-		$log.debug("path = " + path);
-
-		$http.post('/api' + path, $scope.data).then(function successCallback(response) {
-			var data = response.data || {};
-			$scope.reset(data);
-		}, function errorCallback(response) {
-			$log.error("error: ", response);
-			$scope.openalert( {"type":"danger", title: "Error!", content: ""+response} );
-		});
-	};
-
-});
-
 /* Links */
 norApp.directive('norLink', function() {
 	return {
@@ -193,15 +249,6 @@ norApp.directive('norLink', function() {
 				if($scope.link.icon && (!$scope.icon)) {
 					$scope.icon = $scope.link.icon;
 				}
-			}
-
-			function parse_path_name(url) {
-				if(!url) {
-					return;
-				}
-				var tmp = url.split('/api/');
-				tmp.shift();
-				return '/' + tmp.join('/api/');
 			}
 
 			$scope.path = parse_path_name;
@@ -289,5 +336,82 @@ norApp.directive('norRecord', function() {
 
 		}],
 		templateUrl: '/_libs/nor/record.html'
+	};
+});
+
+/* Types */
+norApp.directive('norType', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		//require: '^^norLink',
+		//transclude: true,
+		scope: {
+			name: '=',
+			content: '='
+		},
+		controller: ['$scope', '$log', function($scope, $log) {
+
+			$scope.content = $scope.content || {};
+			$scope.$id = $scope.content.$id || '';
+			$scope.$name = $scope.content.$name || '';
+			$scope.$schema = $scope.content.$schema || {};
+			$scope.properties = $scope.$schema.properties || {};
+			$scope.type = $scope.$schema.type || 'object';
+			$scope.required = $scope.$schema.required || [];
+			$scope.additionalProperties = $scope.$schema.additionalProperties ? true : false;
+			$scope.indexes = $scope.content.indexes;
+			$scope.$ref = $scope.content.$ref;
+			$scope.$created = $scope.content.$created;
+			$scope.$modified = $scope.content.$modified;
+
+			$scope.keys = Object.keys($scope.properties);
+
+		}],
+		templateUrl: '/_libs/nor/type.html'
+	};
+});
+
+/* Forms */
+norApp.directive('norForm', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		//require: '^^norLink',
+		//transclude: true,
+		scope: {
+			model: '=',
+			content: '=?',
+		},
+		controller: ['$scope', '$http', '$log', '$location', 'norRouter', function($scope, $http, $log, $location, norRouter) {
+
+			$scope.content = $scope.content || ($scope.model && $scope.model.content) || [];
+
+			$scope.data = {};
+
+			//norRouter.addResetAction(function() {
+			//	$scope.data = {};
+			//});
+
+			/** Submit a form with HTTP POST action to REST API */
+			$scope.submit = function() {
+				$log.debug("form submit called: ", $scope.data );
+
+				var path = $location.path();
+
+				norRouter.post(path, $scope.data).then(function(data) {
+					$log.debug('data = ', data);
+					//norRouter.reset();
+					//norRouter.changeScopeData($scope.model, data);
+					$scope.data = {};
+					norRouter.resetModel($scope.model, data);
+				}, function errorCallback(response) {
+					$log.error("error: ", response);
+				});
+
+			};
+
+		}],
+		templateUrl: '/_libs/nor/form.html'
 	};
 });

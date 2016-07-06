@@ -1,0 +1,20 @@
+<form name="form" class="pure-form pure-form-aligned" ng-submit="submit(form)">
+    <fieldset>
+
+		<div id="alerts">
+			<div class="alert alert-{{alert.type}}" ng-repeat="alert in alerts">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close" ng-click="closeAlert(alert)">&times;</a>
+				<strong>{{alert.title}}</strong> {{alert.content}}
+			</div>
+		</div>
+
+        <div class="pure-control-group" ng-repeat="field in content">
+            <label for="field-{{field.name}}">{{field.label||field.name}}</label>
+            <input id="field-{{field.name}}" ng-model="data[field.name]" name="{{field.name}}" type="{{field.type}}" placeholder="{{field.placeholder||''}}">
+        </div>
+
+        <div class="pure-controls">
+            <button name="submit" type="submit" class="pure-button pure-button-primary">Submit</button>
+        </div>
+    </fieldset>
+</form>

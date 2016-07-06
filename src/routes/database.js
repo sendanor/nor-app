@@ -180,7 +180,7 @@ function get_type_handler(opts) {
 
 				return {
 					'title': 'Type '+type.$name,
-					'$type': 'record',
+					'$type': 'Type',
 					'content': prepare_type(req, type),
 					'links': [
 						{
@@ -226,7 +226,7 @@ function get_doc_handler(opts) {
 
 				return {
 					'title': 'Document ' + doc.$id,
-					'$type': 'record',
+					'$type': 'Document',
 					'content': prepare_doc(req, doc),
 				};
 			});
@@ -296,7 +296,7 @@ function post_types_handler(opts) {
 				var obj = tr.fetch();
 				return {
 					'title': 'Declared a document type',
-					'$code': 303,
+					'$status': 303,
 					'$type': 'redirect',
 					'content': prepare_type(req, obj),
 					'$ref': ref(req, 'api/database/types', obj.$name)
@@ -340,7 +340,7 @@ function post_type_handler(opts) {
 				var obj = tr.fetch();
 				return {
 					'title': 'Declared a document type',
-					'$code': 303,
+					'$status': 303,
 					'$type': 'redirect',
 					'content': prepare_type(req, obj),
 					'$ref': ref(req, 'api/database/types', obj.$name)
@@ -443,7 +443,7 @@ function post_docs_handler(opts) {
 					var obj = tr.fetch();
 					return {
 						'title': 'Created a document',
-						'$code': 303,
+						'$status': 303,
 						'$type': 'redirect',
 						'content': prepare_doc(req, obj),
 						'$ref': ref(req, 'api/database/types', obj.$type, 'documents', obj.$id)
@@ -489,7 +489,7 @@ function post_doc_handler(opts) {
 				var obj = tr.fetch();
 				return {
 					'title': 'Updated a document',
-					'$code': 303,
+					'$status': 303,
 					'$type': 'redirect',
 					'content': prepare_doc(req, obj),
 					'$ref': ref(req, 'api/database/types', obj.$type, 'documents', obj.$id)
