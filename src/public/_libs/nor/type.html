@@ -1,32 +1,18 @@
 
 <div class="nor-type">
 
-	<h3>Properties</h3>
+	<div class="nor-type-name-container">
+		<h3>Name</h3>
+		<div class="nor-type-name" nor-editable-content="content.$name" on-commit="commit(content)">{{content.$name}}</div>
+	</div>
 
-	<div ng-repeat="(key, value) in properties" class="type-property-container">
+	<div class="nor-type-schema-container">
+		<nor-schema key="'$schema'" value="content.$schema" on-commit="commit(content)"></nor-schema>
+	</div>
 
-		<div ng-switch="value.type">
-
-			<div ng-switch-when="string" class="type-property type-property-text pure-g">
-				<div class="pure-u-1-6 type-property-name">{{key}}</div>
-				<div class="pure-u-1-12 type-property-type">text</div>
-				<div class="pure-u-3-4 type-property-format">{{value}}</div>
-			</div>
-
-			<div ng-switch-when="boolean" class="type-property type-property-checkbox pure-g">
-				<div class="pure-u-1-6 type-property-name">{{key}}</div>
-				<div class="pure-u-1-12 type-property-type">checkbox</div>
-				<div class="pure-u-3-4 type-property-format">{{value}}</div>
-			</div>
-
-			<div ng-switch-default class="type-property type-property-custom pure-g">
-				<div class="pure-u-1-6 type-property-name">{{key}}</div>
-				<div class="pure-u-1-12 type-property-type">custom</div>
-				<div class="pure-u-3-4 type-property-format">{{value}}</div>
-			</div>
-
-		</div>
-
+	<div class="nor-type-format-container">
+		<h3>Format</h3>
+		<pre class="nor-type-format">{{content|prettyPrint}}</pre>
 	</div>
 
 </div>

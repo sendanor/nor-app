@@ -1,0 +1,37 @@
+<div class="nor-schema nor-schema-array">
+	<div class="pure-g">
+		<div class="pure-u-1-6 nor-schema-field nor-schema-title">
+			<span class="label"><i class="fa fa-leaf" aria-hidden="true"></i> Title</span>
+			<span class="value" nor-editable-content="value.title" on-commit="commit()">{{value.title}}</span>
+		</div>
+		<div class="pure-u-1-12 nor-schema-field nor-schema-type">
+			<span class="label"><i class="fa fa-tag" aria-hidden="true"></i> Type</span>
+			<span class="value">array</span>
+		</div>
+		<div class="pure-u-1-6 nor-schema-field nor-schema-name">
+			<span class="label"><i class="fa fa-key" aria-hidden="true"></i> Key</span>
+			<span class="value" ng-if="key">{{key}}</span>
+		</div>
+		<div class="pure-u-7-12 nor-schema-field nor-schema-description">
+			<span class="label"><i class="fa fa-comment-o" aria-hidden="true"></i> Description</span>
+			<span class="value" nor-editable-content="value.description" on-commit="commit()">{{value.description}}</span>
+		</div>
+	</div>
+
+	<div class="nor-schema-field nor-schema-items-container">
+		<div class="label"><i class="fa fa-tags" aria-hidden="true"></i> Items</div>
+
+		<nor-schema key="'items'" value="value.items" on-commit="commit()"></nor-schema>
+	</div>
+
+	<div class="nor-schema-field nor-schema-format">
+		<span class="label"><i class="fa fa-code" aria-hidden="true"></i> Result Code
+			<a ng-click="show_result_code = !show_result_code" class="collapse-link">
+				<span ng-if="!show_result_code"><i class="fa fa-plus" aria-hidden="true"></i></span>
+				<span ng-if="show_result_code"><i class="fa fa-minus" aria-hidden="true"></i></span>
+			</a>
+		</span>
+		<span ng-if="show_result_code" class="value">{{value|prettyPrint}}</span>
+	</div>
+
+</div>

@@ -141,7 +141,7 @@ function get_create_type_form(opts) {
 
 	return function(req, res) {
 		assert_logged_in(req);
-		return nopg.transaction(opts.pg, function(tr) {
+		//return nopg.transaction(opts.pg, function(tr) {
 			return {
 				'title': 'Create a new type',
 				'$type': 'form',
@@ -150,7 +150,7 @@ function get_create_type_form(opts) {
 					{'type':'text','name':'$name', 'label':'Name'}
 				]
 			};
-		});
+		//});
 	};
 }
 
@@ -335,9 +335,14 @@ function post_type_handler(opts) {
 			delete content.$name;
 		}
 
+		//if(content && content.$schema && content.$schema.properties && content.$schema.properties.name) {
+		//	debug.log('input property name = ', content.$schema.properties.name);
+		//}
+
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.declareType(type)(content).then(function(tr) {
 				var obj = tr.fetch();
+				//debug.log('result $schema = ', obj.$schema);
 				return {
 					'title': 'Declared a document type',
 					'$status': 303,
@@ -364,7 +369,7 @@ function get_form_fields(type) {
 		var prop = properties[key];
 
 		if(prop.type === 'string') {
-			fields.push({'type':'text','name':key, 'label':key});
+			fields.push({'type':'text','name':key, 'label':prop.title||key, 'description':prop.description||''});
 		}
 	});
 

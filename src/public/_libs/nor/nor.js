@@ -5,9 +5,13 @@ function parse_path_name(url) {
 	if(!url) {
 		return;
 	}
-	var tmp = url.split('/api/');
-	tmp.shift();
-	return '/' + tmp.join('/api/');
+	if(url.indexOf('/api/') >= 0) {
+		var tmp = url.split('/api/');
+		tmp.shift();
+		return '/' + tmp.join('/api/');
+	} else {
+		return url;
+	}
 }
 
 var norApp = angular.module('norApp', [
@@ -137,7 +141,15 @@ norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log,
 
 	/** */
 	function do_post(path, data) {
-		$log.debug("POSTing: path = " + path);
+		path = parse_path_name(path);
+		$log.debug("POSTing: path = /api" + path, ", with data: ", data);
+		//if(data && data.content && data.content.$schema) {
+		//	$log.debug("POSTing with $schema: ", data.content.$schema);
+		//	$log.debug("POSTing with $schema: ", JSON.stringify(data.content.$schema, null, 2));
+		//}
+		//if(data && data.content && data.content.$schema && data.content.$schema.properties) {
+		//	$log.debug("POSTing with property name: ", data.content.$schema.properties.name);
+		//}
 		return $http.post('/api' + path, data).then(function successCallback(response) {
 			return response.data || {};
 		});
@@ -272,9 +284,12 @@ norApp.directive('norRecord', function() {
 		//require: '^^norLink',
 		//transclude: true,
 		scope: {
-			content: '='
+			content: '=',
+			onCommit: '&?'
 		},
-		controller: ['$scope', '$log', function($scope, $log) {
+		controller: ['$scope', '$log', 'norRouter', function($scope, $log, norRouter) {
+
+			$scope.content = $scope.content || {};
 
 			/** */
 			$scope.get_type = function(obj) {
@@ -334,41 +349,30 @@ norApp.directive('norRecord', function() {
 				return _get_content($scope.content, keys);
 			};
 
+			/** Save changes on the backend */
+			$scope.commit = function(content) {
+				if(!content) { throw new TypeError("!content"); }
+
+				// Trigger .onCommit() once when next change
+				var listener = $scope.$watch('content', function() {
+					listener();
+					if($scope.onCommit) {
+						$log.debug('Triggering norRecord.onCommit()');
+						return $scope.onCommit();
+					}
+				}, true);
+
+				var body = {'content': content};
+				$log.debug('POSTing to ', $scope.content.$ref, ' with ', body);
+				return norRouter.post($scope.content.$ref, body).then(function(data) {
+					$scope.content = data.content;
+				}, function errorCallback(response) {
+					$log.error("error: ", response);
+				});
+			};
+
 		}],
 		templateUrl: '/_libs/nor/record.html'
-	};
-});
-
-/* Types */
-norApp.directive('norType', function() {
-	return {
-		restrict: 'E',
-		replace: true,
-		//require: '^^norLink',
-		//transclude: true,
-		scope: {
-			name: '=',
-			content: '='
-		},
-		controller: ['$scope', '$log', function($scope, $log) {
-
-			$scope.content = $scope.content || {};
-			$scope.$id = $scope.content.$id || '';
-			$scope.$name = $scope.content.$name || '';
-			$scope.$schema = $scope.content.$schema || {};
-			$scope.properties = $scope.$schema.properties || {};
-			$scope.type = $scope.$schema.type || 'object';
-			$scope.required = $scope.$schema.required || [];
-			$scope.additionalProperties = $scope.$schema.additionalProperties ? true : false;
-			$scope.indexes = $scope.content.indexes;
-			$scope.$ref = $scope.content.$ref;
-			$scope.$created = $scope.content.$created;
-			$scope.$modified = $scope.content.$modified;
-
-			$scope.keys = Object.keys($scope.properties);
-
-		}],
-		templateUrl: '/_libs/nor/type.html'
 	};
 });
 
@@ -415,3 +419,342 @@ norApp.directive('norForm', function() {
 		templateUrl: '/_libs/nor/form.html'
 	};
 });
+
+/* Tables */
+norApp.directive('norTable', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		//require: '^^norLink',
+		//transclude: true,
+		scope: {
+			model: '=',
+			content: '=?',
+			onCommit: '&?'
+		},
+		controller: ['$scope', '$http', '$log', '$location', 'norRouter', function($scope, $http, $log, $location, norRouter) {
+
+			$scope.content = $scope.content || ($scope.model && $scope.model.content) || [];
+
+			/** Save changes on the backend */
+			/*
+			$scope.commit = function(content) {
+				if(!content) { throw new TypeError("!content"); }
+
+				// Trigger .onCommit() once when next change
+				var listener = $scope.$watch('content', function() {
+					listener();
+					if($scope.onCommit) {
+						return $scope.onCommit();
+					}
+				}, true);
+
+				return norRouter.post($scope.content.$ref, {'content': content}).then(function(data) {
+					$scope.content = data.content;
+				}, function errorCallback(response) {
+					$log.error("error: ", response);
+				});
+			};
+			*/
+
+		}],
+		templateUrl: '/_libs/nor/table.html'
+	};
+});
+
+/* Types */
+norApp.directive('norType', ['$log', function($log) {
+	return {
+		restrict: 'E',
+		replace: true,
+		//require: '^^norLink',
+		//transclude: true,
+		scope: {
+			content: '=',
+			onCommit: '&?'
+		},
+		controller: ['$scope', '$log', 'norRouter', function($scope, $log, norRouter) {
+
+			$scope.content                    = $scope.content || {};
+			$scope.content.$name              = $scope.content.$name || '';
+			$scope.content.$schema            = $scope.content.$schema || {};
+			$scope.content.$schema.properties = $scope.content.$schema.properties || {};
+			$scope.keys = Object.keys($scope.content.$schema.properties);
+
+			/** */
+			$scope.prettyprint = function(data) {
+				return JSON.stringify(data, null, 2);
+			};
+
+			/** Save changes on the backend */
+			$scope.commit = function(content) {
+				if(!content) { throw new TypeError("!content"); }
+
+				// Trigger .onCommit() once when next change
+				var listener = $scope.$watch('content', function() {
+					listener();
+					if($scope.onCommit) {
+						return $scope.onCommit();
+					}
+				}, true);
+
+				return norRouter.post($scope.content.$ref, {'content': content}).then(function(data) {
+					$scope.content = data.content;
+				}, function errorCallback(response) {
+					$log.error("error: ", response);
+				});
+			};
+
+		}],
+		templateUrl: '/_libs/nor/type.html'
+	};
+}]);
+
+/* Element for any JSON schema element */
+norApp.directive('norSchema', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		scope: {
+			key: '=',
+			value: '=',
+			onCommit: '&?'
+		},
+		controller: ['$scope', '$log', function($scope, $log) {
+
+			/** Action to do on commit */
+			$scope.commit = function() {
+				if($scope.onCommit) {
+					return $scope.onCommit();
+				}
+			};
+
+		}],
+		templateUrl: '/_libs/nor/schema.html'
+	};
+});
+
+/* Element for object JSON Schema */
+norApp.directive('norSchemaObject', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		scope: {
+			key: '=?',
+			value: '=',
+			onCommit: '&?'
+		},
+		controller: ['$scope', '$log', function($scope, $log) {
+
+			$scope.key = $scope.key || undefined;
+
+			/** Action to do on commit */
+			$scope.commit = function() {
+				if($scope.onCommit) {
+					return $scope.onCommit();
+				}
+			};
+
+		}],
+		templateUrl: '/_libs/nor/schemas/object.html'
+	};
+});
+
+/* Element for array JSON Schema */
+norApp.directive('norSchemaArray', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		scope: {
+			key: '=?',
+			value: '=',
+			onCommit: '&?'
+		},
+		controller: ['$scope', '$log', function($scope, $log) {
+
+			$scope.key = $scope.key || undefined;
+
+			/** Action to do on commit */
+			$scope.commit = function() {
+				if($scope.onCommit) {
+					return $scope.onCommit();
+				}
+			};
+
+		}],
+		templateUrl: '/_libs/nor/schemas/array.html'
+	};
+});
+
+/* Element for string JSON schema */
+norApp.directive('norSchemaString', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		scope: {
+			key: '=',
+			value: '=',
+			onCommit: '&?'
+		},
+		controller: ['$scope', '$log', function($scope, $log) {
+
+			/** Action to do on commit */
+			$scope.commit = function() {
+				if($scope.onCommit) {
+					return $scope.onCommit();
+				}
+			};
+
+		}],
+		templateUrl: '/_libs/nor/schemas/string.html'
+	};
+});
+
+/* Element for boolean JSON schema */
+norApp.directive('norSchemaBoolean', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		scope: {
+			key: '=',
+			value: '=',
+			onCommit: '&?'
+		},
+		controller: ['$scope', '$log', function($scope, $log) {
+
+			/** Action to do on commit */
+			$scope.commit = function() {
+				if($scope.onCommit) {
+					return $scope.onCommit();
+				}
+			};
+
+		}],
+		templateUrl: '/_libs/nor/schemas/boolean.html'
+	};
+});
+
+/* Element for custom JSON schema */
+norApp.directive('norSchemaCustom', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		scope: {
+			key: '=',
+			value: '=',
+			onCommit: '&?'
+		},
+		controller: ['$scope', '$log', function($scope, $log) {
+
+			/** Action to do on commit */
+			$scope.commit = function() {
+				if($scope.onCommit) {
+					return $scope.onCommit();
+				}
+			};
+
+		}],
+		templateUrl: '/_libs/nor/schemas/custom.html'
+	};
+});
+
+/* Element for custom JSON schema */
+norApp.directive('norEditableContent', function() {
+	return {
+		restrict: 'A',
+		scope: {
+			'value': '=norEditableContent',
+			onCommit: '&?'
+		},
+		controller: ['$scope', '$log', '$timeout', function($scope, $log, $timeout) {
+
+			$scope.editing = false;
+			$scope.value = $scope.value || undefined;
+
+			/* */
+			$scope.edit = function(editing) {
+				$log.debug('editing = ', editing);
+				$scope.editing = editing ? true : false;
+			};
+
+			/** Disable editing with a delay */
+			$scope.blur = function() {
+				$timeout(function(){
+					$scope.edit(false);
+				}, 125);
+			};
+
+			/* */
+			$scope.commit = function(value) {
+
+				value = value || '';
+
+				// Trigger .onCommit() once when next change
+				var listener = $scope.$watch('value', function() {
+					listener();
+					if($scope.onCommit) {
+						$log.debug('Triggering norEditableContent.onCommit()');
+						return $scope.onCommit();
+					}
+				});
+
+				$scope.editing = false;
+				$scope.value = value;
+
+			};
+
+		}],
+		templateUrl: '/_libs/nor/editable-content.html'
+	};
+});
+
+/** */
+norApp.directive('ngEnter', function() {
+	return function(scope, element, attrs) {
+		element.bind("keydown keypress", function(event) {
+			if(event.which === 13) {
+				scope.$apply(function(){
+					scope.$eval(attrs.ngEnter);
+				});
+				event.preventDefault();
+			}
+		});
+	};
+});
+
+/** */
+norApp.directive('autoFocus', function($timeout) {
+	return {
+		restrict: 'AC',
+		link: function(_scope, _element) {
+			$timeout(function(){
+				_element[0].focus();
+			}, 0);
+		}
+	};
+});
+
+/* Element for dropdown menus */
+norApp.directive('norDropdown', function() {
+	return {
+		restrict: 'E',
+		replace: true,
+		scope: {
+			title: '=',
+			links: '='
+		},
+		controller: ['$scope', '$log', function($scope, $log) {
+			$scope.icon = $scope.icon || 'cog';
+			$scope.title = $scope.title || '';
+			$scope.links = $scope.links || [];
+		}],
+		templateUrl: '/_libs/nor/dropdown.html'
+	};
+});
+
+/** Pretty print JSON filter */
+norApp.filter('prettyPrint', function() {
+	return function(input) {
+		return JSON.stringify(input, null, 2);
+	};
+})

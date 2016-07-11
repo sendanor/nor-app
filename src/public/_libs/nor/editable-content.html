@@ -1,0 +1,17 @@
+<div class="nor-editable-content">
+	<div ng-if="!editing" class="not-editing">
+		<div class="nor-editable-value" ng-click="edit(true)">
+			{{value}}&nbsp;
+			<span class="nor-editable-icon"><a href="#" ng-click="edit(true)"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a></span>
+		</div>
+	</div>
+	<div ng-if="editing" class="editing">
+		<div class="nor-editable-value">
+			<input type="text" name="value" ng-model="value" ng-enter="commit(value)" ng-blur="blur()" auto-focus />
+			<span class="nor-editable-icon">
+				<a href="#" ng-click="edit(false)"><i class="fa fa-times" aria-hidden="true"></i></a>
+				<a href="#" ng-click="commit(value)"><i class="fa fa-check" aria-hidden="true"></i></a>
+			</span>
+		</div>
+	</div>
+</div>

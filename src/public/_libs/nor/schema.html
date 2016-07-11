@@ -1,0 +1,8 @@
+
+<div class="nor-schema-container" ng-switch="value.type">
+	<nor-schema-object  key="key" value="value" ng-switch-when="object" on-commit="commit()"></nor-schema-object>
+	<nor-schema-array   key="key" value="value" ng-switch-when="array" on-commit="commit()"></nor-schema-array>
+	<nor-schema-string  key="key" value="value" ng-switch-when="string" on-commit="commit()"></nor-schema-string>
+	<nor-schema-boolean key="key" value="value" ng-switch-when="boolean" on-commit="commit()"></nor-schema-boolean>
+	<nor-schema-custom  key="key" value="value" ng-switch-default on-commit="commit()"></nor-schema-custom>
+</div>

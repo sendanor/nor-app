@@ -38,22 +38,7 @@
   </div>
 
   <div ng-switch-when="table">
-	<table datatable="" class="row-border hover">
-    <thead>
-    <tr>
-        <th ng-repeat="cell in model.$columns">{{model.$labels[cell] || cell}}</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr ng-repeat="row in model.content">
-        <td ng-repeat="cell in model.$columns">
-			<span ng-if="(cell === '$name') || (cell === '$id')"><nor-link link="row">{{row[cell]}}</nor-link></span>
-			<span ng-if="!((cell === '$name') || (cell === '$id'))">{{row[cell]}}</span>
-		</td>
-    </tr>
-    </tbody>
-	</table>
-
+	<nor-table model="model"></nor-table>
   </div>
 
   <div ng-switch-when="record">
@@ -61,7 +46,7 @@
   </div>
 
   <div ng-switch-when="Type">
-	<nor-type keys="keys(model.content)" content="model.content"></nor-type>
+	<nor-type content="model.content"></nor-type>
   </div>
 
   <div ng-switch-default>

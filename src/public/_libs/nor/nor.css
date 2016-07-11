@@ -47,27 +47,98 @@ body {
 	vertical-align: top;
 }
 
-#content .nor-type .type-property {
-	border: 1px solid #e0e0e0;
+#content .nor-schema {
+	border: 2px solid #e0e0e0;
 	background-color: #f0f0f0;
-	margin: 1em;
+	margin: 1em 0 2em 0;
 }
 
-#content .nor-type .type-property .type-property-name {
-	background-color: #f0fff0;
+#content .nor-schema .nor-schema-title {
+	background-color: #f0ffff;
 	border-right: 1px solid #e0e0e0;
 	padding: 1em;
-	text-align: center;
 }
 
-#content .nor-type .type-property .type-property-type {
+#content .nor-schema .nor-schema-type {
 	background-color: #f0f0ff;
 	border-right: 1px solid #e0e0e0;
 	padding: 1em;
 	text-align: center;
 }
 
-#content .nor-type .type-property .type-property-format {
-	background-color: #f0ffff;
+#content .nor-schema .nor-schema-name {
+	background-color: #f0fff0;
+	border-right: 1px solid #e0e0e0;
 	padding: 1em;
+	text-align: center;
+}
+
+#content .nor-schema .nor-schema-pattern {
+	background-color: #fffff0;
+	border-right: 1px solid #e0e0e0;
+	padding: 1em;
+	text-align: center;
+}
+
+#content .nor-schema .nor-schema-description {
+	border-top: 1px solid #e0e0e0;
+	border-right: 1px solid #e0e0e0;
+	background-color: #f0f0f0;
+	padding: 1em;
+}
+
+#content .nor-schema .nor-schema-format {
+	border-top: 1px solid #e0e0e0;
+	background-color: #f0f0f0;
+	padding: 1em;
+}
+
+#content .nor-schema .nor-schema-format .value {
+	white-space: pre;
+}
+
+#content .nor-schema .nor-schema-field {
+	position: relative;
+}
+
+#content .nor-schema .nor-schema-field .label {
+	color: #909090;
+	font-size: 0.75em;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+}
+
+#content .nor-schema .nor-schema-field .label .collapse-link {
+	float: right;
+}
+
+#content .nor-schema .nor-schema-properties-container {
+	padding: 1em;
+	border-top: 1px solid #e0e0e0;
+}
+
+#content .nor-schema .nor-schema-items-container {
+	padding: 1em;
+	border-top: 1px solid #e0e0e0;
+}
+
+#content .nor-schema-object {
+	background-color: #fcfcfc;
+}
+
+#content .nor-editable-value input {
+	width: 90%;
+}
+
+#content .nor-editable-icon a {
+	float:right;
+	color: #909090;
+	padding: 0 0.2em;
+}
+
+#content .nor-editable-icon a:hover {
+	color: #337ab7;
+	font-weight: bold;
 }

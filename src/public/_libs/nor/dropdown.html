@@ -1,0 +1,10 @@
+<div class="pure-menu pure-menu-horizontal nor-dropdown">
+	<ul class="pure-menu-list">
+        <li class="pure-menu-item pure-menu-has-children pure-menu-allow-hover">
+			{{title}}
+            <ul class="pure-menu-children">
+                <li class="pure-menu-item" ng-repeat="link in links"><nor-link link="link">{{link.label}}</nor-link></li>
+            </ul>
+        </li>
+	</ul>
+</div>
