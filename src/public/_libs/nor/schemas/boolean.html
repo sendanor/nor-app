@@ -2,7 +2,7 @@
 	<div class="pure-g">
 		<div class="pure-u-1-6 nor-schema-field nor-schema-title">
 			<span class="label"><i class="fa fa-leaf" aria-hidden="true"></i> Title</span>
-			<span class="value" nor-editable-content="value.title" on-commit="commit()">{{value.title}}</span>
+			<span class="value" nor-editable-content="value.title" on-commit="commit(value)">{{value.title}}</span>
 		</div>
 		<div class="pure-u-1-12 nor-schema-field nor-schema-type">
 			<span class="label"><i class="fa fa-tag" aria-hidden="true"></i> Type</span>
@@ -14,7 +14,7 @@
 		</div>
 		<div class="pure-u-7-12 nor-schema-field nor-schema-description">
 			<span class="label"><i class="fa fa-comment-o" aria-hidden="true"></i> Description</span>
-			<span class="value" nor-editable-content="value.description" on-commit="commit()">{{value.description}}</span>
+			<span class="value" nor-editable-content="value.description" on-commit="commit(value)">{{value.description}}</span>
 		</div>
 	</div>
 

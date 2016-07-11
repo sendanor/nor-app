@@ -516,11 +516,13 @@ norApp.directive('norSchema', function() {
 		restrict: 'E',
 		replace: true,
 		scope: {
-			key: '=',
+			key: '=?',
 			value: '=',
 			onCommit: '&?'
 		},
 		controller: ['$scope', '$log', function($scope, $log) {
+
+			$scope.key = $scope.key || undefined;
 
 			/** Action to do on commit */
 			$scope.commit = function() {
