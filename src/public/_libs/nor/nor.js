@@ -339,7 +339,7 @@ norApp.directive('norRecord', function() {
 					return data && _get_content(data[keys[0]], keys.slice(1) );
 				}
 
-			};
+			}
 
 			/**
 			 * @param key {string} The path to the value
@@ -759,4 +759,4 @@ norApp.filter('prettyPrint', function() {
 	return function(input) {
 		return JSON.stringify(input, null, 2);
 	};
-})
+});
