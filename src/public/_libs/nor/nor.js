@@ -244,7 +244,6 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location, norRouter)
 norApp.directive('norLink', function() {
 	return {
 		restrict: 'E',
-		replace: true,
 		transclude: true,
 		scope: {
 			link: '=?',
@@ -280,9 +279,6 @@ norApp.directive('norLink', function() {
 norApp.directive('norRecord', function() {
 	return {
 		restrict: 'E',
-		replace: true,
-		//require: '^^norLink',
-		//transclude: true,
 		scope: {
 			content: '=',
 			onCommit: '&?'
@@ -380,9 +376,6 @@ norApp.directive('norRecord', function() {
 norApp.directive('norForm', function() {
 	return {
 		restrict: 'E',
-		replace: true,
-		//require: '^^norLink',
-		//transclude: true,
 		scope: {
 			model: '=',
 			content: '=?',
@@ -424,9 +417,6 @@ norApp.directive('norForm', function() {
 norApp.directive('norTable', function() {
 	return {
 		restrict: 'E',
-		replace: true,
-		//require: '^^norLink',
-		//transclude: true,
 		scope: {
 			model: '=',
 			content: '=?',
@@ -466,9 +456,6 @@ norApp.directive('norTable', function() {
 norApp.directive('norType', ['$log', function($log) {
 	return {
 		restrict: 'E',
-		replace: true,
-		//require: '^^norLink',
-		//transclude: true,
 		scope: {
 			content: '=',
 			onCommit: '&?'
@@ -514,7 +501,6 @@ norApp.directive('norType', ['$log', function($log) {
 norApp.directive('norSchema', function() {
 	return {
 		restrict: 'E',
-		replace: true,
 		scope: {
 			key: '=?',
 			value: '=',
@@ -540,7 +526,6 @@ norApp.directive('norSchema', function() {
 norApp.directive('norSchemaObject', function() {
 	return {
 		restrict: 'E',
-		replace: true,
 		scope: {
 			key: '=?',
 			value: '=',
@@ -566,7 +551,6 @@ norApp.directive('norSchemaObject', function() {
 norApp.directive('norSchemaArray', function() {
 	return {
 		restrict: 'E',
-		replace: true,
 		scope: {
 			key: '=?',
 			value: '=',
@@ -592,7 +576,6 @@ norApp.directive('norSchemaArray', function() {
 norApp.directive('norSchemaString', function() {
 	return {
 		restrict: 'E',
-		replace: true,
 		scope: {
 			key: '=',
 			value: '=',
@@ -616,7 +599,6 @@ norApp.directive('norSchemaString', function() {
 norApp.directive('norSchemaBoolean', function() {
 	return {
 		restrict: 'E',
-		replace: true,
 		scope: {
 			key: '=',
 			value: '=',
@@ -640,7 +622,6 @@ norApp.directive('norSchemaBoolean', function() {
 norApp.directive('norSchemaCustom', function() {
 	return {
 		restrict: 'E',
-		replace: true,
 		scope: {
 			key: '=',
 			value: '=',
@@ -740,7 +721,6 @@ norApp.directive('autoFocus', function($timeout) {
 norApp.directive('norDropdown', function() {
 	return {
 		restrict: 'E',
-		replace: true,
 		scope: {
 			title: '=',
 			links: '='
