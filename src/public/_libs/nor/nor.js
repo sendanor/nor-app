@@ -542,6 +542,41 @@ norApp.directive('norSchemaObject', function() {
 				}
 			};
 
+			$scope.show_add_property_options = false;
+
+			$scope.setAddPropertyOptions = function(value) {
+				$scope.new_property = {};
+				$scope.show_add_property_options = value ? true : false;
+			};
+
+			var enableInitNewPropertyKey = true;
+
+			$scope.initNewPropertyKey = function(value) {
+				if(!enableInitNewPropertyKey) {
+					return;
+				}
+				var key = (''+value).toLowerCase().replace(/[^a-z0-9]+/g, "_");
+				$scope.new_property.key = key;
+				lastNewPropertyKey = key;
+			};
+
+			$scope.disableInitNewPropertyKey = function() {
+				enableInitNewPropertyKey = false;
+			};
+
+			$scope.addNewProperty = function(data) {
+				$scope.show_add_property_options = false;
+				var key = data.key;
+				delete data.key;
+
+				if(data.type === "object") {
+					data.properties = {};
+				}
+
+				$scope.value.properties[key] = data;
+				return $scope.commit();
+			};
+
 		}],
 		templateUrl: '/_libs/nor/schemas/object.html'
 	};
