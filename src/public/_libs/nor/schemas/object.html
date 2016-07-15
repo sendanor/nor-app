@@ -21,7 +21,10 @@
 	<div class="nor-schema-field nor-schema-properties-container">
 		<div class="label"><i class="fa fa-tags" aria-hidden="true"></i> Properties</div>
 
-		<div ng-repeat="(key2, value2) in value.properties">
+		<div ng-repeat="(key2, value2) in value.properties" class="nor-schema-property">
+			<div class="actions">
+				<nor-action click="removeProperty(value, key2)" icon="trash-o" dangerous-icon="trash" safety="enabled">Remove property {{key2}}?</nor-action>
+			</div>
 			<nor-schema key="key2" value="value2" on-commit="commit(value)"></nor-schema>
 		</div>
 

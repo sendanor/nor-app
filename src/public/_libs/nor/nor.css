@@ -53,6 +53,10 @@ body {
 	margin: 1em 0 2em 0;
 }
 
+#content .nor-schema-property .nor-schema {
+	margin: 0 0 2em 0;
+}
+
 #content .nor-schema .nor-schema-title {
 	background-color: #f0ffff;
 	border-right: 1px solid #e0e0e0;
@@ -126,6 +130,22 @@ body {
 
 #content .nor-schema-object {
 	background-color: #fcfcfc;
+}
+
+#content .nor-schema-object .actions {
+	margin: 0;
+	padding: 0;
+	text-align: right;
+}
+
+#content .nor-action .safety-on:hover {
+	font-weight: bold;
+	color: #ff0000;
+}
+
+#content .nor-action .safety-off {
+	font-weight: bold;
+	color: #ff0000;
 }
 
 #content .nor-schema-array {

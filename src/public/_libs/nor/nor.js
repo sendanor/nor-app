@@ -275,6 +275,53 @@ norApp.directive('norLink', function() {
 	};
 });
 
+/* Actions */
+norApp.directive('norAction', function() {
+	return {
+		restrict: 'E',
+		transclude: true,
+		scope: {
+			click: '&',
+			icon: '@?',
+			dangerousIcon: '@?',
+			classes: '@?class'
+		},
+		controller: ['$scope', '$timeout', '$q', function($scope, $timeout, $q) {
+
+			$scope.safety = true;
+			$scope.icon = $scope.icon || undefined;
+			$scope.dangerousIcon = $scope.dangerousIcon || $scope.icon;
+
+			/** Turn off safety for a moment */
+			$scope.safetyOff = function() {
+				$scope.safety = 'loading';
+				$timeout(function() {
+					$scope.safety = false;
+					$timeout(function() {
+						$scope.safety = true;
+					}, 5000);
+				}, 500);
+			};
+
+			/** */
+			$scope.execute = function() {
+				$scope.safety = 'loading';
+				return $q($scope.click, function() {
+					$scope.safety = true;
+				}).then(function() {
+					$scope.safety = true;
+				});
+			};
+
+		}],
+		template: '<div class="nor-action">'+
+			'	<a href="#" ng-if="safety === \'loading\'" class="safety-on"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></a>'+
+			'	<a href="#" ng-if="safety === true" ng-click="safetyOff()" class="safety-on"><i class="fa fa-{{icon}}" ng-if="icon" aria-hidden="true"></i></a>'+
+			'	<a href="#" ng-if="safety === false" ng-click="execute()" class="safety-off"><i class="fa fa-{{dangerousIcon}}" ng-if="dangerousIcon" aria-hidden="true"></i> <ng-transclude></ng-transclude></a>'+
+			'</div>'
+	};
+});
+
 /* Records */
 norApp.directive('norRecord', function() {
 	return {
@@ -544,6 +591,7 @@ norApp.directive('norSchemaObject', function() {
 
 			$scope.show_add_property_options = false;
 
+			/** */
 			$scope.setAddPropertyOptions = function(value) {
 				$scope.new_property = {};
 				$scope.show_add_property_options = value ? true : false;
@@ -551,6 +599,7 @@ norApp.directive('norSchemaObject', function() {
 
 			var enableInitNewPropertyKey = true;
 
+			/** */
 			$scope.initNewPropertyKey = function(value) {
 				if(!enableInitNewPropertyKey) {
 					return;
@@ -560,10 +609,12 @@ norApp.directive('norSchemaObject', function() {
 				lastNewPropertyKey = key;
 			};
 
+			/** */
 			$scope.disableInitNewPropertyKey = function() {
 				enableInitNewPropertyKey = false;
 			};
 
+			/** */
 			$scope.addNewProperty = function(data) {
 				$scope.show_add_property_options = false;
 				var key = data.key;
@@ -575,6 +626,14 @@ norApp.directive('norSchemaObject', function() {
 
 				$scope.value.properties[key] = data;
 				return $scope.commit();
+			};
+
+			/** Remove property */
+			$scope.removeProperty = function(obj, key) {
+				if(obj && obj.properties && obj.properties.hasOwnProperty(key)) {
+					delete obj.properties[key];
+					return $scope.commit();
+				}
 			};
 
 		}],
