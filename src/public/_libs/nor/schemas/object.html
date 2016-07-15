@@ -58,6 +58,11 @@
 
 	</div>
 
+	<div class="nor-schema-field nor-schema-additional-properties">
+		<label ng-if="value.hasOwnProperty('additionalProperties')" for="additional_properties"><input type="checkbox" ng-click="commit()" id="additional_properties" ng-model="value.additionalProperties" /> Accept additional properties</label>
+		<label ng-if="!value.hasOwnProperty('additionalProperties')" class="undefined" for="additional_properties"><input type="checkbox" ng-click="value.additionalProperties=false;commit()" id="additional_properties" checked="checked" /> Accept additional properties</label>		
+	</div>
+
 	<div class="nor-schema-field nor-schema-format">
 		<span class="label"><i class="fa fa-code" aria-hidden="true"></i> Result Code
 			<a ng-click="show_result_code = !show_result_code" class="collapse-link">
