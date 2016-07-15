@@ -136,16 +136,21 @@ body {
 	margin: 0;
 	padding: 0;
 	text-align: right;
+	clear: both;
 }
 
-#content .nor-action .safety-on:hover {
+#content .nor-action {
+	display: inline-block;
+	margin-left: 0.5em;
+}
+
+#content .nor-action a:hover {
 	font-weight: bold;
 	color: #ff0000;
 }
 
 #content .nor-action .safety-off {
 	font-weight: bold;
-	color: #ff0000;
 }
 
 #content .nor-schema-array {

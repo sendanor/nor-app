@@ -284,40 +284,47 @@ norApp.directive('norAction', function() {
 			click: '&',
 			icon: '@?',
 			dangerousIcon: '@?',
-			classes: '@?class'
+			title: '@?',
+			classes: '@?class',
+			safety: '@?'
 		},
 		controller: ['$scope', '$timeout', '$q', function($scope, $timeout, $q) {
 
-			$scope.safety = true;
+			$scope.safety = $scope.safety === 'enabled';
+			$scope.title = $scope.title || '';
+			$scope.state = true;
 			$scope.icon = $scope.icon || undefined;
 			$scope.dangerousIcon = $scope.dangerousIcon || $scope.icon;
 
 			/** Turn off safety for a moment */
 			$scope.safetyOff = function() {
-				$scope.safety = 'loading';
+				$scope.state = 'loading';
 				$timeout(function() {
-					$scope.safety = false;
+					$scope.state = false;
 					$timeout(function() {
-						$scope.safety = true;
+						$scope.state = true;
 					}, 5000);
 				}, 500);
 			};
 
 			/** */
 			$scope.execute = function() {
-				$scope.safety = 'loading';
-				return $q($scope.click, function() {
-					$scope.safety = true;
-				}).then(function() {
-					$scope.safety = true;
-				});
+				$scope.state = 'loading';
+				function fin() {
+					$scope.state = true;
+				}
+				return $q.when($scope.click()).then(fin, fin);
 			};
 
 		}],
-		template: '<div class="nor-action">'+
-			'	<a href="#" ng-if="safety === \'loading\'" class="safety-on"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></a>'+
-			'	<a href="#" ng-if="safety === true" ng-click="safetyOff()" class="safety-on"><i class="fa fa-{{icon}}" ng-if="icon" aria-hidden="true"></i></a>'+
-			'	<a href="#" ng-if="safety === false" ng-click="execute()" class="safety-off"><i class="fa fa-{{dangerousIcon}}" ng-if="dangerousIcon" aria-hidden="true"></i> <ng-transclude></ng-transclude></a>'+
+		template: '<div class="nor-action" ng-if="safety">'+
+			'	<a href="#" title="{{title}}" ng-if="state === \'loading\'" class="safety-on"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></a>'+
+			'	<a href="#" title="{{title}}" ng-if="state === true" ng-click="safetyOff()" class="safety-on"><i class="fa fa-{{icon}}" ng-if="icon" aria-hidden="true"></i></a>'+
+			'	<a href="#" title="{{title}}" ng-if="state === false" ng-click="execute()" class="safety-off"><i class="fa fa-{{dangerousIcon}}" ng-if="dangerousIcon" aria-hidden="true"></i> <ng-transclude></ng-transclude></a>'+
+			'</div>'+
+			'<div class="nor-action" ng-if="!safety">'+
+			'	<a href="#" title="{{title}}" ng-if="state === \'loading\'" class="safety-on"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></a>'+
+			'	<a href="#" title="{{title}}" ng-if="state !== \'loading\'" ng-click="execute()" class="safety-off"><i class="fa fa-{{dangerousIcon}}" ng-if="dangerousIcon" aria-hidden="true"></i> <ng-transclude></ng-transclude></a>'+
 			'</div>'
 	};
 });
@@ -634,6 +641,31 @@ norApp.directive('norSchemaObject', function() {
 					delete obj.properties[key];
 					return $scope.commit();
 				}
+			};
+
+			/** Returns true if property is required */
+			$scope.isRequired = function(obj, key) {
+				if(!obj.hasOwnProperty('required')) {
+					return false;
+				}
+				var required = obj.required;
+				var i = required.indexOf(key);
+				return i >= 0;
+			};
+
+			/** Toggle required */
+			$scope.toggleRequired = function(obj, key) {
+				if(!obj.hasOwnProperty('required')) {
+					obj.required = [];
+				}
+				var required = obj.required;
+				var i = required.indexOf(key);
+				if(i === -1) {
+					required.push(key);
+				} else {
+					required.splice(i, 1);
+				}
+				return $scope.commit();
 			};
 
 		}],
