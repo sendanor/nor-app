@@ -556,12 +556,14 @@ norApp.directive('norSchema', function() {
 	return {
 		restrict: 'E',
 		scope: {
+			parent: '=?',
 			key: '=?',
 			value: '=',
 			onCommit: '&?'
 		},
 		controller: ['$scope', '$log', function($scope, $log) {
 
+			$scope.parent = $scope.parent || undefined;
 			$scope.key = $scope.key || undefined;
 
 			/** Action to do on commit */
@@ -581,12 +583,14 @@ norApp.directive('norSchemaObject', function() {
 	return {
 		restrict: 'E',
 		scope: {
+			parent: '=?',
 			key: '=?',
 			value: '=',
 			onCommit: '&?'
 		},
 		controller: ['$scope', '$log', function($scope, $log) {
 
+			$scope.parent = $scope.parent || undefined;
 			$scope.key = $scope.key || undefined;
 
 			/** Action to do on commit */
@@ -664,6 +668,48 @@ norApp.directive('norSchemaObject', function() {
 					required.push(key);
 				} else {
 					required.splice(i, 1);
+				}
+				return $scope.commit();
+			};
+
+			/** Returns true if property has index support */
+			$scope.indexesEnabled = function() {
+				var parent = $scope.parent;
+				if(!parent) {
+					return false;
+				}
+				return parent.hasOwnProperty('$schema');
+			};
+
+			/** Returns true if property is index */
+			$scope.hasIndex = function(key) {
+				var parent = $scope.parent;
+				if(!parent) {
+					return false;
+				}
+				if(!parent.hasOwnProperty('indexes')) {
+					return false;
+				}
+				var indexes = parent.indexes;
+				var i = indexes.indexOf(key);
+				return i >= 0;
+			};
+
+			/** Toggle index on property */
+			$scope.toggleIndex = function(key) {
+				var parent = $scope.parent;
+				if(!parent) {
+					return false;
+				}
+				if(!parent.hasOwnProperty('indexes')) {
+					parent.indexes = [];
+				}
+				var indexes = parent.indexes;
+				var i = indexes.indexOf(key);
+				if(i === -1) {
+					indexes.push(key);
+				} else {
+					indexes.splice(i, 1);
 				}
 				return $scope.commit();
 			};

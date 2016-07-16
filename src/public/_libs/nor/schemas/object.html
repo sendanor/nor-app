@@ -24,6 +24,9 @@
 		<div ng-repeat="(key2, value2) in value.properties" class="nor-schema-property">
 			<div class="actions">
 
+				<nor-action ng-if="indexesEnabled() && hasIndex(key2)" title="Property is index" click="toggleIndex(key2)" icon="star"></nor-action>
+				<nor-action ng-if="indexesEnabled() && !hasIndex(key2)" title="Property is not index" click="toggleIndex(key2)" icon="star-o"></nor-action>
+
 				<nor-action ng-if="isRequired(value, key2)" title="Property is required" click="toggleRequired(value, key2)" icon="check-circle-o"></nor-action>
 				<nor-action ng-if="!isRequired(value, key2)" title="Property is not required" click="toggleRequired(value, key2)" icon="circle-o"></nor-action>
 
