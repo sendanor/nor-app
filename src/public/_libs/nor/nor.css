@@ -84,6 +84,13 @@ body {
 	text-align: center;
 }
 
+#content .nor-schema .nor-schema-format {
+	background-color: #f0f0ff;
+	border-right: 1px solid #e0e0e0;
+	padding: 1em;
+	text-align: center;
+}
+
 #content .nor-schema .nor-schema-description {
 	border-top: 1px solid #e0e0e0;
 	border-right: 1px solid #e0e0e0;
@@ -91,13 +98,13 @@ body {
 	padding: 1em;
 }
 
-#content .nor-schema .nor-schema-format {
+#content .nor-schema .nor-schema-result-code {
 	border-top: 1px solid #e0e0e0;
 	background-color: #f0f0f0;
 	padding: 1em;
 }
 
-#content .nor-schema .nor-schema-format .value {
+#content .nor-schema .nor-schema-result-code .value {
 	white-space: pre;
 }
 

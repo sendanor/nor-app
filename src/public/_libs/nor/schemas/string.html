@@ -16,20 +16,16 @@
 			<span class="label"><i class="fa fa-gavel" aria-hidden="true"></i> Pattern</span>
 			<span nor-editable-content="value.pattern" on-commit="commit(value)">{{value.pattern}}</span>
 		</div>
-		<div class="pure-u-5-12 nor-schema-field nor-schema-description">
+		<div class="pure-u-1-6 nor-schema-field nor-schema-format">
+			<span class="label"><i class="fa fa-gavel" aria-hidden="true"></i> Format</span>
+			<span nor-editable-content="value.format" nor-options="['date-time','email','hostname','ipv4','ipv6','uri','uuid']" on-commit="commit(value)">{{value.format}}</span>
+		</div>
+		<div class="pure-u-1-4 nor-schema-field nor-schema-description">
 			<span class="label"><i class="fa fa-comment-o" aria-hidden="true"></i> Description</span>
 			<span class="value" nor-editable-content="value.description" on-commit="commit(value)">{{value.description}}</span>
 		</div>
-		<!--
-		<div class="pure-u-1-4 nor-schema-field nor-schema-tools" ng-if="value.pattern">
-			<nor-dropdown>
-				<nor-dropdown-link ></nor-dropdown-link>
-			</nor-dropdown>
-			<span nor-editable-content="value.pattern" on-commit="commit(value)">{{value.pattern}}</span>
-		</div>
-		-->
 	</div>
-	<div class="nor-schema-field nor-schema-format">
+	<div class="nor-schema-field nor-schema-result-code">
 		<span class="label"><i class="fa fa-code" aria-hidden="true"></i> Result Code
 			<a ng-click="show_result_code = !show_result_code" class="collapse-link">
 				<span ng-if="!show_result_code"><i class="fa fa-plus" aria-hidden="true"></i></span>

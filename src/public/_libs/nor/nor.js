@@ -818,13 +818,16 @@ norApp.directive('norEditableContent', function() {
 	return {
 		restrict: 'A',
 		scope: {
+			'norOptions': '=?',
 			'value': '=norEditableContent',
 			onCommit: '&?'
 		},
 		controller: ['$scope', '$log', '$timeout', function($scope, $log, $timeout) {
 
 			$scope.editing = false;
+			$scope.norOptions = $scope.norOptions || undefined;
 			$scope.value = $scope.value || undefined;
+			$scope.option = $scope.value;
 
 			/* */
 			$scope.edit = function(editing) {
@@ -837,6 +840,12 @@ norApp.directive('norEditableContent', function() {
 				$timeout(function(){
 					$scope.edit(false);
 				}, 125);
+			};
+
+			/* */
+			$scope.updateValue = function(option) {
+				$scope.value = option;
+				$scope.option = option;
 			};
 
 			/* */
@@ -854,6 +863,7 @@ norApp.directive('norEditableContent', function() {
 				});
 
 				$scope.editing = false;
+				$scope.option = value;
 				$scope.value = value;
 
 			};
