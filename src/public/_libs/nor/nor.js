@@ -25,32 +25,6 @@ norApp.config(function($locationProvider) {
 /** */
 norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log, $location) {
 
-	/** Array of functions which to call when resetting */
-	//var _resets = [];
-
-	/** */
-	/*
-	function change_scope_data($scope, data) {
-		data = data || {};
-		$log.debug("new data = ", data);
-		Object.keys(data).forEach(function(key) {
-			$scope[key] = data[key];
-		});
-	}
-	*/
-
-	/** Reset content */
-	//function reset_scopes() {
-	//	_resets.forEach(function(f) {
-	//		f();
-	//	});
-	//}
-
-	/** Append new action to reset scope */
-	//function add_reset_action(f) {
-	//	_resets.push(f);
-	//}
-
 	/** */
 	function do_get(path) {
 		//reset_scopes();
@@ -59,9 +33,6 @@ norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log,
 			method: 'GET',
 			url: '/api' + path
 		}).then(function successCallback(response) {
-			if($location.path() !== path) {
-				$location.path(path);
-			}
 			return response.data || {};
 		});
 	}
@@ -71,6 +42,9 @@ norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log,
 		if(!$scope) { throw new TypeError("!$scope"); }
 		if(!path) { throw new TypeError("!path"); }
 		return do_get(path).then(function(data) {
+			if($location.path() !== path) {
+				$location.path(path);
+			}
 			//change_scope_data($scope, data);
 			reset_model($scope.model, data);
 			return data;
@@ -89,30 +63,7 @@ norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log,
 			var path = $location.path();
 			$log.debug("path = " + path);
 			do_go($scope, path);
-			//do_get(path).then(function(data) {
-			//	//change_scope_data($scope, data);
-			//	$scope.model = data;
-			//}, function errorCallback(response) {
-			//	$log.error("error: ", response);
-			//});
 		});
-
-		// Implement action to reset default content
-		/*
-		add_reset_action(function() {
-			$scope.model = {};
-			$scope.model.$app = {
-				name: 'Unnamed-App',
-				menu: []
-			};
-			$scope.model.title = 'Undefined Title';
-			$scope.model.$type = 'default';
-			$scope.model.content = '';
-		});
-		*/
-
-		// Reset scope
-		//reset_scopes();
 
 	}
 
@@ -546,8 +497,118 @@ norApp.directive('norType', ['$log', function($log) {
 				});
 			};
 
+			// 
+			if($scope.content.$schema.type !== "object") {
+				$scope.content.$schema.type = 'object';
+				return $scope.commit($scope.content);
+			}
+			
+
 		}],
 		templateUrl: '/_libs/nor/type.html'
+	};
+}]);
+
+/* Select element for external resource */
+norApp.directive('norSelect', ['$log', function($log) {
+	return {
+		restrict: 'E',
+		scope: {
+			ref: '@?',
+			path: '=?',
+			values: '=?',
+			valueKey: '@?',
+			labelKey: '@?',
+			content: '=?',
+			model: '=?',
+			onChange: '&?'
+		},
+		controller: ['$scope', '$log', 'norRouter', function($scope, $log, norRouter) {
+
+			$scope.loading = true;
+			$scope.ref = $scope.ref || undefined;
+			$scope.path = $scope.path || [];
+			$scope.content = $scope.content || undefined;
+			$scope.model = $scope.model || undefined;
+			$scope.valueKey = $scope.valueKey || '';
+			$scope.labelKey = $scope.labelKey || '';
+			$scope.values = $scope.values || [];
+
+			function fetch_(data, keys) {
+				if(!data) {
+					return;
+				}
+				if(keys.length === 0) {
+					return data;
+				}
+				keys = [].concat(keys);
+				var key = keys.shift();
+				return fetch_(data[key], keys);
+			}
+
+			$scope.items = [];
+
+			// Update items based on content
+			$scope.$watch('content', function() {
+				var content = $scope.content;
+
+				if(!content) {
+					return;
+				}
+
+				// Handle array content
+				if(content instanceof Array) {
+					content.forEach(function(item, key) {
+						$scope.items.push({"key":key, "item":item});
+					});
+					return;
+				}
+
+				// Handle object content
+				Object.keys(content).forEach(function(key) {
+					var item = content[key];
+					$scope.items.push({"key": key, "item":item});
+				});
+
+
+			});
+
+
+			if( (!$scope.content) && $scope.ref ) {
+				norRouter.get($scope.ref).then(function(data) {
+					var content = fetch_(data.content, $scope.path);
+					if(content && content instanceof Array) {
+						$scope.content = [].concat(content).concat($scope.values);
+					} else {
+						Object.keys($scope.values).forEach(function(key) {
+							content[key] = $scope.values[key];
+						});
+						$scope.content = content;
+					}
+					$log.debug("content = ", $scope.content);
+					$scope.loading = false;
+				}, function errorCallback(response) {
+					$log.error("error: ", response);
+				});
+			}
+
+			/** Action to do on change */
+			$scope.change = function() {
+				$log.debug("norSelect.change()");
+
+				// Trigger .onChange() once when next change
+				var listener = $scope.$watch('model', function() {
+					listener();
+					if($scope.onChange) {
+						$log.debug('Triggering norSelect.onChange()');
+						return $scope.onChange();
+					}
+				});
+
+			};
+
+		}],
+		templateUrl: '/_libs/nor/select.html'
 	};
 }]);
 
@@ -749,11 +810,16 @@ norApp.directive('norSchemaString', function() {
 	return {
 		restrict: 'E',
 		scope: {
+			parent: '=?',
 			key: '=',
 			value: '=',
 			onCommit: '&?'
 		},
-		controller: ['$scope', '$log', function($scope, $log) {
+		controller: ['$scope', '$log', '$q', function($scope, $log, $q) {
+
+			$scope.new_field = "";
+
+			$scope.parent = $scope.parent || undefined;
 
 			/** Action to do on commit */
 			$scope.commit = function() {
@@ -761,6 +827,168 @@ norApp.directive('norSchemaString', function() {
 					return $scope.onCommit();
 				}
 			};
+
+			/** Returns true if property has support for (relation of) documents */
+			$scope.documentsEnabled = function() {
+				var parent = $scope.parent;
+				if(!parent) {
+					return false;
+				}
+				return parent.hasOwnProperty('$schema');
+			};
+
+			/** Returns true if property has link to document */
+			$scope.hasDocument = function(key_) {
+				var parent = $scope.parent;
+				if(!parent) {
+					return false;
+				}
+				if(!parent.hasOwnProperty('documents')) {
+					return false;
+				}
+				var documents = parent.documents;
+				var results = documents.filter(function(line) {
+					var parts = line.split('|');
+					var type_key = parts.shift().split('#');
+					var fields = parts.join('|').split(',');
+					var type = type_key.shift();
+					var key = type_key.join('#');
+
+					return key === key_;
+				});
+				return results.length >= 1;
+			};
+
+			/** Returns document link information */
+			$scope.getDocument = function(key_) {
+				$log.debug("key_ = ", key_);
+				var parent = $scope.parent;
+				if(!parent) {
+					$log.debug("No parent");
+					return;
+				}
+				if(!parent.hasOwnProperty('documents')) {
+					$log.debug("No documents in parent");
+					return {
+						"type": "",
+						"key": key_,
+						"fields": []
+					};
+				}
+				var documents = parent.documents;
+				var results = documents.map(function(line) {
+					var parts = line.split('|');
+					var type_key = parts.shift().split('#');
+					var fields = parts.join('|').split(',');
+					var type = type_key.shift();
+					var key = type_key.join('#');
+
+					return {
+						"type": type,
+						"key": key_,
+						"fields": fields
+					};
+				}).filter(function(doc) {
+					return doc.key === key_;
+				});
+				var doc = results.shift();
+				$log.debug('doc = ', doc);
+				return doc;
+			};
+
+			/** Returns fields array without `field` */
+			$scope.removeField = function(field_, fields_) {
+				return fields_.filter(function(field) {
+					return field_ !== field;
+				});
+			};
+
+			/** Returns fields array appended with `field` */
+			$scope.addField = function(field_, fields_) {
+				return [].concat(fields_).concat([field_]);
+			};
+
+			/** Toggle document relation on property */
+			$scope.setDocument = function(type_, key_, fields_) {
+
+				fields_ = fields_ || ['$id'];
+
+				$log.debug("type_ = ", type_);
+				$log.debug("key_ = ", key_);
+				$log.debug("fields_ = ", fields_);
+
+				var parent = $scope.parent;
+
+				$log.debug("parent = ", parent);
+
+				if(!parent) {
+					return false;
+				}
+				if(!parent.hasOwnProperty('documents')) {
+					parent.documents = [];
+				}
+				var documents = parent.documents;
+
+				// Note: We must ignore any keyword which has ',' in it
+				var line_ = (type_||'') + (type_?'#':'') + key_ + '|' + fields_.filter(function(f) {
+					if(!f) { return; }
+					return (''+f).indexOf(',') < 0;
+				}).join(',');
+
+				$log.debug("documents = ", documents);
+				$log.debug("line_ = ", line_);
+
+				var changed = false;
+
+				var seen = {};
+
+				var results = documents.map(function(line) {
+					var parts = (line||'').split('|');
+					var type_key = (parts.shift()||'').split('#');
+					var fields = parts.join('|').split(',');
+					var type = type_key.shift()||'';
+					var key = type_key.join('#');
+
+					$log.debug("key = ", key);
+
+					// Assert unique keywords
+					if(seen.hasOwnProperty(key)) {
+						return;
+					}
+					seen[key] = true;
+
+					// Do not change other keywords
+					if(key !== key_) {
+						return line;
+					}
+
+					// Use our new line_ for this keyword
+					changed = true;
+					return line_;
+				}).filter(function(line){
+					return line?true:false;
+				});
+
+				if(changed) {
+					parent.documents = results;
+				} else {
+					parent.documents.push(line_);
+				}
+
+				$log.debug("parent.documents = ", parent.documents);
+
+				return $q.when($scope.commit()).then(function() {
+					$scope.updateLink();
+				});
+			};
+
+			/** */
+			$scope.updateLink = function() {
+				$scope.new_field = "";
+				$scope.link = $scope.getDocument($scope.key);
+			};
+
+			$scope.updateLink();
 
 		}],
 		templateUrl: '/_libs/nor/schemas/string.html'
@@ -920,5 +1148,15 @@ norApp.directive('norDropdown', function() {
 norApp.filter('prettyPrint', function() {
 	return function(input) {
 		return JSON.stringify(input, null, 2);
+	};
+});
+
+/** Unique filter */
+norApp.filter('unique', function () {
+	return function (items, attr) {
+		var seen = {};
+		return items.filter(function (item) {
+			return (angular.isUndefined(attr) || !item.hasOwnProperty(attr)) ? true : seen[item[attr]] = !seen[item[attr]];
+		});
 	};
 });

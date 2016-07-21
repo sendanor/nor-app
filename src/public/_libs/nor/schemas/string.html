@@ -1,37 +1,56 @@
 <div class="nor-schema nor-schema-string">
 	<div class="pure-g">
 		<div class="pure-u-1-6 nor-schema-field nor-schema-title">
-			<span class="label"><i class="fa fa-leaf" aria-hidden="true"></i> Title</span>
-			<span class="value" nor-editable-content="value.title" on-commit="commit(value)">{{value.title}}</span>
+			<div class="label"><i class="fa fa-leaf" aria-hidden="true"></i> Title</div>
+			<div class="value" nor-editable-content="value.title" on-commit="commit(value)">{{value.title}}</div>
 		</div>
 		<div class="pure-u-1-12 nor-schema-field nor-schema-type">
-			<span class="label"><i class="fa fa-tag" aria-hidden="true"></i> Type</span>
-			<span class="value">string</span>
+			<div class="label"><i class="fa fa-tag" aria-hidden="true"></i> Type</div>
+			<div class="value">string</div>
 		</div>
 		<div class="pure-u-1-6 nor-schema-field nor-schema-name">
-			<span class="label"><i class="fa fa-key" aria-hidden="true"></i> Key</span>
-			<span class="value">{{key}}</span>
+			<div class="label"><i class="fa fa-key" aria-hidden="true"></i> Key</div>
+			<div class="value">{{key}}</div>
 		</div>
 		<div class="pure-u-1-6 nor-schema-field nor-schema-pattern">
-			<span class="label"><i class="fa fa-gavel" aria-hidden="true"></i> Pattern</span>
-			<span nor-editable-content="value.pattern" on-commit="commit(value)">{{value.pattern}}</span>
+			<div class="label"><i class="fa fa-gavel" aria-hidden="true"></i> Pattern</div>
+			<div nor-editable-content="value.pattern" on-commit="commit(value)">{{value.pattern}}</div>
 		</div>
 		<div class="pure-u-1-6 nor-schema-field nor-schema-format">
-			<span class="label"><i class="fa fa-gavel" aria-hidden="true"></i> Format</span>
-			<span nor-editable-content="value.format" nor-options="['date-time','email','hostname','ipv4','ipv6','uri','uuid']" on-commit="commit(value)">{{value.format}}</span>
+			<div class="label"><i class="fa fa-gavel" aria-hidden="true"></i> Format</div>
+			<div nor-editable-content="value.format" nor-options="['date-time','email','hostname','ipv4','ipv6','uri','uuid']" on-commit="commit(value)">{{value.format}}</div>
 		</div>
 		<div class="pure-u-1-4 nor-schema-field nor-schema-description">
-			<span class="label"><i class="fa fa-comment-o" aria-hidden="true"></i> Description</span>
-			<span class="value" nor-editable-content="value.description" on-commit="commit(value)">{{value.description}}</span>
+			<div class="label"><i class="fa fa-comment-o" aria-hidden="true"></i> Description</div>
+			<div class="value" nor-editable-content="value.description" on-commit="commit(value)">{{value.description}}</div>
+		</div>
+	</div>
+	<div class="pure-g nor-schema-documents-container" ng-if="value.format === 'uuid'">
+		<div class="pure-u-1-2 nor-schema-field nor-schema-documents-type">
+			<div class="label"><i class="fa fa-link" aria-hidden="true"></i> Linked to Type</div>
+			<div class="value">
+				<nor-select model="link.type" on-change="setDocument(link.type, key, link.fields)" ref="/database/types" value-key="$name" label-key="$name"></nor-select>
+			</div>
+		</div>
+		<div class="pure-u-1-2 nor-schema-field nor-schema-documents">
+			<div class="label"><i class="fa fa-tags" aria-hidden="true"></i> Select fields for document linking</div>
+			<div class="value" ng-if="link.type">
+
+				<div ng-repeat="field in link.fields|orderBy:'toString()' track by $index">{{field}} <a href="#" ng-click="setDocument(link.type, key, removeField(field, link.fields))"><i class="fa fa-minus-circle" aria-hidden="true"></i></a></div>
+
+				<nor-select model="new_field" on-change="setDocument(link.type, key, addField(new_field, link.fields))"
+					ref="/database/types/{{link.type}}" 
+					path="['$schema', 'properties']" values="{'$id':{},'$type':{},'$types_id':{},'$created':{},'$modified':{}}"></nor-select>
+			</div>
 		</div>
 	</div>
 	<div class="nor-schema-field nor-schema-result-code">
-		<span class="label"><i class="fa fa-code" aria-hidden="true"></i> Result Code
+		<div class="label"><i class="fa fa-code" aria-hidden="true"></i> Result Code
 			<a ng-click="show_result_code = !show_result_code" class="collapse-link">
-				<span ng-if="!show_result_code"><i class="fa fa-plus" aria-hidden="true"></i></span>
-				<span ng-if="show_result_code"><i class="fa fa-minus" aria-hidden="true"></i></span>
+				<div ng-if="!show_result_code"><i class="fa fa-plus" aria-hidden="true"></i></div>
+				<div ng-if="show_result_code"><i class="fa fa-minus" aria-hidden="true"></i></div>
 			</a>
-		</span>
-		<span ng-if="show_result_code" class="value">{{value|prettyPrint}}</span>
+		</div>
+		<div ng-if="show_result_code" class="value">{{value|prettyPrint}}</div>
 	</div>
 </div>

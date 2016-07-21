@@ -289,7 +289,12 @@ function post_types_handler(opts) {
 		debug.assert(content).is('object');
 
 		var type = data.$name || content.$name;
+
 		debug.assert(type).is('string');
+
+		if(content.type === undefined) {
+			content.type = 'object';
+		}
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.declareType(type)(content).then(function(tr) {

@@ -1,0 +1,8 @@
+
+<div class="nor-select">
+	<select ng-model="model" ng-change="change()">
+		<option ng-if="loading" value=""><i class="fa fa-spinner fa-spin"></i></option>
+		<option ng-if="!loading" value="">-</option>
+		<option ng-repeat="item in items" value="{{valueKey?item.item[valueKey]:item.key}}">{{labelKey?item.item[labelKey]:item.key}}</option>
+	</select>
+</div>

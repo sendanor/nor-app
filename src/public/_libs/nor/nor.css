@@ -125,6 +125,11 @@ body {
 	float: right;
 }
 
+#content .nor-schema .nor-schema-field .value {
+	width: 100%;
+	margin-top: 1em;
+}
+
 #content .nor-schema .nor-schema-properties-container {
 	padding: 1em;
 	border-top: 1px solid #e0e0e0;
