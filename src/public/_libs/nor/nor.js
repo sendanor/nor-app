@@ -332,8 +332,13 @@ norApp.directive('norRecord', function() {
 			 */
 			function _get_content(data, keys) {
 
+				//$log.debug('data = ', data);
+				//$log.debug('keys = ', keys);
+
 				if(keys.length === 1) {
-					return data && data[keys[0]];
+					var result = data && data[keys[0]];
+					//$log.debug('found = ', result);
+					return result;
 				}
 
 				if(keys.length >= 2) {

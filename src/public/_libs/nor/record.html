@@ -9,7 +9,7 @@
 		<tr ng-repeat="key in keys" ng-init="value = get_content(key)">
 			<th class="key">{{key.join('.')}}</th>
 	        <td class="value">
-				<div ng-switch="key">
+				<div ng-switch="key.join('.')">
 					<div ng-switch-when="$name"><nor-link ref="content.$ref">{{value}}</nor-link></div>
 					<div ng-switch-when="$id"><nor-link ref="content.$ref">{{value}}</nor-link></div>
 					<div ng-switch-default>
@@ -18,8 +18,8 @@
 								<nor-record content="value"></nor-record>
 							</div>
 							<div ng-switch-default>
-								<div ng-if="key.indexOf('.') >= 0">{{value}}</div>
-								<div ng-if="key.indexOf('.') < 0" nor-editable-content="content[key]" on-commit="commit(content)">{{value}}</div>
+								<div ng-if="key.length >= 2">{{value}}</div>
+								<div ng-if="!(key.length >= 2)" nor-editable-content="content[key]" on-commit="commit(content)">{{value}}</div>
 							</div>
 						</div>
 					</div>
