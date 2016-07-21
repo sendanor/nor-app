@@ -16,12 +16,14 @@
   "license": "MIT",
   "dependencies": {
     "angular": "^1.5.6",
+    "angular-json-edit": "^1.0.4",
     "angular-sanitize": "^1.5.6",
     "angular-ui-router": "^0.3.1",
     "body-parser": "^1.15.1",
     "express": "^4.13.4",
     "express-session": "^1.13.0",
     "font-awesome": "^4.6.3",
+    "jquery": "^2.2.4",
     "merge": "^1.2.0",
     "moment": "^2.13.0",
     "nor-debug": "^0.2.0",
@@ -31,10 +33,10 @@
     "pg": "^4.5.6",
     "purecss": "^0.6.0",
     "q": "^1.4.1",
-    "jquery": "^2.2.4"
+    "tv4": "^1.2.7"
   },
   "devDependencies": {
-    "lint"         : "*",
-    "jshint"       : "*"
+    "lint": "*",
+    "jshint": "*"
   }
 }

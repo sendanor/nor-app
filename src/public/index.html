@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="/_libs/purecss/pure-min.css">
   <link rel="stylesheet" href="/_libs/nor/nor.css">
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/_libs/angular-json-edit/styles/jsonEditor.css">
+
 </head>
 <body>
 
@@ -25,7 +27,9 @@
 </div>
 
 <div id="content">
+
  <h1>{{model.title}}</h1>
+
  <div class="links-menu pure-menu pure-menu-horizontal" ng-if="model.links && (model.links.length >= 1)">
     <ul class="pure-menu-list">
         <li class="pure-menu-item" ng-repeat="link in model.links"><nor-link link="link" class="pure-menu-link">{{link.title}}</a></li>
@@ -33,6 +37,7 @@
  </div>
 
  <div ng-switch="getContentType()">
+
   <div ng-switch-when="form">
 	<nor-form model="model"></nor-form>
   </div>
@@ -67,6 +72,7 @@
 <script src="/_libs/angular-sanitize/angular-sanitize.min.js"></script>
 <script src="/_libs/angular-ui-router/angular-ui-router.min.js"></script>
 <script src="/_libs/angular-datatables/angular-datatables.min.js"></script>
+<script src="/_libs/angular-json-edit/angularJsonEdit.min.js"></script>
 <script src="/_libs/bootstrap/js/bootstrap.min.js"></script>
 <script src="/_libs/nor/nor.js"></script>
 
