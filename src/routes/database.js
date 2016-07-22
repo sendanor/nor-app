@@ -77,6 +77,16 @@ function prepare_doc(req, doc) {
 			tmp[key] = content[key];
 		});
 	}
+
+	var childs;
+	if(tmp.hasOwnProperty('$documents')) {
+		childs = tmp.$documents;
+		Object.keys(childs).forEach(function(id) {
+			var child = childs[id];
+			childs[id] = prepare_doc(req, child);
+		});
+	}
+
 	return tmp;
 }
 
@@ -218,7 +228,7 @@ function get_doc_handler(opts) {
 		debug.assert(type).is('string');
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.search(type)({'$id':id}).then(function(tr) {
+			return tr.search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
 				var docs = tr.fetch();
 				var doc = docs.shift();
 
@@ -252,7 +262,7 @@ function get_docs_handler(opts) {
 		debug.assert(type).is('string');
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.search(type)().then(function(tr) {
+			return tr.search(type)(undefined, {'typeAwareness':true}).then(function(tr) {
 				var docs = tr.fetch();
 				return {
 					'title': 'Documents for '+type,
@@ -492,7 +502,7 @@ function post_doc_handler(opts) {
 		var content = data.content;
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchSingle(type)({'$id':id}).then(function(tr) {
+			return tr.searchSingle(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
 				var obj = tr.fetch();
 				return tr.update(obj, content);
 			}).then(function(tr) {
