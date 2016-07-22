@@ -1,11 +1,13 @@
 html {
 	padding: 0;
 	margin: 0;
+	background-color: #c0e0e0;
 }
 
 body {
 	padding: 0;
 	margin: 0;
+	background-color: #ffffff;
 }
 
 #header {

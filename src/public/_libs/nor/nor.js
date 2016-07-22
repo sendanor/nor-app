@@ -15,7 +15,8 @@ function parse_path_name(url) {
 }
 
 var norApp = angular.module('norApp', [
-	'datatables'
+	'datatables',
+	'ngPrettyJson'
 ]);
 
 norApp.config(function($locationProvider) {
@@ -357,6 +358,9 @@ norApp.directive('norRecord', function() {
 
 			/** Save changes on the backend */
 			$scope.commit = function(content) {
+
+				$log.debug("norRecord.commit()");
+
 				if(!content) { throw new TypeError("!content"); }
 
 				// Trigger .onCommit() once when next change
@@ -478,6 +482,14 @@ norApp.directive('norType', ['$log', function($log) {
 			$scope.content.$schema.properties = $scope.content.$schema.properties || {};
 			$scope.keys = Object.keys($scope.content.$schema.properties);
 
+			/** If true, the JSON editor for the type is enabled */
+			$scope.editor = false;
+
+			/** Set editor */
+			$scope.setEditor = function(value) {
+				$scope.editor = value ? true : false;
+			};
+
 			/** */
 			$scope.prettyprint = function(data) {
 				return JSON.stringify(data, null, 2);
@@ -485,6 +497,7 @@ norApp.directive('norType', ['$log', function($log) {
 
 			/** Save changes on the backend */
 			$scope.commit = function(content) {
+				$log.debug("norType.commit()");
 				if(!content) { throw new TypeError("!content"); }
 
 				// Trigger .onCommit() once when next change
@@ -622,6 +635,7 @@ norApp.directive('norSchema', function() {
 	return {
 		restrict: 'E',
 		scope: {
+			root: '=?',
 			parent: '=?',
 			key: '=?',
 			value: '=',
@@ -629,6 +643,7 @@ norApp.directive('norSchema', function() {
 		},
 		controller: ['$scope', '$log', function($scope, $log) {
 
+			$scope.root = $scope.root || undefined;
 			$scope.parent = $scope.parent || undefined;
 			$scope.key = $scope.key || undefined;
 
@@ -649,6 +664,7 @@ norApp.directive('norSchemaObject', function() {
 	return {
 		restrict: 'E',
 		scope: {
+			root: '=?',
 			parent: '=?',
 			key: '=?',
 			value: '=',
@@ -656,12 +672,27 @@ norApp.directive('norSchemaObject', function() {
 		},
 		controller: ['$scope', '$log', function($scope, $log) {
 
+			$scope.root = $scope.root || undefined;
 			$scope.parent = $scope.parent || undefined;
 			$scope.key = $scope.key || undefined;
 
 			/** Action to do on commit */
-			$scope.commit = function() {
-				if($scope.onCommit) {
+			$scope.commit = function(value) {
+				if(value) {
+
+					// Trigger .onCommit() once when next change
+					var listener = $scope.$watch('value', function() {
+						listener();
+						if($scope.onCommit) {
+							$log.debug('Triggering norSchemaObject.onCommit()');
+							return $scope.onCommit();
+						}
+					}, true);
+
+					$scope.value = value;
+
+				} else if($scope.onCommit) {
+					$log.debug('Triggering norSchemaObject.onCommit()');
 					return $scope.onCommit();
 				}
 			};
@@ -740,37 +771,37 @@ norApp.directive('norSchemaObject', function() {
 
 			/** Returns true if property has index support */
 			$scope.indexesEnabled = function() {
-				var parent = $scope.parent;
-				if(!parent) {
+				var root = $scope.root;
+				if(!root) {
 					return false;
 				}
-				return parent.hasOwnProperty('$schema');
+				return root.hasOwnProperty('$schema');
 			};
 
 			/** Returns true if property is index */
 			$scope.hasIndex = function(key) {
-				var parent = $scope.parent;
-				if(!parent) {
+				var root = $scope.root;
+				if(!root) {
 					return false;
 				}
-				if(!parent.hasOwnProperty('indexes')) {
+				if(!root.hasOwnProperty('indexes')) {
 					return false;
 				}
-				var indexes = parent.indexes;
+				var indexes = root.indexes;
 				var i = indexes.indexOf(key);
 				return i >= 0;
 			};
 
 			/** Toggle index on property */
 			$scope.toggleIndex = function(key) {
-				var parent = $scope.parent;
-				if(!parent) {
+				var root = $scope.root;
+				if(!root) {
 					return false;
 				}
-				if(!parent.hasOwnProperty('indexes')) {
-					parent.indexes = [];
+				if(!root.hasOwnProperty('indexes')) {
+					root.indexes = [];
 				}
-				var indexes = parent.indexes;
+				var indexes = root.indexes;
 				var i = indexes.indexOf(key);
 				if(i === -1) {
 					indexes.push(key);
@@ -799,7 +830,10 @@ norApp.directive('norSchemaArray', function() {
 			$scope.key = $scope.key || undefined;
 
 			/** Action to do on commit */
-			$scope.commit = function() {
+			$scope.commit = function(value) {
+				if(value !== undefined) {
+					$scope.value = value;
+				}
 				if($scope.onCommit) {
 					return $scope.onCommit();
 				}
@@ -815,6 +849,7 @@ norApp.directive('norSchemaString', function() {
 	return {
 		restrict: 'E',
 		scope: {
+			root: '=?',
 			parent: '=?',
 			key: '=',
 			value: '=',
@@ -824,34 +859,49 @@ norApp.directive('norSchemaString', function() {
 
 			$scope.new_field = "";
 
+			$scope.root = $scope.root || undefined;
 			$scope.parent = $scope.parent || undefined;
 
 			/** Action to do on commit */
-			$scope.commit = function() {
-				if($scope.onCommit) {
+			$scope.commit = function(value) {
+				if(value !== undefined) {
+
+					// Trigger .onCommit() once when next change
+					var listener = $scope.$watch('value', function() {
+						listener();
+						if($scope.onCommit) {
+							$log.debug('Triggering norSchemaString.onCommit()');
+							return $scope.onCommit();
+						}
+					}, true);
+
+					$scope.value = value;
+
+				} else if($scope.onCommit) {
+					$log.debug('Triggering norSchemaString.onCommit()');
 					return $scope.onCommit();
 				}
 			};
 
 			/** Returns true if property has support for (relation of) documents */
 			$scope.documentsEnabled = function() {
-				var parent = $scope.parent;
-				if(!parent) {
+				var root = $scope.root;
+				if(!root) {
 					return false;
 				}
-				return parent.hasOwnProperty('$schema');
+				return root.hasOwnProperty('$schema');
 			};
 
 			/** Returns true if property has link to document */
 			$scope.hasDocument = function(key_) {
-				var parent = $scope.parent;
-				if(!parent) {
+				var root = $scope.root;
+				if(!root) {
 					return false;
 				}
-				if(!parent.hasOwnProperty('documents')) {
+				if(!root.hasOwnProperty('documents')) {
 					return false;
 				}
-				var documents = parent.documents;
+				var documents = root.documents;
 				var results = documents.filter(function(line) {
 					var parts = line.split('|');
 					var type_key = parts.shift().split('#');
@@ -867,20 +917,20 @@ norApp.directive('norSchemaString', function() {
 			/** Returns document link information */
 			$scope.getDocument = function(key_) {
 				$log.debug("key_ = ", key_);
-				var parent = $scope.parent;
-				if(!parent) {
-					$log.debug("No parent");
+				var root = $scope.root;
+				if(!root) {
+					$log.debug("No root");
 					return;
 				}
-				if(!parent.hasOwnProperty('documents')) {
-					$log.debug("No documents in parent");
+				if(!root.hasOwnProperty('documents')) {
+					$log.debug("No documents in root");
 					return {
 						"type": "",
 						"key": key_,
 						"fields": []
 					};
 				}
-				var documents = parent.documents;
+				var documents = root.documents;
 				var results = documents.map(function(line) {
 					var parts = line.split('|');
 					var type_key = parts.shift().split('#');
@@ -922,17 +972,17 @@ norApp.directive('norSchemaString', function() {
 				$log.debug("key_ = ", key_);
 				$log.debug("fields_ = ", fields_);
 
-				var parent = $scope.parent;
+				var root = $scope.root;
 
-				$log.debug("parent = ", parent);
+				$log.debug("root = ", root);
 
-				if(!parent) {
+				if(!root) {
 					return false;
 				}
-				if(!parent.hasOwnProperty('documents')) {
-					parent.documents = [];
+				if(!root.hasOwnProperty('documents')) {
+					root.documents = [];
 				}
-				var documents = parent.documents;
+				var documents = root.documents;
 
 				// Note: We must ignore any keyword which has ',' in it
 				var line_ = (type_||'') + (type_?'#':'') + key_ + '|' + fields_.filter(function(f) {
@@ -975,12 +1025,12 @@ norApp.directive('norSchemaString', function() {
 				});
 
 				if(changed) {
-					parent.documents = results;
+					root.documents = results;
 				} else {
-					parent.documents.push(line_);
+					root.documents.push(line_);
 				}
 
-				$log.debug("parent.documents = ", parent.documents);
+				$log.debug("root.documents = ", root.documents);
 
 				return $q.when($scope.commit()).then(function() {
 					$scope.updateLink();
@@ -1035,7 +1085,10 @@ norApp.directive('norSchemaCustom', function() {
 		controller: ['$scope', '$log', function($scope, $log) {
 
 			/** Action to do on commit */
-			$scope.commit = function() {
+			$scope.commit = function(value) {
+				if(value !== undefined) {
+					$scope.value = value;
+				}
 				if($scope.onCommit) {
 					return $scope.onCommit();
 				}

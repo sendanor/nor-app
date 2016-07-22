@@ -33,7 +33,7 @@
 				<nor-action click="removeProperty(value, key2)" title="Remove property" icon="trash-o" dangerous-icon="trash" safety="enabled">Remove property {{key2}}?</nor-action>
 
 			</div>
-			<nor-schema parent="parent" key="key2" value="value2" on-commit="commit(value)"></nor-schema>
+			<nor-schema root="root" parent="value" key="key2" value="value2" on-commit="commit(value)"></nor-schema>
 		</div>
 
 		<div class="nor-schema-add-property">
@@ -73,7 +73,9 @@
 				<span ng-if="show_result_code"><i class="fa fa-minus" aria-hidden="true"></i></span>
 			</a>
 		</span>
-		<span ng-if="show_result_code" class="value">{{value|prettyPrint}}</span>
+		<span ng-if="show_result_code" class="value">
+			<pre pretty-json="value" edition="true" on-edit="commit(newJson)" />
+		</span>
 	</div>
 
 </div>

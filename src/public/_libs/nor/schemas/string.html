@@ -51,6 +51,8 @@
 				<div ng-if="show_result_code"><i class="fa fa-minus" aria-hidden="true"></i></div>
 			</a>
 		</div>
-		<div ng-if="show_result_code" class="value">{{value|prettyPrint}}</div>
+		<div ng-if="show_result_code" class="value">
+			<pre pretty-json="value" edition="true" on-edit="commit(newJson)" />
+		</div>
 	</div>
 </div>

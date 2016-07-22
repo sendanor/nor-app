@@ -15,8 +15,8 @@
   "author": "Jaakko-Heikki Heusala <jhh@sendanor.com>",
   "license": "MIT",
   "dependencies": {
+    "ace-builds": "^1.2.2",
     "angular": "^1.5.6",
-    "angular-json-edit": "^1.0.4",
     "angular-sanitize": "^1.5.6",
     "angular-ui-router": "^0.3.1",
     "body-parser": "^1.15.1",
@@ -26,6 +26,7 @@
     "jquery": "^2.2.4",
     "merge": "^1.2.0",
     "moment": "^2.13.0",
+    "ng-prettyjson": "^0.2.0",
     "nor-debug": "^0.2.0",
     "nor-is": "^0.1.18",
     "nor-nopg": "^0.1.123",

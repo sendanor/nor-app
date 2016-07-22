@@ -1,7 +1,7 @@
 <div class="nor-schema-container" ng-switch="value.type">
-	<nor-schema-object  parent="parent" key="key" value="value" ng-switch-when="object" on-commit="commit(value)"></nor-schema-object>
-	<nor-schema-array   parent="parent" key="key" value="value" ng-switch-when="array" on-commit="commit(value)"></nor-schema-array>
-	<nor-schema-string  parent="parent" key="key" value="value" ng-switch-when="string" on-commit="commit(value)"></nor-schema-string>
-	<nor-schema-boolean parent="parent" key="key" value="value" ng-switch-when="boolean" on-commit="commit(value)"></nor-schema-boolean>
-	<nor-schema-custom  parent="parent" key="key" value="value" ng-switch-default on-commit="commit(value)"></nor-schema-custom>
+	<nor-schema-object  root="root" parent="parent" key="key" value="value" ng-switch-when="object" on-commit="commit(value)"></nor-schema-object>
+	<nor-schema-array   root="root" parent="parent" key="key" value="value" ng-switch-when="array" on-commit="commit(value)"></nor-schema-array>
+	<nor-schema-string  root="root" parent="parent" key="key" value="value" ng-switch-when="string" on-commit="commit(value)"></nor-schema-string>
+	<nor-schema-boolean root="root" parent="parent" key="key" value="value" ng-switch-when="boolean" on-commit="commit(value)"></nor-schema-boolean>
+	<nor-schema-custom  root="root" parent="parent" key="key" value="value" ng-switch-default on-commit="commit(value)"></nor-schema-custom>
 </div>

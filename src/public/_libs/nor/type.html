@@ -7,12 +7,12 @@
 	</div>
 
 	<div class="nor-type-schema-container">
-		<nor-schema parent="content" key="'$schema'" value="content.$schema" on-commit="commit(content)"></nor-schema>
+		<nor-schema root="content" parent="content" key="'$schema'" value="content.$schema" on-commit="commit(content)"></nor-schema>
 	</div>
 
 	<div class="nor-type-format-container">
 		<h3>Format</h3>
-		<pre class="nor-type-format">{{content|prettyPrint}}</pre>
+		<pre class="nor-type-format" pretty-json="content" edition="true" on-edit="commit(newJson)" />
 	</div>
 
 </div>
