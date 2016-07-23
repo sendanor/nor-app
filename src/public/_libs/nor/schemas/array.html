@@ -18,9 +18,32 @@
 		</div>
 	</div>
 
-	<div class="nor-schema-field nor-schema-items-container">
+	<div class="nor-schema-field nor-schema-items-container" ng-if="value.hasOwnProperty('items')">
 		<div class="label"><i class="fa fa-tags" aria-hidden="true"></i> Items</div>
-		<nor-schema key="'items'" value="value.items" on-commit="commit(value)"></nor-schema>
+			<div class="actions">
+			<nor-action click="removeItemsProperty(value)" title="Remove property" icon="trash-o" dangerous-icon="trash" safety="enabled">Remove property {{key2}}?</nor-action>
+		</div>
+		<nor-schema root="root" parent="value" path="path" key="'items'" value="value.items" on-commit="commit(value)"></nor-schema>
+	</div>
+
+	<div class="nor-schema-add-property">
+		<div ng-if="!show_add_property_options">
+			<button class="pure-button" ng-click="setAddPropertyOptions(true)"><i class="fa fa-plus" aria-hidden="true"></i> Add items</button>
+		</div>
+
+		<form ng-if="show_add_property_options" class="nor-schema-add-property-form pure-form" name="addProperty">
+			<fieldset>
+				<input type="text" name="newPropertyTitle" placeholder="Title" ng-model="new_property.title">
+				<select ng-model="new_property.type" name="newPropertyType" required="">
+					<option value="string">String</option>
+					<option value="object">Object</option>
+					<option value="array">Array</option>
+					<option value="boolean">Boolean</option>
+				</select>
+				<input type="text" name="newPropertyDescription" placeholder="Description" ng-model="new_property.description">
+				<button type="submit" class="pure-button pure-button-primary" ng-click="addNewProperty(new_property)">Add</button>
+			</fieldset>
+		</form>
 	</div>
 
 	<div class="nor-schema-field nor-schema-result-code">

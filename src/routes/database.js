@@ -118,7 +118,7 @@ function get_types_handler(opts) {
 		debug.error(err);
 	}).done();
 
-	return function(req, res) {
+	return function(req/*, res*/) {
 		assert_logged_in(req);
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes().then(function(tr) {
@@ -149,7 +149,7 @@ function get_create_type_form(opts) {
 	opts = opts || {};
 	debug.assert(opts.pg).is('string');
 
-	return function(req, res) {
+	return function(req/*, res*/) {
 		assert_logged_in(req);
 		//return nopg.transaction(opts.pg, function(tr) {
 			return {
@@ -171,7 +171,7 @@ function get_type_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
 	debug.assert(opts.pg).is('string');
-	return function(req, res) {
+	return function(req/*, res*/) {
 		assert_logged_in(req);
 
 		var params = req.params || {};
@@ -217,7 +217,7 @@ function get_doc_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
 	debug.assert(opts.pg).is('string');
-	return function(req, res) {
+	return function(req/*, res*/) {
 
 		assert_logged_in(req);
 
@@ -252,7 +252,7 @@ function get_docs_handler(opts) {
 	opts = opts || {};
 	debug.assert(opts.pg).is('string');
 
-	return function(req, res) {
+	return function(req/*, res*/) {
 
 		assert_logged_in(req);
 
@@ -281,7 +281,7 @@ function get_docs_handler(opts) {
 function post_types_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
-	return function(req, res) {
+	return function(req/*, res*/) {
 
 		assert_logged_in(req);
 
@@ -328,7 +328,7 @@ function post_types_handler(opts) {
 function post_type_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
-	return function(req, res) {
+	return function(req/*, res*/) {
 
 		assert_logged_in(req);
 
@@ -399,7 +399,7 @@ function get_create_doc_form(opts) {
 	opts = opts || {};
 	debug.assert(opts.pg).is('string');
 
-	return function(req, res) {
+	return function(req/*, res*/) {
 		assert_logged_in(req);
 
 		var params = req.params || {};
@@ -431,7 +431,7 @@ function get_create_doc_form(opts) {
 function post_docs_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
-	return function(req, res) {
+	return function(req/*, res*/) {
 		assert_logged_in(req);
 
 		var params = req.params || {};
@@ -481,7 +481,7 @@ function post_docs_handler(opts) {
 function post_doc_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
-	return function(req, res) {
+	return function(req/*, res*/) {
 		assert_logged_in(req);
 
 		var params = req.params || {};

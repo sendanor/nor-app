@@ -23,7 +23,7 @@ function api_builder(opts) {
 
 	var routes = opts.routes || [];
 
-	return function(req, res) {
+	return function(req/*, res*/) {
 		return nopg.transaction(opts.pg, function(tr) {
 			debug.assert(tr).is('object');
 			var routes_tr = new Routes(tr);

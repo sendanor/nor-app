@@ -13,7 +13,7 @@ var debug = require('nor-debug');
 function get_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
-	return function(req, res) {
+	return function(req/*, res*/) {
 
 		if(req.session && req.session.user) {
 			return {
@@ -39,7 +39,7 @@ function get_handler(opts) {
 function post_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
-	return function(req, res) {
+	return function(req/*, res*/) {
 
 		var data = req.body || {};
 		debug.log('data = ', data);

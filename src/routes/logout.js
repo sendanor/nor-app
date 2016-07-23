@@ -10,7 +10,7 @@ var debug = require('nor-debug');
 function api_builder(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
-	return function(req, res) {
+	return function(req/*, res*/) {
 		if(req.session) {
 			req.session.user = undefined;
 		}

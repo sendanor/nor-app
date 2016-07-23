@@ -217,6 +217,41 @@ body {
 	border-left: 0.25em solid #c0e0e0;
 }
 
+#content .nor-schema-documents-type {
+	background-color: #f0f0ff;
+	border-top: 1px solid #e0e0e0;
+	border-right: 1px solid #e0e0e0;
+	padding: 1em;
+	text-align: center;
+}
+
+#content .nor-schema-documents {
+	background-color: #f0fff0;
+	border-top: 1px solid #e0e0e0;
+	padding: 1em;
+	text-align: center;
+}
+
+#content .nor-schema-documents .fields {
+	margin: 0.25em;
+}
+
+#content .nor-schema-documents .fields .field {
+	margin: 0.25em;
+	padding: 0.25em;
+	border: 1px solid transparent;
+}
+
+#content .nor-schema-documents .fields .field-selected {
+	background-color: #fff0f0;
+	border: 1px solid #ff0000;
+}
+
+#content .nor-schema-array .nor-schema-add-property {
+	border-top: 1px solid #e0e0e0;
+	padding: 0.75em;
+}
+
 #footer {
 	height: 2em;
 	margin-top: 2em;

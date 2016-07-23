@@ -38,6 +38,29 @@ norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log,
 		});
 	}
 
+	/** */
+	function reset_model(model, new_model) {
+
+		if(!model) { throw new TypeError("!model"); }
+		if(!new_model) { throw new TypeError("!new_model"); }
+
+		$log.debug("Resetting model as new_model=", new_model);
+
+		model.$app = new_model.$app || {};
+		model.$app.name = new_model.$app.name || 'Unnamed-App';
+		model.$app.menu = new_model.$app.menu || [];
+
+		model.title = new_model.title || 'Undefined Title';
+		model.$type = new_model.$type || 'default';
+		model.content = new_model.content || '';
+
+		Object.keys(new_model).forEach(function(key) {
+			model[key] = new_model[key];
+		});
+
+		//$scope.model = model;
+	}
+
 	/** Go to page */
 	function do_go($scope, path) {
 		if(!$scope) { throw new TypeError("!$scope"); }
@@ -66,29 +89,6 @@ norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log,
 			do_go($scope, path);
 		});
 
-	}
-
-	/** */
-	function reset_model(model, new_model) {
-
-		if(!model) { throw new TypeError("!model"); }
-		if(!new_model) { throw new TypeError("!new_model"); }
-
-		$log.debug("Resetting model as new_model=", new_model);
-
-		model.$app = new_model.$app || {};
-		model.$app.name = new_model.$app.name || 'Unnamed-App';
-		model.$app.menu = new_model.$app.menu || [];
-
-		model.title = new_model.title || 'Undefined Title';
-		model.$type = new_model.$type || 'default';
-		model.content = new_model.content || '';
-
-		Object.keys(new_model).forEach(function(key) {
-			model[key] = new_model[key];
-		});
-
-		//$scope.model = model;
 	}
 
 	/** */
@@ -125,7 +125,7 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location, norRouter)
 	norRouter.initialize($scope);
 
 	$scope.keys = Object.keys;
-	$scope.path = parse_path_name;
+	$scope.parsePathName = parse_path_name;
 
 	/** Go to another resource */
 	$scope.go = function(url) {
@@ -137,7 +137,7 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location, norRouter)
 	$scope.getContentType = function() {
 
 		var model = $scope.model || {};
-		var content = model.content;
+		//var content = model.content;
 		var type = model.$type;
 
 		if(type === "form" && angular.isArray(model.content)) {
@@ -214,7 +214,7 @@ norApp.directive('norLink', function() {
 				}
 			}
 
-			$scope.path = parse_path_name;
+			$scope.parsePathName = parse_path_name;
 
 			/** Go to another resource */
 			$scope.go = function(url) {
@@ -223,7 +223,7 @@ norApp.directive('norLink', function() {
 			};
 
 		}],
-		template: '<a href="{{path(ref)}}" ng-click="go(ref)" ng-class="classes"><i class="fa fa-{{icon}}" aria-hidden="true" ng-if="icon"></i> <ng-transclude></ng-transclude></a>'
+		template: '<a href="{{parsePathName(ref)}}" ng-click="go(ref)" ng-class="classes"><i class="fa fa-{{icon}}" aria-hidden="true" ng-if="icon"></i> <ng-transclude></ng-transclude></a>'
 	};
 });
 
@@ -364,7 +364,9 @@ norApp.directive('norRecord', function() {
 				if(!content) { throw new TypeError("!content"); }
 
 				// Trigger .onCommit() once when next change
+				$log.debug('norRecord started listening content');
 				var listener = $scope.$watch('content', function() {
+					$log.debug('norRecord stopped listening content');
 					listener();
 					if($scope.onCommit) {
 						$log.debug('Triggering norRecord.onCommit()');
@@ -436,30 +438,9 @@ norApp.directive('norTable', function() {
 			content: '=?',
 			onCommit: '&?'
 		},
-		controller: ['$scope', '$http', '$log', '$location', 'norRouter', function($scope, $http, $log, $location, norRouter) {
+		controller: ['$scope', function($scope) {
 
 			$scope.content = $scope.content || ($scope.model && $scope.model.content) || [];
-
-			/** Save changes on the backend */
-			/*
-			$scope.commit = function(content) {
-				if(!content) { throw new TypeError("!content"); }
-
-				// Trigger .onCommit() once when next change
-				var listener = $scope.$watch('content', function() {
-					listener();
-					if($scope.onCommit) {
-						return $scope.onCommit();
-					}
-				}, true);
-
-				return norRouter.post($scope.content.$ref, {'content': content}).then(function(data) {
-					$scope.content = data.content;
-				}, function errorCallback(response) {
-					$log.error("error: ", response);
-				});
-			};
-			*/
 
 		}],
 		templateUrl: '/_libs/nor/table.html'
@@ -501,7 +482,9 @@ norApp.directive('norType', ['$log', function($log) {
 				if(!content) { throw new TypeError("!content"); }
 
 				// Trigger .onCommit() once when next change
+				$log.debug('norType started listening content');
 				var listener = $scope.$watch('content', function() {
+					$log.debug('norType stopped listening content');
 					listener();
 					if($scope.onCommit) {
 						return $scope.onCommit();
@@ -538,7 +521,9 @@ norApp.directive('norSelect', ['$log', function($log) {
 			valueKey: '@?',
 			labelKey: '@?',
 			content: '=?',
+			items: '=?',
 			model: '=?',
+			ignoreValues: '=?',
 			onChange: '&?'
 		},
 		controller: ['$scope', '$log', 'norRouter', function($scope, $log, norRouter) {
@@ -550,6 +535,8 @@ norApp.directive('norSelect', ['$log', function($log) {
 			$scope.model = $scope.model || undefined;
 			$scope.valueKey = $scope.valueKey || '';
 			$scope.labelKey = $scope.labelKey || '';
+			$scope.items = $scope.items || [];
+			$scope.ignoreValues = $scope.ignoreValues || undefined;
 			$scope.values = $scope.values || [];
 
 			function fetch_(data, keys) {
@@ -564,10 +551,11 @@ norApp.directive('norSelect', ['$log', function($log) {
 				return fetch_(data[key], keys);
 			}
 
-			$scope.items = [];
-
 			// Update items based on content
+			$log.debug('norSelect started listening content');
 			$scope.$watch('content', function() {
+				$log.debug('norSelect content changed');
+
 				var content = $scope.content;
 
 				if(!content) {
@@ -576,6 +564,7 @@ norApp.directive('norSelect', ['$log', function($log) {
 
 				// Handle array content
 				if(content instanceof Array) {
+					$scope.items = [];
 					content.forEach(function(item, key) {
 						$scope.items.push({"key":key, "item":item});
 					});
@@ -583,40 +572,47 @@ norApp.directive('norSelect', ['$log', function($log) {
 				}
 
 				// Handle object content
+				$scope.items = [];
 				Object.keys(content).forEach(function(key) {
 					var item = content[key];
 					$scope.items.push({"key": key, "item":item});
 				});
 
-
 			});
 
-
-			if( (!$scope.content) && $scope.ref ) {
-				norRouter.get($scope.ref).then(function(data) {
-					var content = fetch_(data.content, $scope.path);
-					if(content && content instanceof Array) {
-						$scope.content = [].concat(content).concat($scope.values);
-					} else {
-						Object.keys($scope.values).forEach(function(key) {
-							content[key] = $scope.values[key];
-						});
-						$scope.content = content;
-					}
-					$log.debug("content = ", $scope.content);
-					$scope.loading = false;
-				}, function errorCallback(response) {
-					$log.error("error: ", response);
-				});
-			}
+			/** Update element values from external resource pointed by $scope.ref */
+			$scope.updateValues = function() {
+				if($scope.ref) {
+					norRouter.get($scope.ref).then(function(data) {
+						var content = fetch_(data.content, $scope.path);
+						if(content && content instanceof Array) {
+							$scope.content = [].concat(content).concat($scope.values);
+						} else {
+							Object.keys($scope.values).forEach(function(key) {
+								content[key] = $scope.values[key];
+							});
+							$scope.content = content;
+						}
+						$log.debug("content = ", $scope.content);
+						$scope.loading = false;
+					}, function errorCallback(response) {
+						$log.error("error: ", response);
+					});
+				}
+			};
 
 			/** Action to do on change */
 			$scope.change = function() {
 				$log.debug("norSelect.change()");
 
+				$log.debug("$scope.model = ", $scope.model);
+
 				// Trigger .onChange() once when next change
+				$log.debug('norSelect started listening model');
 				var listener = $scope.$watch('model', function() {
+					$log.debug('norSelect stopped listening model');
 					listener();
+					$log.debug("$scope.model = ", $scope.model);
 					if($scope.onChange) {
 						$log.debug('Triggering norSelect.onChange()');
 						return $scope.onChange();
@@ -624,6 +620,16 @@ norApp.directive('norSelect', ['$log', function($log) {
 				});
 
 			};
+
+			// Update values if $scope.ref changes
+			$log.debug('norSelect started listening ref');
+			$scope.$watch('ref', function() {
+				$log.debug('ref changed in norSelect');
+				$scope.updateValues();
+			});
+
+			// Initial update
+			$scope.updateValues();
 
 		}],
 		templateUrl: '/_libs/nor/select.html'
@@ -637,6 +643,7 @@ norApp.directive('norSchema', function() {
 		scope: {
 			root: '=?',
 			parent: '=?',
+			path: '&?',
 			key: '=?',
 			value: '=',
 			onCommit: '&?'
@@ -646,6 +653,10 @@ norApp.directive('norSchema', function() {
 			$scope.root = $scope.root || undefined;
 			$scope.parent = $scope.parent || undefined;
 			$scope.key = $scope.key || undefined;
+
+			/** Path from root object to this value as an array */
+			$scope.path = ($scope.path && $scope.path()) || [];
+			$log.debug('path = ', $scope.path);
 
 			/** Action to do on commit */
 			$scope.commit = function() {
@@ -666,6 +677,7 @@ norApp.directive('norSchemaObject', function() {
 		scope: {
 			root: '=?',
 			parent: '=?',
+			path: '&?',
 			key: '=?',
 			value: '=',
 			onCommit: '&?'
@@ -676,12 +688,18 @@ norApp.directive('norSchemaObject', function() {
 			$scope.parent = $scope.parent || undefined;
 			$scope.key = $scope.key || undefined;
 
+			/** Path from root object to this value as an array */
+			$scope.path = ($scope.path && $scope.path()) || [];
+			$log.debug('path = ', $scope.path);
+
 			/** Action to do on commit */
 			$scope.commit = function(value) {
 				if(value) {
 
 					// Trigger .onCommit() once when next change
+					$log.debug('norSchemaObject started listening value');
 					var listener = $scope.$watch('value', function() {
+						$log.debug('norSchemaObject stopped listening value');
 						listener();
 						if($scope.onCommit) {
 							$log.debug('Triggering norSchemaObject.onCommit()');
@@ -714,7 +732,6 @@ norApp.directive('norSchemaObject', function() {
 				}
 				var key = (''+value).toLowerCase().replace(/[^a-z0-9]+/g, "_");
 				$scope.new_property.key = key;
-				lastNewPropertyKey = key;
 			};
 
 			/** */
@@ -727,11 +744,9 @@ norApp.directive('norSchemaObject', function() {
 				$scope.show_add_property_options = false;
 				var key = data.key;
 				delete data.key;
-
 				if(data.type === "object") {
 					data.properties = {};
 				}
-
 				$scope.value.properties[key] = data;
 				return $scope.commit();
 			};
@@ -821,23 +836,73 @@ norApp.directive('norSchemaArray', function() {
 	return {
 		restrict: 'E',
 		scope: {
+			root: '=?',
+			parent: '=?',
+			path: '&?',
 			key: '=?',
 			value: '=',
 			onCommit: '&?'
 		},
 		controller: ['$scope', '$log', function($scope, $log) {
 
+			$scope.root = $scope.root || undefined;
+			$scope.parent = $scope.parent || undefined;
+
+			/** Path from root object to this value as an array */
+			$scope.path = ($scope.path && $scope.path()) || [];
+			$log.debug('path = ', $scope.path);
+
 			$scope.key = $scope.key || undefined;
 
 			/** Action to do on commit */
 			$scope.commit = function(value) {
-				if(value !== undefined) {
+				if(value) {
+
+					// Trigger .onCommit() once when next change
+					$log.debug('norSchemaArray started listening value');
+					var listener = $scope.$watch('value', function() {
+						$log.debug('norSchemaArray stopped listening value');
+						listener();
+						if($scope.onCommit) {
+							$log.debug('Triggering norSchemaArray.onCommit()');
+							return $scope.onCommit();
+						}
+					}, true);
+
 					$scope.value = value;
-				}
-				if($scope.onCommit) {
+
+				} else if($scope.onCommit) {
+					$log.debug('Triggering norSchemaArray.onCommit()');
 					return $scope.onCommit();
 				}
 			};
+
+			$scope.show_add_property_options = false;
+
+			/** */
+			$scope.setAddPropertyOptions = function(value) {
+				$scope.new_property = {};
+				$scope.show_add_property_options = value ? true : false;
+			};
+
+			/** */
+			$scope.addNewProperty = function(data) {
+				$scope.show_add_property_options = false;
+				if(data.type === "object") {
+					data.properties = {};
+				}
+				$scope.value.items = data;
+				return $scope.commit();
+			};
+
+			/** Remove property */
+			$scope.removeItemsProperty = function(obj) {
+				if(obj && obj.hasOwnProperty('items')) {
+					delete obj.items;
+					return $scope.commit();
+				}
+			};
+
 
 		}],
 		templateUrl: '/_libs/nor/schemas/array.html'
@@ -851,6 +916,7 @@ norApp.directive('norSchemaString', function() {
 		scope: {
 			root: '=?',
 			parent: '=?',
+			path: '&?',
 			key: '=',
 			value: '=',
 			onCommit: '&?'
@@ -862,25 +928,33 @@ norApp.directive('norSchemaString', function() {
 			$scope.root = $scope.root || undefined;
 			$scope.parent = $scope.parent || undefined;
 
+			/** Path from root object to this value as an array */
+			$scope.path = ($scope.path && $scope.path()) || [];
+			$log.debug('path = ', $scope.path);
+
 			/** Action to do on commit */
 			$scope.commit = function(value) {
-				if(value !== undefined) {
+				//if(value !== undefined) {
 
 					// Trigger .onCommit() once when next change
+					$log.debug('norSchemaString started listening value');
 					var listener = $scope.$watch('value', function() {
+						$log.debug('norSchemaString stopped listening value');
 						listener();
 						if($scope.onCommit) {
-							$log.debug('Triggering norSchemaString.onCommit()');
+							$log.debug('Triggering norSchemaString.onCommit() #1');
 							return $scope.onCommit();
 						}
 					}, true);
 
-					$scope.value = value;
+					if(value !== undefined) {
+						$scope.value = value;
+					}
 
-				} else if($scope.onCommit) {
-					$log.debug('Triggering norSchemaString.onCommit()');
-					return $scope.onCommit();
-				}
+				//} else if($scope.onCommit) {
+				//	$log.debug('Triggering norSchemaString.onCommit() #2');
+				//	return $scope.onCommit();
+				//}
 			};
 
 			/** Returns true if property has support for (relation of) documents */
@@ -905,8 +979,8 @@ norApp.directive('norSchemaString', function() {
 				var results = documents.filter(function(line) {
 					var parts = line.split('|');
 					var type_key = parts.shift().split('#');
-					var fields = parts.join('|').split(',');
-					var type = type_key.shift();
+					//var fields = parts.join('|').split(',');
+					/*var type = */type_key.shift();
 					var key = type_key.join('#');
 
 					return key === key_;
@@ -915,7 +989,8 @@ norApp.directive('norSchemaString', function() {
 			};
 
 			/** Returns document link information */
-			$scope.getDocument = function(key_) {
+			$scope.getDocument = function(path_) {
+				var key_ = path_.join('.');
 				$log.debug("key_ = ", key_);
 				var root = $scope.root;
 				if(!root) {
@@ -931,6 +1006,8 @@ norApp.directive('norSchemaString', function() {
 					};
 				}
 				var documents = root.documents;
+				$log.debug('key_ = ', key_);
+				$log.debug('documents = ', documents);
 				var results = documents.map(function(line) {
 					var parts = line.split('|');
 					var type_key = parts.shift().split('#');
@@ -938,9 +1015,11 @@ norApp.directive('norSchemaString', function() {
 					var type = type_key.shift();
 					var key = type_key.join('#');
 
+					$log.debug("Key " + key + " has type " + type + " and fields: " + fields);
+
 					return {
 						"type": type,
-						"key": key_,
+						"key": key,
 						"fields": fields
 					};
 				}).filter(function(doc) {
@@ -958,17 +1037,35 @@ norApp.directive('norSchemaString', function() {
 				});
 			};
 
-			/** Returns fields array appended with `field` */
-			$scope.addField = function(field_, fields_) {
-				return [].concat(fields_).concat([field_]);
+			/** Returns true if field is part of accepted fields */
+			$scope.acceptedField = function(field_, accepted_fields) {
+				var items = (accepted_fields || []).map(function(item) {
+					return item.key;
+				});
+				$log.debug("field = ", field_);
+				$log.debug("acceptedFields = ", items);
+				return items.indexOf(field_) >= 0;
+			};
+
+			/** Returns fields array appended with `field`, but only if it is part of accepted fields */
+			$scope.addField = function(field_, fields_, accepted_fields) {
+				fields_ = fields_ || [];
+				if($scope.acceptedField(field_, accepted_fields) && (fields_.indexOf(field_) < 0)) {
+					return [].concat(fields_).concat([field_]);
+				} else {
+					return fields_;
+				}
 			};
 
 			/** Toggle document relation on property */
-			$scope.setDocument = function(type_, key_, fields_) {
+			$scope.setDocument = function(type_, path_, fields_) {
 
 				fields_ = fields_ || ['$id'];
 
+				var key_ = path_.join('.');
+
 				$log.debug("type_ = ", type_);
+				$log.debug("path_ = ", path_);
 				$log.debug("key_ = ", key_);
 				$log.debug("fields_ = ", fields_);
 
@@ -1000,8 +1097,8 @@ norApp.directive('norSchemaString', function() {
 				var results = documents.map(function(line) {
 					var parts = (line||'').split('|');
 					var type_key = (parts.shift()||'').split('#');
-					var fields = parts.join('|').split(',');
-					var type = type_key.shift()||'';
+					//var fields = parts.join('|').split(',');
+					/*var type = */type_key.shift();
 					var key = type_key.join('#');
 
 					$log.debug("key = ", key);
@@ -1040,7 +1137,9 @@ norApp.directive('norSchemaString', function() {
 			/** */
 			$scope.updateLink = function() {
 				$scope.new_field = "";
-				$scope.link = $scope.getDocument($scope.key);
+				$scope.link = $scope.getDocument($scope.path);
+
+				$log.debug('$scope.link for key ('+$scope.key+') updated as: ', $scope.link);
 			};
 
 			$scope.updateLink();
@@ -1140,7 +1239,9 @@ norApp.directive('norEditableContent', function() {
 				value = value || '';
 
 				// Trigger .onCommit() once when next change
+				$log.debug('norEditableContent started listening value');
 				var listener = $scope.$watch('value', function() {
+					$log.debug('norEditableContent stopped listening value');
 					listener();
 					if($scope.onCommit) {
 						$log.debug('Triggering norEditableContent.onCommit()');

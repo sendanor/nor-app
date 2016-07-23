@@ -26,20 +26,26 @@
 		</div>
 	</div>
 	<div class="pure-g nor-schema-documents-container" ng-if="value.format === 'uuid'">
-		<div class="pure-u-1-2 nor-schema-field nor-schema-documents-type">
+		<div class="pure-u-1-4 nor-schema-field nor-schema-documents-type">
 			<div class="label"><i class="fa fa-link" aria-hidden="true"></i> Linked to Type</div>
 			<div class="value">
-				<nor-select model="link.type" on-change="setDocument(link.type, key, link.fields)" ref="/database/types" value-key="$name" label-key="$name"></nor-select>
+				<nor-select model="link.type" on-change="setDocument(link.type, path, link.fields)" ref="/database/types" value-key="$name" label-key="$name"></nor-select>
 			</div>
 		</div>
-		<div class="pure-u-1-2 nor-schema-field nor-schema-documents">
+		<div class="pure-u-3-4 nor-schema-field nor-schema-documents">
 			<div class="label"><i class="fa fa-tags" aria-hidden="true"></i> Select fields for document linking</div>
 			<div class="value" ng-if="link.type">
 
-				<div ng-repeat="field in link.fields|orderBy:'toString()' track by $index">{{field}} <a href="#" ng-click="setDocument(link.type, key, removeField(field, link.fields))"><i class="fa fa-minus-circle" aria-hidden="true"></i></a></div>
+				<div class="fields">
+					<span ng-repeat="field in link.fields|orderBy:'toString()' track by $index"
+					      ng-class="field_selected ? 'field field-selected' : 'field'"">{{field}} <a href="#" 
+					      ng-click="setDocument(link.type, path, removeField(field, link.fields))"
+					      ng-mouseover="field_selected = true"
+					      ng-mouseleave="field_selected = false"><i class="fa fa-minus-circle" aria-hidden="true"></i></a></span>
+				</div>
 
-				<nor-select model="new_field" on-change="setDocument(link.type, key, addField(new_field, link.fields))"
-					ref="/database/types/{{link.type}}" 
+				<nor-select model="new_field" items="acceptedFields" on-change="setDocument(link.type, path, addField(new_field, link.fields, acceptedFields))"
+					ref="/database/types/{{link.type}}" ignore-values="link.fields"
 					path="['$schema', 'properties']" values="{'$id':{},'$type':{},'$types_id':{},'$created':{},'$modified':{}}"></nor-select>
 			</div>
 		</div>

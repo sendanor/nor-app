@@ -16,7 +16,7 @@ function Routes(tr, type_name) {
 }
 
 /** Returns stripped route object for export usage */
-Routes.prepareRoute = function(req, obj) {
+Routes.prepareRoute = function prepare_route(req, obj) {
 	debug.assert(req).is('object');
 	debug.assert(obj).is('object');
 	var tmp = JSON.parse(JSON.stringify(obj));
@@ -28,6 +28,14 @@ Routes.prepareRoute = function(req, obj) {
 	if(content) {
 		ARRAY(Object.keys(content)).forEach(function(key) {
 			tmp[key] = content[key];
+		});
+	}
+	var childs;
+	if(tmp.hasOwnProperty('$documents')) {
+		childs = tmp.$documents;
+		Object.keys(childs).forEach(function(id) {
+			var child = childs[id];
+			childs[id] = prepare_route(req, child);
 		});
 	}
 	return tmp;
@@ -107,6 +115,8 @@ Routes.prototype.getRoute = function(path) {
 
 	return self._tr.searchSingle(self._typeName)({
 		'path': path
+	}, {
+		typeAwareness: true
 	}).then(function(tr) {
 		var route = tr.fetch();
 		if(!route) {
