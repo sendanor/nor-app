@@ -16,7 +16,8 @@ function parse_path_name(url) {
 
 var norApp = angular.module('norApp', [
 	'datatables',
-	'ngPrettyJson'
+	'ngPrettyJson',
+	'ngRoute'
 ]);
 
 norApp.config(function($locationProvider) {
@@ -24,7 +25,7 @@ norApp.config(function($locationProvider) {
 });
 
 /** */
-norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log, $location) {
+norApp.factory('norRouter', ['$http', '$log', '$location', '$route', function($http, $log, $location, $route) {
 
 	/** */
 	function do_get(path) {
@@ -46,17 +47,28 @@ norApp.factory('norRouter', ['$http', '$log', '$location', function($http, $log,
 
 		$log.debug("Resetting model as new_model=", new_model);
 
-		model.$app = new_model.$app || {};
-		model.$app.name = new_model.$app.name || 'Unnamed-App';
-		model.$app.menu = new_model.$app.menu || [];
+		new_model = angular.copy(new_model, model);
 
-		model.title = new_model.title || 'Undefined Title';
-		model.$type = new_model.$type || 'default';
-		model.content = new_model.content || '';
+		// Initialize standard properties
+		new_model.$app = new_model.$app || {};
+		new_model.$app.name = new_model.$app.name || 'Unnamed-App';
+		new_model.$app.menu = new_model.$app.menu || [];
+		new_model.title = new_model.title || 'Undefined Title';
+		new_model.$type = new_model.$type || 'default';
+		new_model.type = new_model.type || undefined;
+		new_model.content = new_model.content || '';
 
-		Object.keys(new_model).forEach(function(key) {
-			model[key] = new_model[key];
-		});
+		// Remove properties that aren't part of new_model anymore
+		//Object.keys(model).forEach(function(key) {
+		//	if(!new_model.hasOwnProperty(key)) {
+		//		delete model[key];
+		//	}
+		//});
+
+		// Copy properties from new_model
+		//Object.keys(new_model).forEach(function(key) {
+		//	model[key] = new_model[key];
+		//});
 
 		//$scope.model = model;
 	}
@@ -429,6 +441,197 @@ norApp.directive('norForm', function() {
 	};
 });
 
+/** Common utilities */
+norApp.factory('norUtils', function($log) {
+	var norUtils = {};
+
+	/** Parses all full paths to generic data from a JSON Schema (no paths to arrays and objects, only generic data). Paths are arrays of property keywords. */
+	var pathParsers = {};
+
+	/** Parse full paths to data from any JSON Schema value
+	 * @param value {object} Any JSON Schema object
+	 * @param path {array} Path to parent as an array of properties as a string.
+	 * @returns {array} Array of arrays.
+	  */
+	pathParsers.any = function parse_value(value, path) {
+		if(!value) { throw new TypeError("!schema"); }
+		if(!path) { throw new TypeError("!path"); }
+
+		if(value.type === 'object') {
+			return pathParsers.object(value, [].concat(path));
+		}
+
+		if(value.type === 'array') {
+			return pathParsers.array(value, [].concat(path));
+		}
+
+		return [[].concat(path)];
+	};
+
+	/** Handle (sub) arrays */
+	pathParsers.array = function get_columns_from_array(schema, path) {
+		if(!schema) { throw new TypeError("!schema"); }
+		if(!path) { throw new TypeError("!path"); }
+
+		//var items = schema.items || {};
+		//pathParsers.any(items, [].concat(path) );
+
+		return [[].concat(path)];
+	};
+
+	/** Handle (sub) objects */
+	pathParsers.object = function get_columns_from_object(schema, path) {
+		if(!schema) { throw new TypeError("!schema"); }
+		if(!path) { throw new TypeError("!path"); }
+		var properties = schema.properties || {};
+		return Object.keys(properties).map(function(key) {
+			var value = properties[key];
+			return pathParsers.any(value, [].concat(path).concat([key]));
+		}).reduce(function(a, b) {
+			return a.concat(b);
+		}, []);
+	};
+
+	norUtils.pathParsers = pathParsers;
+
+	/** Returns a path array -- an array of properties
+	 * @param path {array|string} Path as a string or array.
+	 * @returns {array} Array of properties.
+	 */
+	norUtils.parsePathArray = function norUtils_parsePathArray(path) {
+		if(!path) { throw new TypeError("!path"); }
+		if(angular.isArray(path)) {
+			return [].concat(path);
+		}
+		if(angular.isString(path)) {
+			return path.split('.');
+		}
+		throw new TypeError("path is in unknown format: " + typeof path);
+	};
+
+	/** Returns an array of paths to each non-object data in a NoPg type object
+	 * @param type {object} The NoPG type object
+	 * @returns {array} Array of paths. Each path is also an array with each property as a string.
+	 */
+	norUtils.getDataPaths = function norUtils_getDataPaths(type) {
+		if(!type) { throw new TypeError("!type"); }
+
+		// Default expected columns
+		var columns = [['$id'], ['$created'], ['$modified']];
+		if(type.$schema) {
+			columns = columns.concat(pathParsers.any(type.$schema, []));
+		}
+		return columns;
+	};
+
+	/** Returns the JSON schema of a (sub) property
+	 * @param schema {object} The full JSON schema
+	 * @param keys {array} Path as an array of property names (as string)
+	 * @returns {object} JSON Schema for this property
+	 */
+	norUtils.getSchemaFromPath = function norUtils_getSchemaFromPath(schema, keys) {
+		if(!schema) { throw new TypeError("!schema"); }
+		if(!keys) { throw new TypeError("!keys"); }
+		if(schema.$schema) {
+			return norUtils_getSchemaFromPath(schema.$schema, keys);
+		}
+
+		if(typeof keys === 'string') {
+			keys = keys.split('.');
+		}
+
+		if(keys.length === 0) {
+			return schema;
+		}
+
+		if(schema.type !== "object") {
+			throw new TypeError("Schema was not JSONSchema object: " + JSON.stringify(schema));
+		}
+
+		var properties = schema.properties || {};
+		var key = keys[0];
+
+		if(!properties.hasOwnProperty(key)) {
+			return;
+		}
+
+		if(keys.length === 1) {
+			return properties[key];
+		}
+
+		if(keys.length >= 2) {
+			return norUtils_getSchemaFromPath(properties[key], keys.slice(1) );
+		}
+
+	};
+
+	/**
+	 * @param key {string} The path to the value
+	 * @returns value at the place for key
+	 */
+	norUtils.getDataFromPath = function get_data_from_path(data, keys) {
+
+		if(!keys) { throw new TypeError("!keys"); }
+
+		if(!data) {
+			return;
+		}
+
+		if(typeof keys === 'string') {
+			keys = keys.split('.');
+		}
+
+		if(keys.length === 1) {
+			return data[keys[0]];
+		}
+
+		if(keys.length >= 2) {
+			return get_data_from_path(data[keys[0]], keys.slice(1) );
+		}
+
+	};
+
+	/** Returns the title of element from path
+	 * @param schema {object} NoPg Type Object or JSON Schema
+	 * @param keys {array} Path as an array of property names (as string)
+	 * @returns {object} JSON Schema for this property
+	 */
+	norUtils.getTitleFromPath = function get_title_from_path(schema, keys) {
+		if(!keys) { throw new TypeError("!keys"); }
+		if(!angular.isArray(keys)) {
+			keys = keys.split('.');
+		}
+		if(!schema) { return keys.join('.'); }
+
+		if(schema.$schema) {
+			return get_title_from_path(schema.$schema, keys) || keys.join('.');
+		}
+		schema = norUtils.getSchemaFromPath(schema, keys) || {};
+		return schema.title || keys.join('.');
+	};
+
+	/** Returns the description of element from path
+	 * @param schema {object} NoPg Type Object or JSON Schema
+	 * @param keys {array} Path as an array of property names (as string)
+	 * @returns {object} JSON Schema for this property
+	 */
+	norUtils.getDescriptionFromPath = function get_description_from_path(schema, keys) {
+		if(!keys) { throw new TypeError("!keys"); }
+		if(!angular.isArray(keys)) {
+			keys = keys.split('.');
+		}
+		if(!schema) { return keys.join('.'); }
+
+		if(schema.$schema) {
+			return get_description_from_path(schema.$schema, keys) || keys.join('.');
+		}
+		schema = norUtils.getSchemaFromPath(schema, keys) || {};
+		return schema.description || keys.join('.');
+	};
+
+	return norUtils;
+});
+
 /* Tables */
 norApp.directive('norTable', function() {
 	return {
@@ -438,9 +641,27 @@ norApp.directive('norTable', function() {
 			content: '=?',
 			onCommit: '&?'
 		},
-		controller: ['$scope', function($scope) {
+		controller: ['$scope', 'norUtils', function($scope, norUtils) {
 
 			$scope.content = $scope.content || ($scope.model && $scope.model.content) || [];
+
+			$scope.updatePaths = function() {
+				var model = $scope.model;
+				var columns = model.$columns;
+				var type = model.type;
+				$scope.paths = (type && norUtils.getDataPaths(type)) || columns.map(norUtils.parsePathArray) || [['$id'], ['$created'], ['$modified']];
+			};
+
+			$scope.updatePaths();
+			$scope.$watch('model', function() {
+				$scope.updatePaths();
+			}, true);
+
+			$scope.parsePathArray = norUtils.parsePathArray;
+			$scope.getDataFromPath = norUtils.getDataFromPath;
+			$scope.getSchemaFromPath = norUtils.getSchemaFromPath;
+			$scope.getTitleFromPath = norUtils.getTitleFromPath;
+			$scope.getDescriptionFromPath = norUtils.getDescriptionFromPath;
 
 		}],
 		templateUrl: '/_libs/nor/table.html'
