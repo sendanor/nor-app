@@ -7,7 +7,19 @@ var ARRAY = require('nor-array');
 var debug = require('nor-debug');
 var ref = require('nor-ref');
 var nopg = require('nor-nopg');
+var URL = require('url');
 var _Q = require('q');
+
+/** Default limit of data in a collection searches */
+var DEFAULT_SEARCH_LIMIT = 20;
+
+/** Maximum limit of data in a collection searches */
+var MAX_SEARCH_LIMIT = 20;
+
+/** Parse integer */
+function parse_integer(value) {
+	return parseInt(value, 10);
+}
 
 /** Returns true if type has been initialized */
 function check_if_initialized(tr, name) {
@@ -261,15 +273,60 @@ function get_docs_handler(opts) {
 		var type = params.type;
 		debug.assert(type).is('string');
 
+		debug.log('url = ', req.url);
+
+		var parsed_url = URL.parse(req.url, true);
+		debug.log('parsed_url = ', parsed_url);
+
+		var query = parsed_url.query || {};
+		debug.log('query = ', query);
+
+		var search_opts = {'typeAwareness':true};
+
+		search_opts.order = ['$created'];
+
+		var limit = DEFAULT_SEARCH_LIMIT;
+		if(query.hasOwnProperty('_limit')) {
+			limit = parse_integer(query._limit) || DEFAULT_SEARCH_LIMIT;
+			delete query._limit;
+			if(limit > MAX_SEARCH_LIMIT) {
+				limit = MAX_SEARCH_LIMIT;
+			}
+		}
+		search_opts.limit = limit;
+
+		var offset = 0;
+		if(query.hasOwnProperty('_offset')) {
+			offset = parse_integer(query._offset) || 0;
+			delete query._offset;
+		}
+		search_opts.offset = offset;
+
+		debug.log('search_opts.limit = ', search_opts.limit, ' type of ', typeof search_opts.limit);
+
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.search(type)(undefined, {'typeAwareness':true}).then(function(tr) {
-				var docs = tr.fetch();
-				return {
-					'title': 'Documents for '+type,
-					'$type': 'table',
-					'$columns': ['$id', '$name', '$modified'],
-					'content': prepare_docs(req, docs)
-				};
+			return tr.searchTypes({'$name':type}).then(function(tr) {
+				var type_obj = tr.fetchSingle();
+				debug.assert(type_obj).is('object');
+				var schema = type_obj.$schema || {};
+				debug.assert(schema).is('object');
+				var properties = schema.properties || {};
+				debug.assert(properties).is('object');
+				var columns = ['$id'].concat(Object.keys(properties)).concat(['$created', '$modified']);
+				//debug.log('search_opts.limit = ', search_opts.limit, ' type of ', typeof search_opts.limit);
+				return tr.search(type)(undefined, search_opts).then(function(tr) {
+					var docs = tr.fetch();
+					//debug.log('type of limit: ', typeof search_opts.limit);
+					return {
+						'title': 'Documents for '+type,
+						'type': prepare_type(req, type_obj),
+						'$type': 'table',
+						'limit': limit,
+						'offset': offset,
+						'$columns': columns,
+						'content': prepare_docs(req, docs)
+					};
+				});
 			});
 		});
 	};

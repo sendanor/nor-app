@@ -24,8 +24,10 @@ body {
 }
 
 #content {
-	padding-left: 10em;
-	padding-right: 10em;
+	padding-left: 2em;
+	padding-right: 2em;
+	min-width: 100%;
+	overflow: auto;
 }
 
 /* .nor-record */
@@ -250,6 +252,21 @@ body {
 #content .nor-schema-array .nor-schema-add-property {
 	border-top: 1px solid #e0e0e0;
 	padding: 0.75em;
+}
+
+#content .nor-table table {
+	width: 100%;
+}
+
+#content .nor-table th {
+	border-bottom: 1px solid #e0e0e0;
+}
+
+#content .nor-table td, 
+#content .nor-table th {
+	white-space: nowrap;
+	word-wrap: normal;
+	padding: 0.5em;
 }
 
 #footer {
