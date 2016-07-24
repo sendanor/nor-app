@@ -304,6 +304,8 @@ function get_docs_handler(opts) {
 
 		debug.log('search_opts.limit = ', search_opts.limit, ' type of ', typeof search_opts.limit);
 
+		var where = undefined;
+
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes({'$name':type}).then(function(tr) {
 				var type_obj = tr.fetchSingle();
@@ -314,13 +316,15 @@ function get_docs_handler(opts) {
 				debug.assert(properties).is('object');
 				var columns = ['$id'].concat(Object.keys(properties)).concat(['$created', '$modified']);
 				//debug.log('search_opts.limit = ', search_opts.limit, ' type of ', typeof search_opts.limit);
-				return tr.search(type)(undefined, search_opts).then(function(tr) {
+				return tr.count(type)(where).search(type)(where, search_opts).then(function(tr) {
+					var count = tr.fetch();
 					var docs = tr.fetch();
 					//debug.log('type of limit: ', typeof search_opts.limit);
 					return {
 						'title': 'Documents for '+type,
 						'type': prepare_type(req, type_obj),
 						'$type': 'table',
+						'totalResults': count,
 						'limit': limit,
 						'offset': offset,
 						'$columns': columns,
