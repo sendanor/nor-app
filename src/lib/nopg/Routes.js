@@ -2,6 +2,7 @@
 
 var debug = require('nor-debug');
 var PATH = require('path');
+var URL = require('url');
 var ref = require('nor-ref');
 var ARRAY = require('nor-array');
 
@@ -57,7 +58,12 @@ Routes.getParentPath = function(path) {
 /** Returns normalized path */
 Routes.getNormalizedPath = function(path) {
 	debug.assert(path).is('string');
-	return PATH.normalize(path);
+	debug.log('path = ', path);
+	var obj = URL.parse(path);
+	debug.log('obj = ', obj);
+	debug.assert(obj).is('object');
+	debug.assert(obj.pathname).is('string');
+	return PATH.normalize(obj.pathname);
 };
 
 /** Returns promise of new Route object for `path`.

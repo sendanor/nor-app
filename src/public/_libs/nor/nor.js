@@ -28,13 +28,17 @@ norApp.config(function($locationProvider) {
 norApp.factory('norRouter', ['$http', '$log', '$location', '$route', function($http, $log, $location, $route) {
 
 	/** */
-	function do_get(path) {
+	function do_get(path, params) {
 		//reset_scopes();
 		if(!path) { throw new TypeError("!path"); }
-		return $http({
+		var opts = {
 			method: 'GET',
 			url: '/api' + path
-		}).then(function successCallback(response) {
+		};
+		if(params) {
+			opts.params = params;
+		}
+		return $http(opts).then(function successCallback(response) {
 			return response.data || {};
 		});
 	}
@@ -73,16 +77,46 @@ norApp.factory('norRouter', ['$http', '$log', '$location', '$route', function($h
 		//$scope.model = model;
 	}
 
+	/** */
+	function reset_search_params(params) {
+		if(!angular.isObject(params)) { throw new TypeError("params not object"); }
+
+		var current = $location.search();
+
+		$log.debug('current = ', current);
+
+		// Remove missing params
+		Object.keys(current).forEach(function(key) {
+			if(!params.hasOwnProperty(key)) {
+				$log.debug('unsetting ', key);
+				$location.search(key, null);
+			}
+		});
+
+		// Copy new params
+		Object.keys(params).forEach(function(key) {
+			$log.debug('setting ', key, ' as ', params[key]);
+			$location.search(key, params[key]);
+		});
+
+	}
+
 	/** Go to page */
-	function do_go($scope, path) {
+	function do_go($scope, path, params) {
 		if(!$scope) { throw new TypeError("!$scope"); }
 		if(!path) { throw new TypeError("!path"); }
-		return do_get(path).then(function(data) {
+		if(params) {
+			params = angular.copy(params);
+		}
+		return do_get(path, params).then(function(data) {
 			if($location.path() !== path) {
 				$location.path(path);
 			}
+			reset_search_params(params||{});
 			//change_scope_data($scope, data);
-			reset_model($scope.model, data);
+			if($scope.model) {
+				reset_model($scope.model, data);
+			}
 			return data;
 		}, function errorCallback(response) {
 			$log.error("error: ", response);
@@ -98,7 +132,7 @@ norApp.factory('norRouter', ['$http', '$log', '$location', '$route', function($h
 		$scope.$on('$locationChangeSuccess', function() {
 			var path = $location.path();
 			$log.debug("path = " + path);
-			do_go($scope, path);
+			do_go($scope, path, $location.search());
 		});
 
 	}
@@ -140,9 +174,9 @@ norApp.controller('norCtrl', function($scope, $http, $log, $location, norRouter)
 	$scope.parsePathName = parse_path_name;
 
 	/** Go to another resource */
-	$scope.go = function(url) {
+	$scope.go = function(url, params) {
 		var path = parse_path_name(url);
-		return norRouter.go($scope, path);
+		return norRouter.go($scope, path, params);
 	};
 
 	/** @returns {string} Content display type */
@@ -215,7 +249,7 @@ norApp.directive('norLink', function() {
 			icon: '=?',
 			classes: '@?class'
 		},
-		controller: ['$scope', '$location', function($scope, $location) {
+		controller: ['$scope', 'norRouter', function($scope, norRouter) {
 
 			if($scope.link) {
 				if($scope.link.$ref && (!$scope.ref)) {
@@ -229,9 +263,9 @@ norApp.directive('norLink', function() {
 			$scope.parsePathName = parse_path_name;
 
 			/** Go to another resource */
-			$scope.go = function(url) {
+			$scope.go = function(url, params) {
 				var path = parse_path_name(url);
-				$location.path(path);
+				return norRouter.go($scope, path, params);
 			};
 
 		}],
@@ -641,7 +675,7 @@ norApp.directive('norTable', function() {
 			content: '=?',
 			onCommit: '&?'
 		},
-		controller: ['$scope', 'norUtils', function($scope, norUtils) {
+		controller: ['$scope', 'norUtils', 'norRouter', '$location', function($scope, norUtils, norRouter, $location) {
 
 			$scope.content = $scope.content || ($scope.model && $scope.model.content) || [];
 
@@ -652,9 +686,43 @@ norApp.directive('norTable', function() {
 				$scope.paths = (type && norUtils.getDataPaths(type)) || columns.map(norUtils.parsePathArray) || [['$id'], ['$created'], ['$modified']];
 			};
 
+			$scope.updatePages = function() {
+				var model = $scope.model;
+				var results = model.totalResults;
+				var offset = model.offset || 0;
+				var limit = model.limit;
+
+				$scope.pages = Math.ceil(results/limit);
+				$scope.page = Math.round(offset/results*$scope.pages)+1;
+			};
+
+			$scope.prevPage = function() {
+				var model = $scope.model;
+				var results = model.totalResults;
+				var offset = model.offset || 0;
+				var limit = model.limit;
+				var params = $location.search();
+				offset -= limit;
+				params = angular.merge(params, {'_offset':offset});
+				return norRouter.go($scope, $location.path(), params);
+			};
+
+			$scope.nextPage = function() {
+				var model = $scope.model;
+				var results = model.totalResults;
+				var offset = model.offset || 0;
+				var limit = model.limit;
+				var params = $location.search();
+				offset += limit;
+				return norRouter.go($scope, $location.path(), angular.merge(params, {'_offset':offset}));
+			};
+
 			$scope.updatePaths();
+			$scope.updatePages();
+
 			$scope.$watch('model', function() {
 				$scope.updatePaths();
+				$scope.updatePages();
 			}, true);
 
 			$scope.parsePathArray = norUtils.parsePathArray;

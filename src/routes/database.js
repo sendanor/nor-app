@@ -139,6 +139,9 @@ function get_types_handler(opts) {
 					'title': 'Types',
 					'$type': 'table',
 					'$columns': ['$name', '$modified'],
+					'totalResults': types.length,
+					'limit': types.length,
+					'offset': 0,
 					'content': prepare_types(req, types),
 					'links': [
 						{
