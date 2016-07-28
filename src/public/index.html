@@ -46,7 +46,7 @@
   </div>
 
   <div ng-switch-when="record">
-	<nor-record keys="keys(model.content)" content="model.content"></nor-record>
+	<nor-record content="model.content" type="model.type"></nor-record>
   </div>
 
   <div ng-switch-when="Type">
@@ -66,6 +66,8 @@
 
 <!-- Scripts -->
 <script src="/_libs/jquery/jquery.min.js"></script>
+<script src="/_libs/tv4/tv4.js"></script>
+<script src="/_libs/tv4/tv4.async-jquery.js"></script>
 <script src="/_libs/datatables.net/js/jquery.dataTables.js"></script>
 <script src="/_libs/angular/angular.min.js"></script>
 <script src="/_libs/angular-sanitize/angular-sanitize.min.js"></script>

@@ -1,4 +1,13 @@
-<table class="row-border hover nor-record">
+<div class="nor-record">
+
+	<div ng-if="missing_schemas" class="missing-schemas">
+		This data has missing JSON Schema settings.<br />
+		<br />
+		<a title="Schema missing -- click here to create" href="#" ng-click="detectMissingSettings()">
+			<i class="fa fa-chain-broken" aria-hidden="true"></i> Automatically detect missing settings</a>
+	</div>
+
+	<table class="row-border hover">
 	<thead>
 	    <tr>
 	        <th class="key">Property</th>
@@ -6,20 +15,24 @@
 	    </tr>
 	</thead>
 	<tbody>
-		<tr ng-repeat="key in keys" ng-init="value = get_content(key)">
-			<th class="key">{{key.join('.')}}</th>
+		<tr ng-repeat="pointer in pointers" ng-init="key = pointer.getPath()">
+			<th class="key">{{key.join('.')}}
+				<span class="warnings">
+					<span class="data-invalid" ng-if="!pointer.validate()" title="Invalid data"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+				</span>
+			</th>
 	        <td class="value">
 				<div ng-switch="key.join('.')">
-					<div ng-switch-when="$name"><nor-link ref="content.$ref">{{value}}</nor-link></div>
-					<div ng-switch-when="$id"><nor-link ref="content.$ref">{{value}}</nor-link></div>
+					<div ng-switch-when="$name"><nor-link ref="content.$ref">{{pointer.getData()}}</nor-link></div>
+					<div ng-switch-when="$id"><nor-link ref="content.$ref">{{pointer.getData()}}</nor-link></div>
 					<div ng-switch-default>
-						<div ng-switch="get_type(value)">
+						<div ng-switch="getType(pointer.getData())">
 							<div ng-switch-when="object">
-								<nor-record content="value"></nor-record>
+								<nor-record content="pointer.getData()"></nor-record>
 							</div>
 							<div ng-switch-default>
-								<div ng-if="key.length >= 2">{{value}}</div>
-								<div ng-if="!(key.length >= 2)" nor-editable-content="content[key]" on-commit="commit(content)">{{value}}</div>
+								<div ng-if="key.length >= 2">{{pointer.getData()}}</div>
+								<div ng-if="!(key.length >= 2)" nor-editable-content="content[key]" on-commit="commit(content)">{{pointer.getData()}}</div>
 							</div>
 						</div>
 					</div>
@@ -27,4 +40,5 @@
 			</td>
 		</tr>
 	</tbody>
-</table>
+	</table>
+</div>

@@ -25,6 +25,7 @@
     "express-session": "^1.13.0",
     "font-awesome": "^4.6.3",
     "jquery": "^2.2.4",
+    "karma-cli": "^1.0.1",
     "merge": "^1.2.0",
     "moment": "^2.13.0",
     "ng-prettyjson": "^0.2.0",
@@ -38,7 +39,14 @@
     "tv4": "^1.2.7"
   },
   "devDependencies": {
+    "angular-mocks": "^1.5.8",
+    "chai": "^3.5.0",
+    "jshint": "*",
+    "karma": "^1.1.2",
+    "karma-chai": "^0.1.0",
+    "karma-mocha": "^1.1.1",
+    "karma-phantomjs-launcher": "^1.0.1",
     "lint": "*",
-    "jshint": "*"
+    "mocha": "^2.5.3"
   }
 }

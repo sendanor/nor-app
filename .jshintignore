@@ -4,8 +4,10 @@ src/public/_libs/angular
 src/public/_libs/angular-datatables
 src/public/_libs/angular-sanitize
 src/public/_libs/angular-ui-router
+src/public/_libs/angular-route
 src/public/_libs/bootstrap
 src/public/_libs/datatables.net
 src/public/_libs/font-awesome
 src/public/_libs/jquery
 src/public/_libs/purecss
+src/public/_libs/tv4

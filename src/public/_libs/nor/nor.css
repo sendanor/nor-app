@@ -32,7 +32,7 @@ body {
 
 /* .nor-record */
 
-#content .nor-record {
+#content .nor-record table {
 	border: 1px solid #f0f0f0;
 }
 
@@ -267,6 +267,28 @@ body {
 	white-space: nowrap;
 	word-wrap: normal;
 	padding: 0.5em;
+}
+
+#content .nor-table .results {
+	border-top: 1px solid #e0e0e0;
+	text-align: center;
+	padding-top: 2em;
+}
+
+#content .nor-table .results-rows {
+	margin-right: 6em;
+}
+
+#content .nor-record .warnings {
+	float: right;
+}
+
+#content .nor-record .warnings .data-invalid {
+	color: #990000;
+}
+
+#content .nor-record .missing-schemas {
+	margin: 1em;
 }
 
 #footer {

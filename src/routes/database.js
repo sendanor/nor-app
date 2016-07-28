@@ -243,16 +243,29 @@ function get_doc_handler(opts) {
 		debug.assert(type).is('string');
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
+			return tr.searchTypes({'$name':type}).search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
+
+				var type_obj = tr.fetchSingle();
+				debug.assert(type_obj).is('object');
+
 				var docs = tr.fetch();
+
 				var doc = docs.shift();
 
 				if(!doc) { throw new HTTPError(404); }
 
 				return {
 					'title': 'Document ' + doc.$id,
+					'type': prepare_type(req, type_obj),
 					'$type': 'Document',
 					'content': prepare_doc(req, doc),
+					'links': [
+						{
+							'$ref': ref(req, 'api/database/types', doc.$type, 'search'),
+							'title': 'Search documents',
+							'icon': 'search'
+						},
+					]
 				};
 			});
 		});
@@ -331,7 +344,14 @@ function get_docs_handler(opts) {
 						'limit': limit,
 						'offset': offset,
 						'$columns': columns,
-						'content': prepare_docs(req, docs)
+						'content': prepare_docs(req, docs),
+						'links': [
+							{
+								'$ref': ref(req, 'api/database/types', type_obj.$name),
+								'title': 'Type '+type_obj.$name,
+								'icon': 'file-o'
+							}
+						]
 					};
 				});
 			});
