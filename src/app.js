@@ -36,7 +36,7 @@ app.use(require('morgan')('dev'));
 
 app.use(base_app);
 
-app.use(express.static(__dirname + '/public'));
+//app.use(express.static(__dirname + '/public'));
 
 app.listen(PORT, function () {
 	console.log(APPNAME + ' listening on port ' + PORT);

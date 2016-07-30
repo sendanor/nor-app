@@ -1,48 +1,45 @@
 "use strict";
 
-var uuid = require('../schemas/uuid.js');
-var flags = require('../schemas/flags.js');
-
 module.exports = {
-	$schema: {
-		type: "object",
-		properties: {
-			path: {
-				title: "path",
-				type: "string",
-				description: "Path of the route"
+	"$schema": {
+		"type": "object",
+		"properties": {
+			"path": {
+				"title": "path",
+				"type": "string",
+				"description": "Path of the route"
 			},
-			title: {
-				title: "title",
-				type: "string",
-				description: "Title of the route"
+			"title": {
+				"title": "title",
+				"type": "string",
+				"description": "Title of the route"
 			},
-			parent: {
-				title: "parent",
-				type: "string",
-				description: "The parent of this route",
-				format: "uuid"
+			"parent": {
+				"title": "parent",
+				"type": "string",
+				"description": "The parent of this route",
+				"format": "uuid"
 			},
-			icon: {
-				title: "Icon",
-				type: "string",
-				description: "FontAwesome icon name"
+			"icon": {
+				"title": "Icon",
+				"type": "string",
+				"description": "FontAwesome icon name"
 			}
 		},
-		additionalProperties: false,
-		description: "The app routes requests to operations by associating an operation with an address, known as a route.",
-		required: [
+		"additionalProperties": false,
+		"description": "The app routes requests to operations by associating an operation with an address, known as a route.",
+		"required": [
 			"path",
 			"title"
 		]
 	},
-	indexes: [
+	"indexes": [
 		"path"
 	],
-	uniqueIndexes: [
+	"uniqueIndexes": [
 		"path"
 	],
-	documents: [
+	"documents": [
 		"Route#parent|$id,$type,path,title"
 	]
 };
