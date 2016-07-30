@@ -118,7 +118,7 @@ with a command `npm start` and stop it `npm stop`.
 
 ### After installation
 
-Open your browser at http://localhost:3000
+Open your browser at http://localhost:3000 -- username is `demo` and the password `demo`
 
 ... and design your database in the browser...
 
