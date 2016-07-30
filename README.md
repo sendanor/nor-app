@@ -1,4 +1,19 @@
 Sendanor App Project
+====================
+
+### Description
+
+`nor-app` provides a HTTP interface in to a [nor-nopg 
+database](https://github.com/sendanor/nor-nopg) -- noSQL features in a 
+PostgreSQL database server.
+
+### Features
+
+* Web based UI to maintain document types with [JSON Schema](http://json-schema.org/)
+* Web interface to create, search, edit and delete documents
+* Maintains a hypermedia REST api for the data
+
+### Development
 
 * Trello board: https://trello.com/b/MHiSILez
 
