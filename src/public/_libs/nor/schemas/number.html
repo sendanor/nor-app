@@ -1,0 +1,31 @@
+<div class="nor-schema nor-schema-number">
+	<div class="pure-g">
+		<div class="pure-u-1-6 nor-schema-field nor-schema-title">
+			<div class="label"><i class="fa fa-leaf" aria-hidden="true"></i> Title</div>
+			<div class="value" nor-editable-content="value.title" on-commit="commit(value)">{{value.title}}</div>
+		</div>
+		<div class="pure-u-1-12 nor-schema-field nor-schema-type">
+			<div class="label"><i class="fa fa-tag" aria-hidden="true"></i> Type</div>
+			<div class="value">number</div>
+		</div>
+		<div class="pure-u-1-6 nor-schema-field nor-schema-name">
+			<div class="label"><i class="fa fa-key" aria-hidden="true"></i> Key</div>
+			<div class="value">{{key}}</div>
+		</div>
+		<div class="pure-u-1-4 nor-schema-field nor-schema-description">
+			<div class="label"><i class="fa fa-comment-o" aria-hidden="true"></i> Description</div>
+			<div class="value" nor-editable-content="value.description" on-commit="commit(value)">{{value.description}}</div>
+		</div>
+	</div>
+	<div class="nor-schema-field nor-schema-result-code">
+		<div class="label"><i class="fa fa-code" aria-hidden="true"></i> Result Code
+			<a ng-click="show_result_code = !show_result_code" class="collapse-link">
+				<div ng-if="!show_result_code"><i class="fa fa-plus" aria-hidden="true"></i></div>
+				<div ng-if="show_result_code"><i class="fa fa-minus" aria-hidden="true"></i></div>
+			</a>
+		</div>
+		<div ng-if="show_result_code" class="value">
+			<pre pretty-json="value" edition="true" on-edit="commit(newJson)" />
+		</div>
+	</div>
+</div>
