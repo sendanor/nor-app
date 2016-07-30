@@ -122,6 +122,7 @@ function get_types_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
 	debug.assert(opts.pg).is('string');
+	debug.assert(opts.documents).is('object');
 
 	// Initialize types if neccessary
 	nopg.transaction(opts.pg, function(tr) {
@@ -320,7 +321,7 @@ function get_docs_handler(opts) {
 
 		debug.log('search_opts.limit = ', search_opts.limit, ' type of ', typeof search_opts.limit);
 
-		var where = undefined;
+		var where;
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes({'$name':type}).then(function(tr) {

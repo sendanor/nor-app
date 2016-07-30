@@ -16,6 +16,11 @@ function app_builder(opts) {
 	debug.assert(opts.routePaths).ignore(undefined).is('array');
 	debug.assert(opts.routes).ignore(undefined).is('array');
 	debug.assert(opts.documents).ignore(undefined).is('object');
+
+	if(!opts.pg) {
+		throw new TypeError("You must set PGCONFIG");
+	}
+
 	debug.assert(opts.pg).is('string');
 
 	var documents = require(__dirname + '/types/documents/');
