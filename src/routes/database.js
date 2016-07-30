@@ -180,6 +180,44 @@ function get_create_type_form(opts) {
 	};
 }
 
+/** Get a form to delete a type
+ * @returns `function(req, res)` which uses promises
+ */
+function get_del_type_form(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+
+	return function(req/*, res*/) {
+		assert_logged_in(req);
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchTypes({'$name': type}).then(function(tr) {
+				var types = tr.fetch();
+				var type = types.shift();
+
+				if(!type) { throw new HTTPError(404); }
+
+				// FIXME: This api/database/:name/items should use configuration paths
+
+				return {
+					'title': 'Delete a type',
+					'$type': 'form',
+					'$method': 'delete',
+					'$target': ref(req, 'api/database/types', type.$name, 'delete'),
+					'content': [
+					]
+				};
+			});
+		});
+	};
+}
+
 /** Get single document type
  * @returns `function(req, res)` which uses promises
  */
@@ -218,7 +256,54 @@ function get_type_handler(opts) {
 							'$ref': ref(req, 'api/database/types', type.$name, 'documents/create'),
 							'title': 'Create new document',
 							'icon': 'plus'
+						},
+						{
+							'$ref': ref(req, 'api/database/types', type.$name, 'delete'),
+							'title': 'Delete this type',
+							'icon': 'trash-o'
 						}
+					]
+				};
+			});
+		});
+	};
+}
+
+/** Get a form to delete a doc
+ * @returns `function(req, res)` which uses promises
+ */
+function get_del_doc_form(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+
+	return function(req/*, res*/) {
+		assert_logged_in(req);
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+		var type = params.type;
+		var id = params.id;
+		debug.assert(type).is('string');
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchTypes({'$name':type}).search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
+
+				var type_obj = tr.fetchSingle();
+				debug.assert(type_obj).is('object');
+
+				var docs = tr.fetch();
+
+				var doc = docs.shift();
+
+				if(!doc) { throw new HTTPError(404); }
+
+				return {
+					'title': 'Delete a document '+doc.$id,
+					'$type': 'form',
+					'$method': 'delete',
+					'$target': ref(req, 'api/database/types', type.$name, 'documents', doc.$id, 'delete'),
+					'content': [
 					]
 				};
 			});
@@ -266,6 +351,11 @@ function get_doc_handler(opts) {
 							'title': 'Search documents',
 							'icon': 'search'
 						},
+						{
+							'$ref': ref(req, 'api/database/types', doc.$type, 'documents', doc.$id, 'delete'),
+							'title': 'Delete this document',
+							'icon': 'trash-o'
+						}
 					]
 				};
 			});
@@ -473,12 +563,15 @@ function del_type_handler(opts) {
 		debug.assert(type).is('string');
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.count(type)().then(function(count) {
+			return tr.count(type)().then(function(tr) {
+				var count = tr.fetch();
+				debug.log('count = ', count);
 				if(count !== 0) { throw new HTTPError(500, "Cannot delete type. You must remove documents first."); }
-				return tr.deleteType(type)().then(function(tr) {
+				return tr.deleteType(type).then(function() {
 					//debug.log('result $schema = ', obj.$schema);
 					return {
 						'title': 'Type removed',
+						'$type': 'Document',
 						'content': {
 							'$name': type
 						}
@@ -660,9 +753,10 @@ function del_doc_handler(opts) {
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchSingle(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
 				var obj = tr.fetch();
-				return tr.del(obj).then(function(tr) {
+				return tr.del(obj).then(function() {
 					return {
 						'title': 'Deleted a document',
+						'$type': 'Document',
 						'content': prepare_doc(req, obj)
 					};
 				});
@@ -689,6 +783,11 @@ module.exports = {
 			'search': {
 				'$get': get_docs_handler
 			},
+			'delete': {
+				'$get': get_del_type_form,
+				'$post': del_type_handler,
+				'$del': del_type_handler
+			},
 			'documents': {
 				'$get': get_docs_handler,
 				'$post': post_docs_handler,
@@ -699,7 +798,12 @@ module.exports = {
 				':id': {
 					'$get': get_doc_handler,
 					'$post': post_doc_handler,
-					'$del': del_doc_handler
+					'$del': del_doc_handler,
+					'delete': {
+						'$get': get_del_doc_form,
+						'$post': del_doc_handler,
+						'$del': del_doc_handler
+					},
 				}
 			}
 		}
