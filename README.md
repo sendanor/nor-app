@@ -1,7 +1,5 @@
-Sendanor App Project
-====================
-
-### Description
+nor-app -- Hypermedia App Server
+================================
 
 `nor-app` provides a HTTP interface in to a [nor-nopg 
 database](https://github.com/sendanor/nor-nopg) -- noSQL features in a 
