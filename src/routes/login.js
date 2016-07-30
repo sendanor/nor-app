@@ -47,7 +47,7 @@ function post_handler(opts) {
 		var username = data.username;
 		var password = data.password;
 
-		if((username === "demo") && (password === "test")) {
+		if((username === "demo") && (password === "demo")) {
 			req.session.user = username;
 			return {'title': 'Login', 'content': 'Login was successful.','$user':username};
 		} else {
