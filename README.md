@@ -52,3 +52,7 @@ nor-app start
 Check log files at `~/.nor-app/logs/myapp/`.
 
 Open browser at http://localhost:3000
+
+... and create your database in the browser...
+
+... and access REST interface from: http://localhost:3000/api/
