@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://jhh@bitbucket.sendanor.fi/scm/nor/nor-app.git"
+    "url": "git://github.com/sendanor/nor-app.git"
   },
   "author": "Jaakko-Heikki Heusala <jhh@sendanor.com>",
   "license": "MIT",
