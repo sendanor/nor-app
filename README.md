@@ -49,16 +49,22 @@ CREATE EXTENSION tcn;
 CREATE EXTENSION moddatetime;
 ```
 
+Set your database configurations into a `PGCONFIG` environment variable: 
+
+```
+export PGCONFIG='postgres://app:password@localhost/app'
+```
+
 Name your application (default name is `nor-app`): 
 
 ```
 export APPNAME='myapp'
 ```
 
-Set it as `PGCONFIG` environment variable: 
+You can also change your application port (default port is `3000`):
 
 ```
-export PGCONFIG='postgres://app:password@localhost/app'
+export PORT='8080'
 ```
 
 Initialize NoPG:
@@ -67,13 +73,11 @@ Initialize NoPG:
 nor-nopg init
 ```
 
-Start the server (by default at port 3000):
+Start the server:
 
 ```
 nor-app start
 ```
-
-Check log files at `~/.nor-app/logs/myapp/`.
 
 Open browser at http://localhost:3000
 
@@ -81,11 +85,13 @@ Open browser at http://localhost:3000
 
 ... and access REST interface from: http://localhost:3000/api/
 
-### Testing
+If something doesn't work, check log files at `~/.nor-app/logs/myapp/`.
+
+### Testing API
 
 We recommend using [jsonview](https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc) when working in Google Chrome.
 
-#### Testing with `curl`
+#### Testing API with `curl`
 
 We also have a curl wrapper `./tools/curl` which makes it easier to work with our API.
 
@@ -102,3 +108,4 @@ Then you can use the api:
 ```
 ./tools/curl http://localhost:3000/api/
 ```
+
