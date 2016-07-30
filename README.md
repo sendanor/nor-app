@@ -116,7 +116,7 @@ After that, you can initialize the NoPg database with a command
 `npm run init` instead of `nor-nopg init` and start the server simply 
 with a command `npm start` and stop it `npm stop`.
 
-#### After installation
+### After installation
 
 Open your browser at http://localhost:3000
 
