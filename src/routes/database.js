@@ -14,7 +14,7 @@ var _Q = require('q');
 var DEFAULT_SEARCH_LIMIT = 20;
 
 /** Maximum limit of data in a collection searches */
-var MAX_SEARCH_LIMIT = 20;
+var MAX_SEARCH_LIMIT = 1000;
 
 /** Parse integer */
 function parse_integer(value) {
@@ -456,6 +456,40 @@ function post_type_handler(opts) {
 	};
 }
 
+/** Delete document type
+ * @returns `function(req, res)` which uses promises
+ */
+function del_type_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req/*, res*/) {
+
+		assert_logged_in(req);
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.count(type)().then(function(count) {
+				if(count !== 0) { throw new HTTPError(500, "Cannot delete type. You must remove documents first."); }
+				return tr.deleteType(type)().then(function(tr) {
+					//debug.log('result $schema = ', obj.$schema);
+					return {
+						'title': 'Type removed',
+						'content': {
+							'$name': type
+						}
+					};
+				});
+			});
+		});
+
+	};
+}
+
 /** Returns form fields based on type object */
 function get_form_fields(type) {
 	debug.assert(type).is('object');
@@ -605,12 +639,45 @@ function post_doc_handler(opts) {
 	};
 }
 
+/** Delete a document
+ * @returns `function(req, res)` which uses promises
+ */
+function del_doc_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req/*, res*/) {
+		assert_logged_in(req);
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		var id = params.id;
+		debug.assert(id).is('uuid');
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchSingle(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
+				var obj = tr.fetch();
+				return tr.del(obj).then(function(tr) {
+					return {
+						'title': 'Deleted a document',
+						'content': prepare_doc(req, obj)
+					};
+				});
+			});
+		});
+
+	};
+}
+
 // Exports
 module.exports = {
 	'$get': get_types_handler,
 	'createType': {
 		'$get': get_create_type_form,
-		'$post': post_types_handler
+		'$post': post_types_handler,
 	},
 	'types': {
 		'$get': get_types_handler,
@@ -618,6 +685,7 @@ module.exports = {
 		':type': {
 			'$get': get_type_handler,
 			'$post': post_type_handler,
+			'$del': del_type_handler,
 			'search': {
 				'$get': get_docs_handler
 			},
@@ -630,7 +698,8 @@ module.exports = {
 				},
 				':id': {
 					'$get': get_doc_handler,
-					'$post': post_doc_handler
+					'$post': post_doc_handler,
+					'$del': del_doc_handler
 				}
 			}
 		}

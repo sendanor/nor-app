@@ -188,7 +188,7 @@ function merge_settled_results(results) {
 /** Returns true if value is not one of $get or $post */
 function other_than_methods(value) {
 	//debug.log('step');
-	return (value !== '$get') && (value !== '$post');
+	return (value !== '$get') && (value !== '$post') && (value !== '$del');
 }
 
 // Initialize route handler array if doesn't exist
@@ -265,7 +265,8 @@ function get_routes(routes, paths) {
 
 	var result = {
 		'$get': {},
-		'$post': {}
+		'$post': {},
+		'$del': {}
 	};
 
 	// 
@@ -297,6 +298,19 @@ function get_routes(routes, paths) {
 					}
 				}
 			}).filter(function get_routes_filter_post_funcs(func) {
+				//debug.log('step');
+				return is.func(func);
+			}),
+			"$del": funcs.map(function get_routes_map_del_funcs(func) {
+				//debug.log('step');
+				if(is.func(func)) {
+					return;
+				} else if(is.obj(func)) {
+					if(is.func(func.$del)) {
+						return func.$del;
+					}
+				}
+			}).filter(function get_routes_filter_del_funcs(func) {
 				//debug.log('step');
 				return is.func(func);
 			})
@@ -362,9 +376,11 @@ function app_builder(opts) {
 	debug.assert(routes).is('object');
 	debug.assert(routes.$get).is('object');
 	debug.assert(routes.$post).is('object');
+	debug.assert(routes.$del).is('object');
 
 	//debug.log('routes.$get = ', routes.$get);
 	//debug.log('routes.$post = ', routes.$post);
+	//debug.log('routes.$del = ', routes.$del);
 
 	ARRAY(Object.keys(routes)).forEach(function app_builder_foreach_route_keys(type) {
 		ARRAY(Object.keys(routes[type])).forEach(function app_builder_foreach_type_keys(route) {
@@ -378,6 +394,9 @@ function app_builder(opts) {
 			} else if(type === '$post') {
 				debug.log('Added POST route for '+ path);
 				app.post(path, urlencoded_parser, json_parser, route_builder(routes.$post[route](opts)) );
+			} else if(type === '$del') {
+				debug.log('Added DELETE route for '+ path);
+				app.del(path, urlencoded_parser, json_parser, route_builder(routes.$del[route](opts)) );
 			}
 		});
 	});
