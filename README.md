@@ -28,6 +28,8 @@ PostgreSQL database server.
 
 ### Install
 
+#### Installing globally
+
 Install `nor-nopg`: 
 
 ```
@@ -39,6 +41,8 @@ Install `nor-app`:
 ```
 npm install -g nor-app
 ```
+
+#### Creating a database
 
 Create a PostgreSQL database with these extensions:
 
@@ -55,6 +59,8 @@ Set your database configurations into a `PGCONFIG` environment variable:
 export PGCONFIG='postgres://app:password@localhost/app'
 ```
 
+#### Setting name and port
+
 Name your application (default name is `nor-app`): 
 
 ```
@@ -67,23 +73,58 @@ You can also change your application port (default port is `3000`):
 export PORT='8080'
 ```
 
-Initialize NoPG:
+#### Initializing NoPG
 
 ```
 nor-nopg init
 ```
 
-Start the server:
+#### Start the server
 
 ```
 nor-app start
 ```
 
-Open browser at http://localhost:3000
+#### Installing as a dependency
 
-... and create your database in the browser...
+You may want to use `nor-app` as a dependency instead of a global command.
+
+Create a directory for your project and initialize NPM there:
+
+```
+mkdir myapp
+cd myapp
+npm init
+npm install --save nor-nopg
+npm install --save nor-app
+```
+
+...then edit `scripts` section in your `./package.json` to look like this:
+
+```json
+{
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "init": "nor-nopg init",
+    "start": "nor-app start",
+    "stop": "nor-app stop"
+  }
+}
+```
+
+After that, you can initialize the NoPg database with a command 
+`npm run init` instead of `nor-nopg init` and start the server simply 
+with a command `npm start` and stop it `npm stop`.
+
+#### After installation
+
+Open your browser at http://localhost:3000
+
+... and design your database in the browser...
 
 ... and access REST interface from: http://localhost:3000/api/
+
+### Troubleshooting
 
 If something doesn't work, check log files at `~/.nor-app/logs/myapp/`.
 
