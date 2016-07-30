@@ -14,13 +14,13 @@ PostgreSQL database server.
 ### Requirements
 
 * Ubuntu Linux LTS 14.04 (other Linux systems probably work, too)
-* (NodeJS v4.4.)[http://nodejs.org]
-* (PostgreSQL 9.3 Server)[https://www.postgresql.org/], with extensions:
+* [NodeJS v4.4.](http://nodejs.org)
+* [PostgreSQL 9.3 Server](https://www.postgresql.org/), with extensions:
   * `pvl8`
   * `uuid-ossp`
   * `tcn`
   * `moddatetime`
-* See other dependencies from (the NPM registry)[https://www.npmjs.com/package/nor-app]
+* See other dependencies from [the NPM registry](https://www.npmjs.com/package/nor-app)
 
 ### Development
 
