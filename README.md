@@ -9,7 +9,7 @@ PostgreSQL database server.
 
 * Web based UI to maintain document types with [JSON Schema](http://json-schema.org/)
 * Web interface to create, search, edit and delete documents
-* Maintains a hypermedia REST api for the data
+* Maintains a hypermedia JSON REST API for the data
 
 ### Development
 
