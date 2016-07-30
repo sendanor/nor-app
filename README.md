@@ -14,7 +14,7 @@ PostgreSQL database server.
 ### Requirements
 
 * Ubuntu Linux LTS 14.04 (other Linux systems probably work, too)
-* [NodeJS v4.4.](http://nodejs.org)
+* [Node.js v4.4.](http://nodejs.org)
 * [PostgreSQL 9.3 Server](https://www.postgresql.org/), with extensions:
   * `pvl8`
   * `uuid-ossp`
