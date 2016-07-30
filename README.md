@@ -11,6 +11,17 @@ PostgreSQL database server.
 * Web interface to create, search, edit and delete documents
 * Maintains a hypermedia JSON REST API for the data
 
+### Requirements
+
+* Ubuntu Linux LTS 14.04 (other Linux systems probably work, too)
+* (NodeJS v4.4.)[http://nodejs.org]
+* (PostgreSQL 9.3 Server)[https://www.postgresql.org/], with extensions:
+  * `pvl8`
+  * `uuid-ossp`
+  * `tcn`
+  * `moddatetime`
+* See other dependencies from (the NPM registry)[https://www.npmjs.com/package/nor-app]
+
 ### Development
 
 * Trello board: https://trello.com/b/MHiSILez
