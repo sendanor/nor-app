@@ -107,11 +107,31 @@ function prepare_docs(req, docs) {
 	return ARRAY(docs).map(prepare_doc.bind(undefined, req)).valueOf();
 }
 
-/** Assert that we have logged in */
-function assert_logged_in(req) {
-	var logged_in = req && req.user ? true : false;
+/** Assert that we have logged in
+ * @param required_flags {array} Optional array of flags, which at least one must match.
+ */
+function assert_logged_in(req, required_flags) {
+	debug.assert(req).is('object');
+	debug.assert(req.flags).ignore(undefined).is('object');
+	debug.assert(required_flags).ignore(undefined).is('array');
+
+	var flags = req.flags || {};
+
+	var logged_in = flags.authenticated ? true : false;
 	if(!logged_in) {
-		throw new HTTPError(403);
+		throw new HTTPError(401);
+	}
+
+	if(required_flags && (required_flags.length >= 0)) {
+		var value = ARRAY(required_flags).some(function(flag) {
+			var value;
+			if(flags.hasOwnProperty(flag)) {
+				return flags[flag] === true;
+			}
+		});
+		if(!value) {
+			throw new HTTPError(403);
+		}
 	}
 }
 
@@ -132,11 +152,18 @@ function get_types_handler(opts) {
 	}).done();
 
 	return function(req/*, res*/) {
-		assert_logged_in(req);
+
+		assert_logged_in(req, [
+			'admin',
+			'database',
+			'database_types'
+		]);
+
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes().then(function(tr) {
 				var types = tr.fetch();
 				return {
+					'$ref': ref(req, 'api/database/types'),
 					'title': 'Types',
 					'$type': 'table',
 					'$columns': ['$name', '$modified'],
@@ -166,7 +193,12 @@ function get_create_type_form(opts) {
 	debug.assert(opts.pg).is('string');
 
 	return function(req/*, res*/) {
-		assert_logged_in(req);
+
+		assert_logged_in(req, [
+			'admin',
+			'database_create_type'
+		]);
+
 		//return nopg.transaction(opts.pg, function(tr) {
 			return {
 				'title': 'Create a new type',
@@ -189,12 +221,17 @@ function get_del_type_form(opts) {
 	debug.assert(opts.pg).is('string');
 
 	return function(req/*, res*/) {
-		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_delete_type',
+			'database_types_'+type+'_delete_type'
+		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes({'$name': type}).then(function(tr) {
@@ -206,6 +243,7 @@ function get_del_type_form(opts) {
 				// FIXME: This api/database/:name/items should use configuration paths
 
 				return {
+					'$ref': ref(req, 'api/database/types', type.$name, 'delete'),
 					'title': 'Delete a type',
 					'$type': 'form',
 					'$method': 'delete',
@@ -226,12 +264,17 @@ function get_type_handler(opts) {
 	opts = opts || {};
 	debug.assert(opts.pg).is('string');
 	return function(req/*, res*/) {
-		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database',
+			'database_types_'+type
+		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes({'$name': type}).then(function(tr) {
@@ -243,6 +286,7 @@ function get_type_handler(opts) {
 				// FIXME: This api/database/:name/items should use configuration paths
 
 				return {
+					'$ref': ref(req, 'api/database/types', type.$name),
 					'title': 'Type '+type.$name,
 					'$type': 'Type',
 					'content': prepare_type(req, type),
@@ -278,13 +322,18 @@ function get_del_doc_form(opts) {
 	debug.assert(opts.pg).is('string');
 
 	return function(req/*, res*/) {
-		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
 		var type = params.type;
 		var id = params.id;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_delete_document',
+			'database_types_'+type+'_delete_document',
+		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes({'$name':type}).search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
@@ -299,6 +348,7 @@ function get_del_doc_form(opts) {
 				if(!doc) { throw new HTTPError(404); }
 
 				return {
+					'$ref': ref(req, 'api/database/types', type.$name, 'documents', doc.$id, 'delete'),
 					'title': 'Delete a document '+doc.$id,
 					'$type': 'form',
 					'$method': 'delete',
@@ -320,13 +370,18 @@ function get_doc_handler(opts) {
 	debug.assert(opts.pg).is('string');
 	return function(req/*, res*/) {
 
-		assert_logged_in(req);
-
 		var params = req.params || {};
 		debug.assert(params).is('object');
 		var type = params.type;
 		var id = params.id;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database',
+			'database_types_'+type,
+			'database_types_'+type+'_documents'
+		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes({'$name':type}).search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
@@ -373,12 +428,17 @@ function get_docs_handler(opts) {
 
 	return function(req/*, res*/) {
 
-		assert_logged_in(req);
-
 		var params = req.params || {};
 		debug.assert(params).is('object');
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database',
+			'database_types_'+type,
+			'database_types_'+type+'_documents'
+		]);
 
 		debug.log('url = ', req.url);
 
@@ -458,7 +518,10 @@ function post_types_handler(opts) {
 	opts = opts || {};
 	return function(req/*, res*/) {
 
-		assert_logged_in(req);
+		assert_logged_in(req, [
+			'admin',
+			'database_create_type'
+		]);
 
 		var data = req.body || {};
 		debug.log('data = ', data);
@@ -474,7 +537,6 @@ function post_types_handler(opts) {
 		debug.assert(content).is('object');
 
 		var type = data.$name || content.$name;
-
 		debug.assert(type).is('string');
 
 		if(content.type === undefined) {
@@ -505,13 +567,17 @@ function post_type_handler(opts) {
 	opts = opts || {};
 	return function(req/*, res*/) {
 
-		assert_logged_in(req);
-
 		var params = req.params || {};
 		debug.assert(params).is('object');
 
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_update_type'
+			'database_types_'+type+'_update_type'
+		]);
 
 		var data = req.body || {};
 		debug.log('data = ', data);
@@ -554,13 +620,17 @@ function del_type_handler(opts) {
 	opts = opts || {};
 	return function(req/*, res*/) {
 
-		assert_logged_in(req);
-
 		var params = req.params || {};
 		debug.assert(params).is('object');
 
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_delete_type'
+			'database_types_'+type+'_delete_type'
+		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.count(type)().then(function(tr) {
@@ -603,7 +673,7 @@ function get_form_fields(type) {
 	return fields;
 }
 
-/** Get a form to create document
+/** Get a form to create a document
  * @returns `function(req, res)` which uses promises
  */
 function get_create_doc_form(opts) {
@@ -612,13 +682,18 @@ function get_create_doc_form(opts) {
 	debug.assert(opts.pg).is('string');
 
 	return function(req/*, res*/) {
-		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
 
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_create_document',
+			'database_types_'+type+'_create_document'
+		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes({'$name':type}).then(function(tr) {
@@ -644,13 +719,18 @@ function post_docs_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
 	return function(req/*, res*/) {
-		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
 
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_create_document',
+			'database_types_'+type+'_create_document'
+		]);
 
 		var data = req.body || {};
 		debug.log('data = ', data);
@@ -694,13 +774,18 @@ function post_doc_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
 	return function(req/*, res*/) {
-		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
 
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_update_document',
+			'database_types_'+type+'_update_document'
+		]);
 
 		var id = params.id;
 		debug.assert(id).is('uuid');
@@ -739,13 +824,18 @@ function del_doc_handler(opts) {
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
 	return function(req/*, res*/) {
-		assert_logged_in(req);
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
 
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_delete_document',
+			'database_types_'+type+'_delete_document'
+		]);
 
 		var id = params.id;
 		debug.assert(id).is('uuid');

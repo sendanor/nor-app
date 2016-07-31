@@ -52,6 +52,13 @@ function app_builder(opts) {
 
 	var api = api_builder(api_opts);
 
+	// Setup req.flags etc
+	app.use(passport.setupHelpers({
+		'default_flags': {
+			'public': true
+		}
+	}));
+
 	// Serve static files
 	app.use(express.static(__dirname + '/public'));
 
