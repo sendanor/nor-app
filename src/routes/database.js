@@ -109,7 +109,7 @@ function prepare_docs(req, docs) {
 
 /** Assert that we have logged in */
 function assert_logged_in(req) {
-	var logged_in = req.session && req.session.user ? true : false;
+	var logged_in = req && req.user ? true : false;
 	if(!logged_in) {
 		throw new HTTPError(403);
 	}

@@ -27,6 +27,11 @@ function route_builder(f) {
 			//debug.log('at route_builder_req_handler_1()');
 			return f(req, res);
 		}).then(function route_builder_req_handler_2(body) {
+
+			if(body === undefined) {
+				return;
+			}
+
 			//debug.log('at route_builder_req_handler_2()');
 			debug.assert(body).is('object');
 
@@ -117,12 +122,20 @@ function require_if_exists(path) {
 
 function merge_settled_results(results) {
 	//debug.log('step');
+	var no_reply = false;
 	var body = {};
 	ARRAY(results).forEach(function merge_settled_results_foreach(result) {
 		//debug.log('step');
 		//debug.log('result = ', result);
 		debug.assert(result).is('object');
 		if(result.state === "fulfilled") {
+
+			// Ignore undefined
+			if(result.value === undefined) {
+				no_reply = true;
+				return;
+			}
+
 			debug.assert(result.value).is('object');
 			//debug.log('result.value = ', result.value);
 			ARRAY(Object.keys(result.value)).forEach(function merge_settled_results_foreach_2(key) {
@@ -182,13 +195,16 @@ function merge_settled_results(results) {
 			}
 		}
 	}
+	if(no_reply) {
+		return;
+	}
 	return body;
 }
 
-/** Returns true if value is not one of $get or $post */
+/** Returns true if value is not one of special methods, eg. $get or $post */
 function other_than_methods(value) {
 	//debug.log('step');
-	return (value !== '$get') && (value !== '$post') && (value !== '$del');
+	return value.charAt(0) !== '$';
 }
 
 // Initialize route handler array if doesn't exist
@@ -209,7 +225,7 @@ function register_raw_func(_raw, route, f, d) {
 	// Childs
 	if(is.obj(f)) {
 		ARRAY(Object.keys(f)).filter(other_than_methods).forEach(function register_raw_func_foreach(key) {
-			//debug.log('key = ', key);
+			debug.log('key = ', key);
 			if(d) {
 				register_raw_func(_raw, route+'/'+key, d);
 			}
@@ -226,6 +242,7 @@ function register_raw_func(_raw, route, f, d) {
  */
 function get_routes(routes, paths) {
 	//debug.log('step');
+	debug.log('get_routes() started');
 
 	debug.assert(paths).is('array');
 	debug.assert(routes).is('array');
@@ -266,7 +283,8 @@ function get_routes(routes, paths) {
 	var result = {
 		'$get': {},
 		'$post': {},
-		'$del': {}
+		'$del': {},
+		'$use': {}
 	};
 
 	// 
@@ -275,49 +293,63 @@ function get_routes(routes, paths) {
 		var funcs = _raw[route];
 
 		var _handlers = {
-			"$get": funcs.map(function get_routes_map_get_funcs(func) {
-				//debug.log('step');
+			"$get": ARRAY(funcs).map(function get_routes_map_get_funcs(func) {
 				if(is.func(func)) {
 					return func;
-				} else if(is.obj(func)) {
-					if(is.func(func.$get)) {
-						return func.$get;
-					}
+				}
+				if(is.obj(func) && func.hasOwnProperty('$get')) {
+					return func.$get;
 				}
 			}).filter(function get_routes_filter_get(func) {
-				//debug.log('step');
 				return is.func(func);
-			}),
-			"$post": funcs.map(function get_routes_map_post_funcs(func) {
-				//debug.log('step');
+			}).valueOf(),
+			"$post": ARRAY(funcs).map(function get_routes_map_post_funcs(func) {
 				if(is.func(func)) {
 					return;
-				} else if(is.obj(func)) {
-					if(is.func(func.$post)) {
-						return func.$post;
-					}
+				}
+				if(is.obj(func) && func.hasOwnProperty('$post')) {
+					return func.$post;
 				}
 			}).filter(function get_routes_filter_post_funcs(func) {
-				//debug.log('step');
 				return is.func(func);
-			}),
-			"$del": funcs.map(function get_routes_map_del_funcs(func) {
-				//debug.log('step');
+			}).valueOf(),
+			"$del": ARRAY(funcs).map(function get_routes_map_del_funcs(func) {
 				if(is.func(func)) {
 					return;
-				} else if(is.obj(func)) {
-					if(is.func(func.$del)) {
-						return func.$del;
-					}
+				}
+				if(is.obj(func) && func.hasOwnProperty('$del')) {
+					return func.$del;
 				}
 			}).filter(function get_routes_filter_del_funcs(func) {
-				//debug.log('step');
 				return is.func(func);
-			})
+			}).valueOf(),
+			"$use": ARRAY(funcs).map(function get_routes_map_use_funcs(func) {
+				if(is.func(func)) {
+					return;
+				}
+				if(is.obj(func) && func.hasOwnProperty('$use')) {
+					return func.$use;
+				}
+			}).filter(function get_routes_filter_use_funcs(func) {
+				return is.func(func);
+			}).valueOf()
 		};
+
+		debug.log(
+			'There are ' + _handlers.$get.length +' GET handlers loaded for ' + route + '\n' +
+			'There are ' + _handlers.$post.length +' POST handlers loaded for ' + route + '\n' +
+			'There are ' + _handlers.$del.length +' DEL handlers loaded for ' + route + '\n' +
+			'There are ' + _handlers.$use.length +' USE handlers loaded for '+ route + '\n'
+		);
 
 		ARRAY(Object.keys(_handlers)).forEach(function get_routes_foreach_handler_keys(method) {
 			//debug.log('step');
+
+			debug.log(route + ': Route has ' + _handlers[method].length + ' '+method+' handlers');
+			if(_handlers[method].length === 0) {
+				return;
+			}
+
 			result[method][route] = function get_routes_result_method_route(opts) {
 				//debug.log('step');
 
@@ -331,13 +363,10 @@ function get_routes(routes, paths) {
 					//debug.log('step');
 
 					var promises = handlers.map(function get_routes_map_handlers(handler) {
-						return _Q.when(handler(req, res)).then(function(body) {
-							//debug.log('result body = ', body);
-							return body;
-						});
+						return _Q.when(handler(req, res));
 					});
 
-					debug.log(route + ': Created ' + promises.length + ' promises for route.');
+					debug.log(route + ': Created ' + promises.length + ' promises for route '+method);
 					return _Q.allSettled(promises).then( merge_settled_results );
 
 				};
@@ -346,12 +375,15 @@ function get_routes(routes, paths) {
 
 	});
 
+	debug.log('get_routes() finished');
+
 	return result;
 }
 
 /** Returns Express application instance */
 function app_builder(opts) {
 	//debug.log('step');
+	debug.log('app_builder() started');
 	debug.assert(opts).ignore(undefined).is('object');
 	opts = opts || {};
 
@@ -371,35 +403,63 @@ function app_builder(opts) {
 	var json_parser = bodyParser.json();
 
 	var app = express();
+
 	var routes = get_routes(opts.routes, opts.routePaths);
 
 	debug.assert(routes).is('object');
 	debug.assert(routes.$get).is('object');
 	debug.assert(routes.$post).is('object');
 	debug.assert(routes.$del).is('object');
+	debug.assert(routes.$use).is('object');
 
 	//debug.log('routes.$get = ', routes.$get);
 	//debug.log('routes.$post = ', routes.$post);
 	//debug.log('routes.$del = ', routes.$del);
+	//debug.log('routes.$use = ', routes.$use);
 
+	// Remove other handlers for any $use routes
+	ARRAY(Object.keys(routes.$use)).forEach(function app_builder_routes_foreach(route) {
+		ARRAY(['$get', '$post', '$del']).forEach(function(method) {
+			if(routes[method].hasOwnProperty(route)) {
+				delete routes[method][route];
+			}
+		});
+	});
+
+	// 
 	ARRAY(Object.keys(routes)).forEach(function app_builder_foreach_route_keys(type) {
+
+		debug.log('Method ' + type + ' has ' + Object.keys(routes[type]).length + ' routes');
+
 		ARRAY(Object.keys(routes[type])).forEach(function app_builder_foreach_type_keys(route) {
 			var path = '/';
 			if(route !== "index") {
 				path += route;
 			}
+			if(type === '$use') {
+				debug.log('Added USE route for '+ path);
+				app.use(path, urlencoded_parser, json_parser, route_builder(routes.$use[route](opts)) );
+				return;
+			}
 			if(type === '$get') {
 				debug.log('Added GET route for '+ path);
 				app.get(path, route_builder(routes.$get[route](opts)) );
-			} else if(type === '$post') {
+				return;
+			}
+			if(type === '$post') {
 				debug.log('Added POST route for '+ path);
 				app.post(path, urlencoded_parser, json_parser, route_builder(routes.$post[route](opts)) );
-			} else if(type === '$del') {
+				return;
+			}
+			if(type === '$del') {
 				debug.log('Added DELETE route for '+ path);
-				app.del(path, urlencoded_parser, json_parser, route_builder(routes.$del[route](opts)) );
+				app.delete(path, urlencoded_parser, json_parser, route_builder(routes.$del[route](opts)) );
+				return;
 			}
 		});
 	});
+
+	debug.log('app_builder() finished');
 
 	return app;
 }

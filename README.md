@@ -79,6 +79,14 @@ export PORT='8080'
 nor-nopg init
 ```
 
+#### Create admin user
+
+```
+nor-app-useradd --email='demo@example.com'
+```
+
+Write down the password, you need it to login :)
+
 #### Start the server
 
 ```
@@ -118,7 +126,7 @@ with a command `npm start` and stop it `npm stop`.
 
 ### After installation
 
-Open your browser at http://localhost:3000 -- username is `demo` and the password `demo`
+Open your browser at http://localhost:3000 and login
 
 ... and design your database in the browser...
 

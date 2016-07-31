@@ -36,6 +36,9 @@ function app_builder(opts) {
 	api_opts.documents = opts.documents;
 	api_opts.pg = opts.pg;
 
+	var passport = require('nor-passport');
+	passport.setup({'pg': opts.pg});
+
 	var NoPgStore = require('nor-nopg-store');
 
 	var app = express();
@@ -43,6 +46,9 @@ function app_builder(opts) {
 	var session_config = opts.session || {};
 	session_config.store = new NoPgStore({"pg": opts.pg});
 	app.use(session(session_config));
+
+	app.use(passport.initialize());
+	app.use(passport.session());
 
 	var api = api_builder(api_opts);
 

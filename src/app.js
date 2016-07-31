@@ -8,7 +8,7 @@ var SESSION_SECRET = process.env.SESSION_SECRET || 'YmLV90WXHaLynw';
 var PGCONFIG = process.env.PGCONFIG || undefined;
 
 // FIXME: read possible default routes from filesystem, maybe?
-var routes = ['index', 'database', 'login', 'logout'];
+var routes = ['index', 'database', 'auth'];
 if(process.env.APPROUTES) {
 	routes = process.env.APPROUTES.split(',');
 }

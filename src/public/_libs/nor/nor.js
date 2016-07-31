@@ -484,8 +484,7 @@ norApp.directive('norForm', function() {
 			$scope.submit = function() {
 				$log.debug("form submit called: ", $scope.data );
 
-				var path = $location.path();
-
+				var path = $scope.model.$target || $location.path();
 				norRouter.post(path, $scope.data).then(function(data) {
 					$log.debug('data = ', data);
 					//norRouter.reset();

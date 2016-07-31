@@ -30,13 +30,37 @@ function api_builder(opts) {
 			return routes_tr.getRoute(req.url).then(function(route) {
 
 				var user;
-				if(req.session && (req.session.user !== undefined)) {
-					user = req.session.user;
+				if(req && (req.user !== undefined)) {
+					user = req.user;
 				}
 
 				var url = req.url;
 				if( (url.length >= 1) && (url[0]==='/')) {
 					url = url.slice(1);
+				}
+
+				var logged_in = req && req.user ? true : false;
+
+				var menu = routes.filter(function(route_name) {
+					if(route_name === "index") {
+						return false;
+					}
+					if(route_name === "auth") {
+						return false;
+					}
+					if(logged_in) {
+						return true;
+					}
+				}).map(function(route_name) {
+					return {'$ref': ref(req, base_path, route_name), 'href':'/'+route_name, 'title': get_title(route_name)};
+				});
+
+				if(routes.indexOf('auth') >= 0) {
+					if(logged_in) {
+						menu.push({'$ref': ref(req, base_path, 'auth/logout'), 'href':'/auth/logout', 'title': 'Logout', 'icon':'sign-out'});
+					} else {
+						menu.push({'$ref': ref(req, base_path, 'auth'), 'href':'/auth', 'title': 'Login', 'icon':'sign-in'});
+					}
 				}
 
 				return {
@@ -46,28 +70,7 @@ function api_builder(opts) {
 					'$route': Routes.prepareRoute(req, route),
 					'$app': {
 						'name': opts && opts.$parent && opts.$parent.name || 'unnamed-app',
-						'menu': routes.filter(function(route_name) {
-
-							var logged_in = req.session && req.session.user ? true : false;
-
-							if(route_name === "index") {
-								return false;
-							}
-
-							if(logged_in) {
-								if(route_name === "login") {
-									return false;
-								}
-								return true;
-							} else {
-								if(route_name === "login") {
-									return true;
-								}
-							}
-
-						}).map(function(route_name) {
-							return {'$ref': ref(req, base_path, route_name), 'href':'/'+route_name, 'title': get_title(route_name)};
-						})
+						'menu': menu
 					},
 					'title': route.title || 'Resource ' + req.url,
 					'content': ''
