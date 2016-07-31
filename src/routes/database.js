@@ -124,7 +124,6 @@ function assert_logged_in(req, required_flags) {
 
 	if(required_flags && (required_flags.length >= 0)) {
 		var value = ARRAY(required_flags).some(function(flag) {
-			var value;
 			if(flags.hasOwnProperty(flag)) {
 				return flags[flag] === true;
 			}
@@ -272,7 +271,7 @@ function get_type_handler(opts) {
 
 		assert_logged_in(req, [
 			'admin',
-			'database',
+			'database_types',
 			'database_types_'+type
 		]);
 
@@ -378,7 +377,6 @@ function get_doc_handler(opts) {
 
 		assert_logged_in(req, [
 			'admin',
-			'database',
 			'database_types_'+type,
 			'database_types_'+type+'_documents'
 		]);
@@ -435,7 +433,6 @@ function get_docs_handler(opts) {
 
 		assert_logged_in(req, [
 			'admin',
-			'database',
 			'database_types_'+type,
 			'database_types_'+type+'_documents'
 		]);
@@ -575,7 +572,7 @@ function post_type_handler(opts) {
 
 		assert_logged_in(req, [
 			'admin',
-			'database_update_type'
+			'database_update_type',
 			'database_types_'+type+'_update_type'
 		]);
 
@@ -628,7 +625,7 @@ function del_type_handler(opts) {
 
 		assert_logged_in(req, [
 			'admin',
-			'database_delete_type'
+			'database_delete_type',
 			'database_types_'+type+'_delete_type'
 		]);
 

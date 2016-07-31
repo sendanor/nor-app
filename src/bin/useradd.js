@@ -9,7 +9,6 @@ var debug = require('nor-debug');
 var comname = __filename || 'nopg-adduser';
 var NoPg = require('nor-nopg');
 var path = require('path');
-var util = require('util');
 var crypt = require('crypt3/q');
 var Q = require('q');
 var PGCONFIG;
