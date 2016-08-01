@@ -39,7 +39,7 @@ function app_builder(opts) {
 	var passport = require('nor-passport');
 	passport.setup({'pg': opts.pg});
 
-	var NoPgStore = require('nor-nopg-store');
+	var NoPgStore = require('nor-nopg-store')(session);
 
 	var app = express();
 

@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "node-lint src/ --config=lint.json",
-    "jshint": "jshint src/"
+    "jshint": "jshint src/",
+    "start": "src/bin/nor-app.js start",
+    "stop": "src/bin/nor-app.js stop"
   },
   "bin": {
     "nor-app": "./src/bin/nor-app.js",
@@ -29,8 +31,8 @@
     "bootstrap": "^3.3.7",
     "datatables.net": "^1.10.12",
     "datatables.net-dt": "^1.10.12",
-    "express": "^4.13.4",
-    "express-session": "^1.13.0",
+    "express": "^4.14.0",
+    "express-session": "^1.14.0",
     "font-awesome": "^4.6.3",
     "jquery": "^2.2.4",
     "karma-cli": "^1.0.1",
@@ -43,7 +45,7 @@
     "nor-debug": "^1.0.0",
     "nor-is": "^1.0.0",
     "nor-nopg": "^1.0.0",
-    "nor-nopg-store": "^1.0.0",
+    "nor-nopg-store": "^1.0.2",
     "nor-ref": "^1.0.0",
     "nor-express": "^1.0.0",
     "nor-passport": "^1.0.0",
