@@ -83,6 +83,16 @@ export PORT='8080'
 nor-nopg init
 ```
 
+#### Start the server
+
+```
+nor-app start
+```
+
+Check the logs at `~/.nor-app/logs/myapp/`. 
+
+If there's any problems, just [create an issue](https://github.com/sendanor/nor-app/issues).
+
 #### Create admin user
 
 ```
@@ -90,12 +100,6 @@ nor-app-useradd --email='demo@example.com'
 ```
 
 Write down the password, you need it to login :)
-
-#### Start the server
-
-```
-nor-app start
-```
 
 #### Installing as a dependency
 

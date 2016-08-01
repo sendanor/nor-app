@@ -2,6 +2,7 @@
 "use strict";
 
 // Dependencies
+var PATH = require('path');
 var debug = require('nor-debug');
 var express = require('express');
 var session = require('express-session');
@@ -60,7 +61,7 @@ function app_builder(opts) {
 	}));
 
 	// Serve static files
-	app.use(express.static(__dirname + '/public'));
+	app.use(express.static( PATH.resolve(__dirname, 'public') ));
 
 	// Serve API application
 	app.use('/api', api);
@@ -68,7 +69,7 @@ function app_builder(opts) {
 	// Enable serving our Angular App for each route
 	opts.routes.forEach(function(route) {
 		app.use('/'+route, function(req, res) {
-			res.sendFile(__dirname + '/public/index.html');
+			res.sendFile( PATH.resolve(__dirname, 'public/index.html') );
 		});
 	});
 
