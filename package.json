@@ -43,6 +43,7 @@
     "nor-debug": "^1.0.0",
     "nor-is": "^1.0.0",
     "nor-nopg": "^1.0.0",
+    "nor-nopg-store": "^1.0.0",
     "nor-ref": "^1.0.0",
     "nor-express": "^1.0.0",
     "nor-passport": "^1.0.0",
