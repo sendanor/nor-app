@@ -8,7 +8,8 @@
     "lint": "node-lint src/ --config=lint.json",
     "jshint": "jshint src/",
     "start": "src/bin/nor-app.js start",
-    "stop": "src/bin/nor-app.js stop"
+    "stop": "src/bin/nor-app.js stop",
+    "build": "./scripts/install-symlinks.sh"
   },
   "bin": {
     "nor-app": "./src/bin/nor-app.js",
