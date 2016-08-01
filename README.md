@@ -11,6 +11,10 @@ PostgreSQL database server.
 * Web interface to create, search, edit and delete documents
 * Maintains a hypermedia JSON REST API for the data
 
+### See also
+
+* [nopg](https://github.com/sendanor/nor-nopg-cli) -- Shell scripting CLI for nor-nopg
+
 ### Requirements
 
 * Ubuntu Linux LTS 14.04 (other Linux systems probably work, too)
