@@ -25,6 +25,7 @@
     "nosql",
     "nopg",
     "postgresql",
+    "http",
     "node",
     "pg",
     "rest",
