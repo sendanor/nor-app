@@ -6,6 +6,7 @@ var debug = require('nor-debug');
 //var express = require('express');
 var ref = require('nor-ref');
 var Routes = require('../lib/nopg/Routes.js');
+var Users = require('../lib/nopg/Users.js');
 var nopg = require('nor-nopg');
 
 /** Returns title of route */
@@ -39,7 +40,7 @@ function api_builder(opts) {
 					url = url.slice(1);
 				}
 
-				var logged_in = req && req.user ? true : false;
+				var logged_in = user ? true : false;
 
 				var menu = routes.filter(function(route_name) {
 					if(route_name === "index") {
@@ -66,7 +67,7 @@ function api_builder(opts) {
 				return {
 					'$ref': ref(req, base_path, url),
 					'$resource': url,
-					'$user': user,
+					'$user': Users.prepareUser(req, user),
 					'$route': Routes.prepareRoute(req, route),
 					'$app': {
 						'name': opts && opts.$parent && opts.$parent.name || 'unnamed-app',
