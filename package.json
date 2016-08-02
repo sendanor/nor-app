@@ -1,7 +1,7 @@
 {
   "name": "nor-app",
   "version": "1.0.8",
-  "description": "Sendanor App Framework",
+  "description": "Sendanor Hypermedia App Server",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -21,6 +21,18 @@
   },
   "author": "Jaakko-Heikki Heusala <jhh@sendanor.com>",
   "license": "MIT",
+  "keywords": [
+    "nosql",
+    "nopg",
+    "postgresql",
+    "node",
+    "pg",
+    "rest",
+    "api",
+    "json",
+    "jsonschema",
+    "client"
+  ],
   "dependencies": {
     "ace-builds": "^1.2.2",
     "angular": "^1.5.6",

@@ -2,7 +2,7 @@ nor-app -- Hypermedia App Server
 ================================
 
 `nor-app` provides a HTTP interface in to a [nor-nopg 
-database](https://github.com/sendanor/nor-nopg) -- noSQL features in a 
+database](https://github.com/sendanor/nor-nopg) -- which provides noSQL features in a 
 PostgreSQL database server.
 
 ### Features
