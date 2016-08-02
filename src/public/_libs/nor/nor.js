@@ -249,6 +249,7 @@ norApp.directive('norLink', function() {
 			link: '=?',
 			ref: '=?',
 			icon: '=?',
+			target: '=?',
 			classes: '@?class'
 		},
 		controller: ['$scope', 'norRouter', function($scope, norRouter) {
@@ -260,6 +261,13 @@ norApp.directive('norLink', function() {
 				if($scope.link.icon && (!$scope.icon)) {
 					$scope.icon = $scope.link.icon;
 				}
+				if($scope.link.target && (!$scope.target)) {
+					$scope.target = $scope.link.target;
+				}
+			}
+
+			if(!$scope.target) {
+				$scope.target = 'hypermedia';
 			}
 
 			$scope.parsePathName = parse_path_name;
@@ -271,7 +279,8 @@ norApp.directive('norLink', function() {
 			};
 
 		}],
-		template: '<a href="{{parsePathName(ref)}}" ng-click="go(ref)" ng-class="classes"><i class="fa fa-{{icon}}" aria-hidden="true" ng-if="icon"></i> <ng-transclude></ng-transclude></a>'
+		template: '<a ng-if="target === \'hypermedia\'" href="{{parsePathName(ref)}}" ng-click="go(ref)" ng-class="classes"><i class="fa fa-{{icon}}" aria-hidden="true" ng-if="icon"></i> <ng-transclude></ng-transclude></a>'+
+			'<a ng-if="target !== \'hypermedia\'" href="{{ref}}" target="{{target}}" ng-class="classes"><i class="fa fa-{{icon}}" aria-hidden="true" ng-if="icon"></i> <ng-transclude></ng-transclude></a>'
 	};
 });
 

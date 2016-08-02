@@ -28,6 +28,15 @@ function route_builder(f) {
 			return f(req, res);
 		}).then(function route_builder_req_handler_2(body) {
 
+			// If user has already sent something, we'll ignore the body.
+			if(res.headerSent) {
+				if(body !== undefined) {
+					debug.warn('Headers were already sent. Ignoring the body.');
+				}
+				return;
+			}
+
+			// We'll also ignore the body if user didn't submit any data.
 			if(body === undefined) {
 				return;
 			}

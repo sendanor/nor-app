@@ -2,12 +2,14 @@
 "use strict";
 
 // Dependencies
+var norUtils = require('nopg/src/norUtils.js');
 var HTTPError = require('nor-express/src/HTTPError.js');
 var ARRAY = require('nor-array');
 var debug = require('nor-debug');
 var ref = require('nor-ref');
 var nopg = require('nor-nopg');
 var URL = require('url');
+var CSV = require('nor-csv');
 var _Q = require('q');
 
 /** Default limit of data in a collection searches */
@@ -450,23 +452,34 @@ function get_docs_handler(opts) {
 		search_opts.order = ['$created'];
 
 		var limit = DEFAULT_SEARCH_LIMIT;
+		if(opts.disableDefaultSearchLimit === true) {
+			limit = 0; // 0 means no limit
+		}
 		if(query.hasOwnProperty('_limit')) {
 			limit = parse_integer(query._limit) || DEFAULT_SEARCH_LIMIT;
 			delete query._limit;
+			if(limit < 1) {
+				limit = 1;
+			}
+		}
+		if(opts.disableMaxSearchLimit !== true) {
 			if(limit > MAX_SEARCH_LIMIT) {
 				limit = MAX_SEARCH_LIMIT;
 			}
 		}
-		search_opts.limit = limit;
 
-		var offset = 0;
-		if(query.hasOwnProperty('_offset')) {
-			offset = parse_integer(query._offset) || 0;
-			delete query._offset;
+		if(limit >= 1) {
+			search_opts.limit = limit;
+
+			var offset = 0;
+			if(query.hasOwnProperty('_offset')) {
+				offset = parse_integer(query._offset) || 0;
+				delete query._offset;
+			}
+			search_opts.offset = offset;
+
+			debug.log('search_opts.limit = ', search_opts.limit, ' type of ', typeof search_opts.limit);
 		}
-		search_opts.offset = offset;
-
-		debug.log('search_opts.limit = ', search_opts.limit, ' type of ', typeof search_opts.limit);
 
 		var where;
 
@@ -498,11 +511,82 @@ function get_docs_handler(opts) {
 								'$ref': ref(req, 'api/database/types', type_obj.$name),
 								'title': 'Type '+type_obj.$name,
 								'icon': 'file-o'
+							},
+							{
+								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export'),
+								'title': 'Export all',
+								'target': '_self',
+								'icon': 'cloud-download'
 							}
 						]
 					};
 				});
 			});
+		});
+	};
+}
+
+/** Export documents as csv
+ * @returns `function(req, res)` which uses promises
+ */
+function export_docs_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+
+	var get_docs_opts = JSON.parse(JSON.stringify(opts));
+	get_docs_opts.disableDefaultSearchLimit = true;
+	get_docs_opts.disableMaxSearchLimit = true;
+
+	var get_docs = get_docs_handler(get_docs_opts);
+	return function export_docs_handler_(req, res) {
+		if(req.method !== 'GET') {
+			throw new HTTPError(405);
+		}
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		return _Q.when(get_docs(req, res)).then(function export_docs_handler__(body) {
+			debug.log('body = ', body);
+
+			debug.assert(body).is('object');
+
+			var content = body.content;
+			debug.assert(content).is('array');
+
+			var keys = norUtils.getKeys(content);
+			var data = [];
+
+			// Add header
+			data.push( ARRAY(keys).map(function(key) {
+				return ''+key;
+			}).valueOf() );
+
+			// Add data
+			ARRAY(content).forEach(function(obj) {
+				var result = {};
+				var paths = norUtils.getPathsFromData(obj);
+				ARRAY(paths).forEach(function(path) {
+					var key = path.join('.');
+					var value = norUtils.getDataFromPath(obj, path);
+					result[key] = value;
+				});
+
+				data.push( ARRAY(keys).map(function(key) {
+					return ''+result[key];
+				}).valueOf() );
+			});
+
+			var csv = CSV.stringify(data);
+			debug.assert(csv).is('string');
+
+			res.setHeader('Content-disposition', 'attachment; filename='+type+'-documents.csv');
+			res.set('Content-Type', 'text/csv');
+			res.status(200);
+			res.send(csv);
 		});
 	};
 }
@@ -869,6 +953,9 @@ module.exports = {
 			'$del': del_type_handler,
 			'search': {
 				'$get': get_docs_handler
+			},
+			'export': {
+				'$use': export_docs_handler
 			},
 			'delete': {
 				'$get': get_del_type_form,
