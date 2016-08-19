@@ -1,8 +1,8 @@
 "use strict";
 
 var debug = require('nor-debug');
-var PATH = require('path');
-var URL = require('url');
+//var PATH = require('path');
+//var URL = require('url');
 var ref = require('nor-ref');
 var ARRAY = require('nor-array');
 

@@ -60,18 +60,25 @@ function app_builder(opts) {
 		}
 	}));
 
-	// Serve static files
-	app.use(express.static( PATH.resolve(__dirname, 'public') ));
-
 	// Serve API application
 	app.use('/api', api);
 
 	// Enable serving our Angular App for each route
 	opts.routes.forEach(function(route) {
-		app.use('/'+route, function(req, res) {
-			res.sendFile( PATH.resolve(__dirname, 'public/index.html') );
+		app.get('/'+route, function(req, res) {
+			res.sendFile( PATH.resolve(__dirname, 'nor/layout/index.html') );
 		});
+		if(route === "index") {
+			app.get('/', function(req, res) {
+				res.redirect('/index');
+			});
+		}
 	});
+
+
+	// Serve static files
+	app.use(express.static( PATH.resolve(__dirname, './public') ));
+	app.use(express.static( PATH.resolve(__dirname, './../build') ));
 
 	return app;
 }

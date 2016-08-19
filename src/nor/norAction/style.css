@@ -1,0 +1,14 @@
+#content .nor-action {
+	display: inline-block;
+	margin-left: 0.5em;
+
+	a:hover {
+		font-weight: bold;
+		color: #ff0000;
+	}
+
+	.safety-off {
+		font-weight: bold;
+	}
+
+}

@@ -1,10 +1,12 @@
 <div class="nor-record">
 
-	<div ng-if="missing_schemas" class="missing-schemas">
+	<div ng-if="type && type.$ref && missing_schemas" class="missing-schemas">
 		This data has missing JSON Schema settings.<br />
 		<br />
 		<a title="Schema missing -- click here to create" href="#" ng-click="detectMissingSettings()">
 			<i class="fa fa-chain-broken" aria-hidden="true"></i> Automatically detect missing settings</a>
+		<br />
+		<br />
 	</div>
 
 	<table class="row-border hover">

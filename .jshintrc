@@ -19,5 +19,5 @@
 	"undef": true,
 	"unused": true,
 	"strict": true,
-    "predef": [ "angular" ]
+    "predef": [ ]
 }

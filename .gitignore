@@ -13,3 +13,5 @@ src/public/_libs/purecss
 src/public/_libs/tv4
 node_modules
 *.log
+build
+old

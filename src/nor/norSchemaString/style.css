@@ -1,0 +1,35 @@
+/* norSchemaString */
+
+#content .nor-schema-string {
+
+	.nor-schema-documents-type {
+		background-color: #f0f0ff;
+		border-top: 1px solid #e0e0e0;
+		border-right: 1px solid #e0e0e0;
+		padding: 1em;
+		text-align: center;
+	}
+
+	.nor-schema-documents {
+		background-color: #f0fff0;
+		border-top: 1px solid #e0e0e0;
+		padding: 1em;
+		text-align: center;
+	}
+
+	.nor-schema-documents .fields {
+		margin: 0.25em;
+	}
+
+	.nor-schema-documents .fields .field {
+		margin: 0.25em;
+		padding: 0.25em;
+		border: 1px solid transparent;
+	}
+
+	.nor-schema-documents .fields .field-selected {
+		background-color: #fff0f0;
+		border: 1px solid #ff0000;
+	}
+
+}

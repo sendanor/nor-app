@@ -1,0 +1,20 @@
+/* norEditableContent */
+
+#content .nor-editable-content {
+
+	.nor-editable-value input {
+		width: 90%;
+	}
+
+	.nor-editable-icon a {
+		float:right;
+		color: #909090;
+		padding: 0 0.2em;
+	}
+
+	.nor-editable-icon a:hover {
+		color: #337ab7;
+		font-weight: bold;
+	}
+
+}

@@ -1,0 +1,29 @@
+/* norTable */
+#content .nor-table {
+
+	table {
+		width: 100%;
+	}
+
+	th {
+		border-bottom: 1px solid #e0e0e0;
+	}
+
+	td, 
+	th {
+		white-space: nowrap;
+		word-wrap: normal;
+		padding: 0.5em;
+	}
+
+	.results {
+		border-top: 1px solid #e0e0e0;
+		text-align: center;
+		padding-top: 2em;
+	}
+
+	.results-rows {
+		margin-right: 6em;
+	}
+
+}

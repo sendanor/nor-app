@@ -59,7 +59,15 @@ function initialize_types(tr, docs) {
 
 /** Prepare types for publification */
 function prepare_type(req, type) {
-	var tmp = JSON.parse(JSON.stringify(type));
+	debug.assert(req).is('object');
+	debug.assert(type).is('object').instanceOf(nopg.Type);
+	var tmp;
+	try {
+		tmp = JSON.parse(JSON.stringify(type));
+	} catch(e) {
+		debug.log('Failed to copy: ', type);
+		throw e;
+	}
 	var meta = tmp.$meta;
 	delete tmp.$events;
 	delete tmp.$meta;

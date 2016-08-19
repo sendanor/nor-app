@@ -8,7 +8,7 @@ var passport = require('nor-passport');
 var ref = require('nor-ref');
 
 /** Do logout */
-function do_logout(opts) {
+function do_logout(/*opts*/) {
 	return function do_logout_(req, res) {
 		req.logout();
 		res.redirect( ref(req, 'api/auth') );
@@ -16,7 +16,7 @@ function do_logout(opts) {
 }
 
 /** */
-function get_auth_status(opts) {
+function get_auth_status(/*opts*/) {
 	return function get_auth_status_(req/*, res*/) {
 		debug.log('get_auth_status()');
 		var result = {};
@@ -41,7 +41,7 @@ function get_auth_status(opts) {
 }
 
 /** */
-function do_passport_local(opts) {
+function do_passport_local(/*opts*/) {
 	return function do_passport_local_(req, res) {
 		debug.log('do_passport_local()');
 		return passport.authenticate('local', {
@@ -72,7 +72,7 @@ var ref = require('nor-ref');
 /** Errors */
 routes.errors = {};
 
-routes.errors.$get = function(opts) {
+routes.errors.$get = function(/*opts*/) {
 	return function(req/*, res*/) {
 		return {'$ref': ref(req, 'api/auth/errors') };
 	};
@@ -80,7 +80,7 @@ routes.errors.$get = function(opts) {
 
 /** 401 HTTP error */
 routes.errors['401'] = {
-	$get: function(opts) {
+	$get: function(/*opts*/) {
 		return function(/*req, res*/) {
 			throw new HTTPError(401);
 		};

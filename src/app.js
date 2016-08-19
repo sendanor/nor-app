@@ -13,10 +13,10 @@ if(process.env.APPROUTES) {
 	routes = process.env.APPROUTES.split(',');
 }
 
-var debug = require('nor-debug');
 var express = require('express');
 var nor_app = require('./index.js');
 
+//var debug = require('nor-debug');
 //debug.log('PGCONFIG = ', PGCONFIG);
 
 var base_app = nor_app({
@@ -35,8 +35,6 @@ var app = express();
 app.use(require('morgan')('dev'));
 
 app.use(base_app);
-
-//app.use(express.static(__dirname + '/public'));
 
 app.listen(PORT, function () {
 	console.log(APPNAME + ' listening on port ' + PORT);

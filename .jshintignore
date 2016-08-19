@@ -1,3 +1,5 @@
+src/public/build/app.bundle.js
+src/public/build/vendor.bundle.js
 src/public/_libs/ng-prettyjson
 src/public/_libs/ace
 src/public/_libs/angular

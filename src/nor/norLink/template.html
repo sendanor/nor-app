@@ -1,0 +1,6 @@
+<a ng-if="target === 'hypermedia'" href="{{parsePathName(ref)}}" ng-click="go(ref)" ng-class="classes">
+  <i class="fa fa-{{icon}}" aria-hidden="true" ng-if="icon"></i> <ng-transclude></ng-transclude>
+</a>
+<a ng-if="target !== 'hypermedia'" href="{{ref}}" target="{{target}}" ng-class="classes">
+  <i class="fa fa-{{icon}}" aria-hidden="true" ng-if="icon"></i> <ng-transclude></ng-transclude>
+</a>

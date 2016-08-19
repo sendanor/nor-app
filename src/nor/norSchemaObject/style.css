@@ -1,0 +1,31 @@
+/* norSchemaObject */
+
+#content .nor-schema-object {
+	background-color: #fcfcfc;
+
+	.actions {
+		margin: 0;
+		padding: 0;
+		text-align: right;
+		clear: both;
+	}
+
+	.nor-schema-properties-container {
+		padding: 1em;
+		border-top: 1px solid #e0e0e0;
+	}
+
+	.nor-schema-additional-properties {
+		margin: 0.5em 1.25em;
+
+		.undefined {
+			color: #999999;
+		}
+
+	}
+
+	.nor-schema-property .nor-schema {
+		margin: 0 0 2em 0;
+	}
+
+}

@@ -1,0 +1,49 @@
+/* norRecord */
+
+#content .nor-record {
+
+	table {
+		border: 1px solid #f0f0f0;
+	}
+
+	thead .key,
+	thead .value {
+		background-color: #d0d0d0;
+	}
+
+	thead tr {
+		border-bottom: 1px solid #d0d0d0;
+	}
+
+	tbody tr {
+		border-bottom: 1px solid #f0f0f0;
+	}
+
+	.key {
+		width: 20%;
+		vertical-align: top;
+		text-align: left;
+		padding: 0.2em 0.4em;
+		border-right: 1px solid #d0d0d0;
+		background-color: #f6f6f6;
+	}
+
+	.value {
+		width: 80%;
+		padding: 0.2em 0.4em;
+		vertical-align: top;
+	}
+
+	.warnings {
+		float: right;
+
+		.data-invalid {
+			color: #990000;
+		}
+	}
+
+	.missing-schemas {
+		margin: 1em;
+	}
+
+} // .nor-record
