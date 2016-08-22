@@ -65,9 +65,12 @@ function app_builder(opts) {
 
 	// Enable serving our Angular App for each route
 	opts.routes.forEach(function(route) {
-		app.get('/'+route, function(req, res) {
+
+		// This needs to be .use() instead of .get() so that sub routes work also!
+		app.use('/'+route, function(req, res) {
 			res.sendFile( PATH.resolve(__dirname, 'nor/layout/index.html') );
 		});
+
 		if(route === "index") {
 			app.get('/', function(req, res) {
 				res.redirect('/index');
