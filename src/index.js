@@ -68,7 +68,7 @@ function app_builder(opts) {
 
 		// This needs to be .use() instead of .get() so that sub routes work also!
 		app.use('/'+route, function(req, res) {
-			res.sendFile( PATH.resolve(__dirname, 'nor/layout/index.html') );
+			res.sendFile( PATH.resolve(__dirname, 'nor/norApp/layouts/default/index.html') );
 		});
 
 		if(route === "index") {

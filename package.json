@@ -9,8 +9,9 @@
     "jshint": "jshint src/",
     "start": "src/bin/nor-app.js start",
     "stop": "src/bin/nor-app.js stop",
-    "build": "webpack",
-    "build-symlinks": "./scripts/install-symlinks.sh"
+    "build": "npm run build-webpack && npm run -s build-externals",
+    "build-webpack": "webpack",
+    "build-externals": "./scripts/build-externals.sh"
   },
   "bin": {
     "nor-app": "./src/bin/nor-app.js",
@@ -37,6 +38,7 @@
   ],
   "dependencies": {
     "body-parser": "^1.15.1",
+    "crypt3": "^1.0.0",
     "express": "^4.14.0",
     "express-session": "^1.14.0",
     "karma-cli": "^1.0.1",
@@ -44,23 +46,23 @@
     "minimist": "^1.2.0",
     "moment": "^2.13.0",
     "morgan": "^1.7.0",
-    "nor-csv": "^1.0.0",
+    "nopg": "^1.1.0",
     "nor-array": "^1.0.0",
+    "nor-csv": "^1.0.0",
     "nor-debug": "^1.0.0",
+    "nor-express": "^1.0.0",
+    "nor-function": "^1.0.0",
     "nor-is": "^1.0.0",
     "nor-nopg": "^1.1.0",
-    "nopg": "^1.1.0",
     "nor-nopg-store": "^1.0.2",
-    "nor-ref": "^1.0.0",
-    "nor-express": "^1.0.0",
     "nor-passport": "^1.0.0",
+    "nor-ref": "^1.0.0",
     "parse-stack": "^0.1.3",
     "pg": "^4.5.6",
     "pm2": "^1.1.3",
     "purecss": "^0.6.0",
-    "tv4": "^1.2.7",
     "q": "^1.4.1",
-    "crypt3": "^1.0.0"
+    "tv4": "^1.2.7"
   },
   "devDependencies": {
     "angular": "^1.5.6",
@@ -70,7 +72,7 @@
     "angular-sanitize": "^1.5.6",
     "angular-ui-router": "^0.3.1",
     "bootstrap": "^3.3.7",
-    "brace": "^0.8.0",
+    "ace-builds": "^1.2.2",
     "chai": "^3.5.0",
     "css-loader": "^0.23.1",
     "datatables.net": "^1.10.12",
