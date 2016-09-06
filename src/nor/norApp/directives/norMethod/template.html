@@ -1,0 +1,16 @@
+<div class="nor-method">
+
+	<div class="nor-method-name-container pure-g">
+		<div class="nor-method-name-label pure-u-1-12">Method</div>
+		<div class="nor-method-name pure-u-11-12" nor-editable-content="content.$name" on-commit="commit(content)">{{content.$name}}</div>
+	</div>
+
+	<div class="nor-method-body-container">
+		<div class="nor-method-body" ng-model="body" ui-ace="bodyOptions" ng-style="{'height': ''+bodyHeight+'px'}"></div>
+	</div>
+
+	<div class="publish-button-container" ng-if="content.body != content.$body">
+		<button ng-click="publish()"><i class="fa fa-floppy-o" aria-hidden="true"></i> Publish changes</button>
+	</div>
+
+</div>

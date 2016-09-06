@@ -13,7 +13,8 @@ var angular = require("angular");
 var app = module.exports = angular.module('norApp', [
 	'datatables',
 	'ngPrettyJson',
-	'ngRoute'
+	'ngRoute',
+	'ui.ace'
 ]);
 
 app.config(function($locationProvider) {

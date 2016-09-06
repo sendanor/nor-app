@@ -24,7 +24,7 @@ module.exports = function norSchemaArray_directive() {
 
 			/** Path from root object to this value as an array */
 			$scope.path = ($scope.path && $scope.path()) || [];
-			debug.log('path = ', $scope.path);
+			//debug.log('path = ', $scope.path);
 
 			$scope.key = $scope.key || undefined;
 

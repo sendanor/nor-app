@@ -18,3 +18,4 @@ app.directive('norSchemaCustom', require('./norSchemaCustom/directive.js'));
 app.directive('norSelect', require('./norSelect/directive.js'));
 app.directive('norTable', require('./norTable/directive.js'));
 app.directive('norType', require('./norType/directive.js'));
+app.directive('norMethod', require('./norMethod/directive.js'));

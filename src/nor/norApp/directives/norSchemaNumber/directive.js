@@ -24,7 +24,7 @@ module.exports = function nor_schema_number_directive() {
 
 			/** Path from root object to this value as an array */
 			$scope.path = ($scope.path && $scope.path()) || [];
-			debug.log('path = ', $scope.path);
+			//debug.log('path = ', $scope.path);
 
 			/** Action to do on commit */
 			$scope.commit = function(value) {

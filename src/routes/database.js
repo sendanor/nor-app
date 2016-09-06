@@ -81,9 +81,38 @@ function prepare_type(req, type) {
 	return tmp;
 }
 
+/** Prepare methods for publification */
+function prepare_method(req, method) {
+	debug.assert(req).is('object');
+	debug.assert(method).is('object').instanceOf(nopg.Method);
+	var tmp;
+	try {
+		tmp = JSON.parse(JSON.stringify(method));
+	} catch(e) {
+		debug.log('Failed to copy: ', method);
+		throw e;
+	}
+	var meta = tmp.$meta;
+	delete tmp.$events;
+	delete tmp.$meta;
+	// FIXME: This api/database/methods should use configuration paths
+	tmp.$ref = ref(req, 'api/database/types', method.$type, 'methods', tmp.$name);
+	if(meta) {
+		ARRAY(Object.keys(meta)).forEach(function(key) {
+			tmp[key] = meta[key];
+		});
+	}
+	return tmp;
+}
+
 /** Prepare types for publification */
 function prepare_types(req, types) {
 	return ARRAY(types).map(prepare_type.bind(undefined, req)).valueOf();
+}
+
+/** Prepare methods for publification */
+function prepare_methods(req, methods) {
+	return ARRAY(methods).map(prepare_method.bind(undefined, req)).valueOf();
 }
 
 /** Prepare document for publification */
@@ -286,11 +315,12 @@ function get_type_handler(opts) {
 		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchTypes({'$name': type}).then(function(tr) {
+			return tr.searchTypes({'$name': type}).searchMethods(type)({'$active': true}).then(function(tr) {
 				var types = tr.fetch();
 				var type = types.shift();
-
 				if(!type) { throw new HTTPError(404); }
+
+				var methods = tr.fetch() || [];
 
 				// FIXME: This api/database/:name/items should use configuration paths
 
@@ -315,7 +345,11 @@ function get_type_handler(opts) {
 							'title': 'Delete this type',
 							'icon': 'trash-o'
 						}
-					]
+					],
+					'methods': {
+						'$ref': ref(req, 'api/database/types', type.$name, 'methods'),
+						'content': prepare_methods(req, methods)
+					}
 				};
 			});
 		});
@@ -345,7 +379,7 @@ function get_del_doc_form(opts) {
 		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchTypes({'$name':type}).search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
+			return tr.searchTypes({'$name':type}).initDocumentBuilder(type)().search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
 
 				var type_obj = tr.fetchSingle();
 				debug.assert(type_obj).is('object');
@@ -392,7 +426,7 @@ function get_doc_handler(opts) {
 		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchTypes({'$name':type}).search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
+			return tr.searchTypes({'$name':type}).initDocumentBuilder(type)().search(type)({'$id':id}, {'typeAwareness':true}).then(function(tr) {
 
 				var type_obj = tr.fetchSingle();
 				debug.assert(type_obj).is('object');
@@ -501,7 +535,7 @@ function get_docs_handler(opts) {
 				debug.assert(properties).is('object');
 				var columns = ['$id'].concat(Object.keys(properties)).concat(['$created', '$modified']);
 				//debug.log('search_opts.limit = ', search_opts.limit, ' type of ', typeof search_opts.limit);
-				return tr.count(type)(where).search(type)(where, search_opts).then(function(tr) {
+				return tr.count(type)(where).initDocumentBuilder(type)().search(type)(where, search_opts).then(function(tr) {
 					var count = tr.fetch();
 					var docs = tr.fetch();
 					//debug.log('type of limit: ', typeof search_opts.limit);
@@ -945,6 +979,253 @@ function del_doc_handler(opts) {
 	};
 }
 
+/** Get methods by type
+ * @returns `function(req, res)` which uses promises
+ */
+function get_methods_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_types_'+type,
+			'database_types_'+type+'_methods'
+		]);
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchMethods(type)({'$active': true}).then(function(tr) {
+				var methods = tr.fetch();
+				debug.assert(methods).is('array');
+
+				return {
+					'title': 'Methods for '+type,
+				//	'type': prepare_type(req, type_obj),
+					'$type': 'table',
+					'content': prepare_methods(req, methods),
+					'links': [
+						/*
+						{
+							'$ref': ref(req, 'api/database/types', type),
+							'title': 'Type '+type,
+							'icon': 'file-o'
+						}
+						*/
+					]
+				};
+
+			});
+		});
+	};
+}
+
+/** Create a new method
+ * @returns `function(req, res)` which uses promises
+ */
+function post_methods_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_create_method',
+			'database_types_'+type+'_create_method'
+		]);
+
+		var data = req.body || {};
+		debug.log('data = ', data);
+
+		debug.assert(data).is('object');
+		debug.assert(data.content).is('object');
+		var content = data.content;
+		debug.assert(content.$name).is('string');
+		debug.assert(content.$body).is('string');
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.declareMethod(type)(content.$name, content.$body).then(function(tr) {
+				var obj = tr.fetch();
+				return {
+					'title': 'Created a method',
+					'$status': 303,
+					'$type': 'redirect',
+					'content': prepare_method(req, obj),
+					'$ref': ref(req, 'api/database/types', obj.$type, 'methods', obj.$name)
+				};
+			});
+		});
+
+	};
+}
+
+/** Get single method
+ * @returns `function(req, res)` which uses promises
+ */
+function get_method_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+		var type = params.type;
+		var name = params.name;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_types_'+type,
+			'database_types_'+type+'_methods'
+		]);
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchMethods(type)({'$name':name, '$active':true}).then(function(tr) {
+				var methods = tr.fetch();
+				var method = methods.shift();
+				if(!method) { throw new HTTPError(404); }
+
+				return {
+					'title': 'Method ' +method.$type + '.' + method.$name,
+					'$type': 'Method',
+					'content': prepare_method(req, method),
+					'links': [
+					/*
+						{
+							'$ref': ref(req, 'api/database/types', method.$type, 'search'),
+							'title': 'Search methods',
+							'icon': 'search'
+						},
+						{
+							'$ref': ref(req, 'api/database/types', method.$type, 'methods', method.$name, 'delete'),
+							'title': 'Delete this method',
+							'icon': 'trash-o'
+						}
+					*/
+					]
+				};
+			});
+		});
+	};
+}
+
+/** Update a method
+ * @returns `function(req, res)` which uses promises
+ */
+function post_method_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_update_method',
+			'database_types_'+type+'_update_method'
+		]);
+
+		var name = params.name;
+		debug.assert(name).is('string');
+
+		var body = req.body || {};
+		debug.log('body = ', body);
+		debug.assert(body).is('object');
+
+		var data = body.content || {};
+		debug.assert(data).is('object');
+
+		Object.keys(data).forEach(function(key) {
+			if(key === '$body') {
+				return;
+			}
+			if(key.charAt(0) === '$') {
+				delete data[key];
+			}
+		});
+
+		debug.log('data = ', data);
+
+		debug.assert(data.$body).is('string');
+		var body = data.$body;
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchMethods(type)({'$name':name, '$active': true}).then(function(tr) {
+				var methods = tr.fetch();
+				debug.assert(methods).is('array').length(1);
+				var method = methods.shift();
+				return tr.declareMethod(type)(method.$name, body, data);
+			}).then(function(tr) {
+				var obj = tr.fetch();
+				return {
+					'title': 'Updated a method',
+					'$status': 303,
+					'$type': 'redirect',
+					'content': prepare_method(req, obj),
+					'$ref': ref(req, 'api/database/types', obj.$type, 'methods', obj.$name)
+				};
+			});
+		});
+
+	};
+}
+
+/** Delete a method
+ * @returns `function(req, res)` which uses promises
+ */
+function del_method_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_delete_method',
+			'database_types_'+type+'_delete_method'
+		]);
+
+		var name = params.name;
+		debug.assert(name).is('string');
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.getMethod(type)(name).then(function(tr) {
+				var obj = tr.fetch();
+				return tr.deleteMethod(type)(name).then(function() {
+					return {
+						'title': 'Deleted a method',
+						'$type': 'Method',
+						'content': prepare_method(req, obj)
+					};
+				});
+			});
+		});
+
+	};
+}
+
 // Exports
 module.exports = {
 	'$get': get_types_handler,
@@ -985,6 +1266,22 @@ module.exports = {
 						'$get': get_del_doc_form,
 						'$post': del_doc_handler,
 						'$del': del_doc_handler
+					},
+				}
+			},
+			'methods': {
+				'$get': get_methods_handler,
+				'$post': post_methods_handler,
+				'create': {
+					'$post': post_methods_handler
+				},
+				':name': {
+					'$get': get_method_handler,
+					'$post': post_method_handler,
+					'$del': del_method_handler,
+					'delete': {
+						'$post': del_method_handler,
+						'$del': del_method_handler
 					},
 				}
 			}

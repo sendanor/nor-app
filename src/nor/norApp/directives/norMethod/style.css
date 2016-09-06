@@ -1,0 +1,42 @@
+.nor-method {
+	border: 1px solid #e0e0e0;
+	margin-bottom: 1em;
+
+	.nor-method-name-container {
+
+		margin: 1em;
+		border: 1px solid #e0e0e0;
+
+		.nor-method-name-label {
+			border-right: 1px solid #e0e0e0;
+			text-align: right;
+			padding-right: 1em;
+			background-color: #fafafa;
+
+			h3 {
+				font-size: 1.25em;
+				margin: 0;
+				padding: 0;
+			}
+		}
+
+		.nor-method-name {
+			padding-left: 1em;
+		}
+
+	}
+
+	.nor-method-body-container {
+		margin: 1em;
+	}
+
+	.nor-method-body {
+		/*height: 200px;*/
+		/*height: auto !important;*/
+	}
+
+	.publish-button-container {
+		margin: 0.5em 1em;
+	}
+
+}

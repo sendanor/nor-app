@@ -5,7 +5,7 @@ mkdir -p build/_libs
 
 cd build/_libs
 
-test ! -e ace                 && cp -afr ../../node_modules/ace-builds/src-min ace
+test ! -e ace                 && cp -afr ../../node_modules/ace-builds/src-min-noconflict ace
 
 #test ! -e angular             && cp -afr ../../node_modules/angular angular
 #test ! -e angular-datatables  && cp -afr ../../node_modules/angular-datatables/dist/ angular-datatables

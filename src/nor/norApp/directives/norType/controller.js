@@ -3,6 +3,7 @@
 /* Types */
 module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($scope, $log, norRouter) {
 
+			$scope.methods                    = $scope.methods || {};
 			$scope.content                    = $scope.content || {};
 			$scope.content.$name              = $scope.content.$name || '';
 			$scope.content.$schema            = $scope.content.$schema || {};
@@ -49,5 +50,27 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 				$scope.content.$schema.type = 'object';
 				return $scope.commit($scope.content);
 			}
+
+
+	$scope.show_add_method_options = false;
+
+			/** */
+			$scope.setAddMethodOptions = function(value) {
+				$scope.new_method = {};
+				$scope.show_add_method_options = value ? true : false;
+			};
+
+			/** */
+			$scope.addNewMethod = function(data) {
+				$scope.show_add_method_options = false;
+				return norRouter.post($scope.methods.$ref, {'content': {
+					"$name": data.name,
+					"$body": data.body
+				}}).then(function(data) {
+					$scope.content = data.content;
+				}, function errorCallback(response) {
+					$log.error("error: ", response);
+				});
+			};
 
 }];

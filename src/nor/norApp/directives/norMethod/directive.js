@@ -9,7 +9,6 @@ module.exports = [function nor_type_directive() {
 	return {
 		restrict: 'E',
 		scope: {
-			methods: '=',
 			content: '=',
 			onCommit: '&?'
 		},

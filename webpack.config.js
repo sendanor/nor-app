@@ -22,6 +22,7 @@ module.exports = {
 			'angular-sanitize',
 			'angular-route',
 			'angular-ui-router',
+			'angular-ui-ace',
 			'angular-datatables',
 			'ng-prettyjson-js',
 			'ng-prettyjson-css',
