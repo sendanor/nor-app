@@ -1,4 +1,8 @@
-<div class="nor-method">
+<div class="nor-method" ng-if="content.$active">
+
+	<div class="actions">
+		<nor-action click="unpublish(content)" title="Remove method" icon="trash-o" dangerous-icon="trash" safety="enabled">Remove method {{content.$name}}?</nor-action>
+	</div>
 
 	<div class="pure-g">
 

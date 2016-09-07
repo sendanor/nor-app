@@ -31,6 +31,10 @@ module.exports = ['$scope', '$log', 'norRouter', '$timeout', function nor_method
 	/** */
 	$scope.recountLines = function resize_body() {
 
+		if(!($scope.content && $scope.content.$active)) {
+			return;
+		}
+
 		var lines = $scope.body.split('\n').length;
 		if(lines < 1) {
 			lines = 1;
@@ -122,6 +126,13 @@ module.exports = ['$scope', '$log', 'norRouter', '$timeout', function nor_method
 			$scope.content.$body = $scope.content.body;
 			$scope.commit($scope.content);
 		}
+	};
+
+	/** */
+	$scope.unpublish = function norMethod_unpublish() {
+		$scope.content.$active = false;
+		$scope.content.$body = $scope.content.body;
+		$scope.commit($scope.content);
 	};
 
 	$scope.$watch('body', $scope.recountLines);

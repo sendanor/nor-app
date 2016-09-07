@@ -319,7 +319,7 @@ function get_type_handler(opts) {
 		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchTypes({'$name': type}).searchMethods(type)({'$active': true}).then(function(tr) {
+			return tr.searchTypes({'$name': type}).searchMethods(type)({'$active': true}, {'order':'$created'}).then(function(tr) {
 				var types = tr.fetch();
 				var type = types.shift();
 				if(!type) { throw new HTTPError(404); }
@@ -530,7 +530,7 @@ function get_docs_handler(opts) {
 		var where;
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchTypes({'$name':type}).searchMethods(type)({'$active': true}).then(function(tr) {
+			return tr.searchTypes({'$name':type}).searchMethods(type)({'$active': true}, {'order':'$created'}).then(function(tr) {
 				var type_obj = tr.fetchSingle();
 				debug.assert(type_obj).is('object');
 
@@ -1044,7 +1044,7 @@ function get_methods_handler(opts) {
 		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchMethods(type)({'$active': true}).then(function(tr) {
+			return tr.searchMethods(type)({'$active': true}, {'order':'$created'}).then(function(tr) {
 				var methods = tr.fetch();
 				debug.assert(methods).is('array');
 
@@ -1199,6 +1199,9 @@ function post_method_handler(opts) {
 			if(key === '$body') {
 				return;
 			}
+			if(key === '$active') {
+				return;
+			}
 			if(key.charAt(0) === '$') {
 				delete data[key];
 			}
@@ -1214,6 +1217,9 @@ function post_method_handler(opts) {
 				var methods = tr.fetch();
 				debug.assert(methods).is('array').length(1);
 				var method = methods.shift();
+				if(data && data.hasOwnProperty('$active') && (data.$active !== true)) {
+					data.$active = null;
+				}
 				return tr.declareMethod(type)(method.$name, body, data);
 			}).then(function(tr) {
 				var obj = tr.fetch();

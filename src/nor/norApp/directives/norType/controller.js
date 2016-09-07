@@ -1,5 +1,7 @@
 "use strict";
 
+var debug = require('nor-debug');
+
 /* Types */
 module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($scope, $log, norRouter) {
 
@@ -56,7 +58,10 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 
 			/** */
 			$scope.setAddMethodOptions = function(value) {
-				$scope.new_method = {};
+				$scope.new_method = {
+					'name': '',
+					'body': 'function() {\n\treturn "";\n}'
+				};
 				$scope.show_add_method_options = value ? true : false;
 			};
 
@@ -67,7 +72,17 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 					"$name": data.name,
 					"$body": data.body
 				}}).then(function(data) {
-					$scope.content = data.content;
+					//$scope.content = data.content;
+					debug.log('data = ', data);
+					debug.log('$ref = ', $scope.content.$ref);
+
+					return norRouter.get($scope.content.$ref).then(function(data2) {
+						debug.log('data2 = ', data2);
+						$scope.content = data2.content;
+						$scope.methods = data2.methods;
+						$scope.show_add_method_options = false;
+					});
+
 				}, function errorCallback(response) {
 					$log.error("error: ", response);
 				});
