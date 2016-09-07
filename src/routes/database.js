@@ -9,8 +9,10 @@ var debug = require('nor-debug');
 var ref = require('nor-ref');
 var nopg = require('nor-nopg');
 var URL = require('url');
-var CSV = require('nor-csv');
+var PATH = require('path');
 var _Q = require('q');
+
+var export_handlers = require('../lib/exports/');
 
 /** Default limit of data in a collection searches */
 var DEFAULT_SEARCH_LIMIT = 20;
@@ -571,8 +573,26 @@ function get_docs_handler(opts) {
 								'icon': 'file-o'
 							},
 							{
-								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export'),
-								'title': 'Export all',
+								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export/csv'),
+								'title': 'Export as CSV',
+								'target': '_self',
+								'icon': 'cloud-download'
+							},
+							{
+								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export/xlsx'),
+								'title': 'Export as XLSX',
+								'target': '_self',
+								'icon': 'cloud-download'
+							},
+							{
+								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export/all/csv'),
+								'title': 'Export all as CSV',
+								'target': '_self',
+								'icon': 'cloud-download'
+							},
+							{
+								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export/all/xlsx'),
+								'title': 'Export all as XLSX',
 								'target': '_self',
 								'icon': 'cloud-download'
 							}
@@ -604,23 +624,32 @@ function export_docs_handler(opts) {
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
+
 		var type = params.type;
 		debug.assert(type).is('string');
+
+		var export_type = PATH.basename(req.url);
+		var export_all = PATH.basename(PATH.dirname(req.url)) === "all";
 
 		return _Q.when(get_docs(req, res)).then(function export_docs_handler__(body) {
 			debug.log('body = ', body);
 
 			debug.assert(body).is('object');
 
+			var type_obj = body.type;
+			debug.assert(type_obj).is('object');
+
 			var content = body.content;
 			debug.assert(content).is('array');
 
-			var keys = norUtils.getKeys(content);
+			var keys = ((!export_all) && type_obj && type_obj.content && type_obj.content.listFields) || norUtils.getKeys(content) || [];
+
 			var data = [];
 
 			// Add header
 			data.push( ARRAY(keys).map(function(key) {
-				return ''+key;
+				var title = norUtils.getTitleFromPath(type_obj, key);
+				return ''+title;
 			}).valueOf() );
 
 			// Add data
@@ -638,13 +667,11 @@ function export_docs_handler(opts) {
 				}).valueOf() );
 			});
 
-			var csv = CSV.stringify(data);
-			debug.assert(csv).is('string');
+			if(Object.keys(export_handlers).indexOf(export_type) >= 0) {
+				return export_handlers[export_type](req, res, data, type_obj);
+			}
 
-			res.setHeader('Content-disposition', 'attachment; filename='+type+'-documents.csv');
-			res.set('Content-Type', 'text/csv');
-			res.status(200);
-			res.send(csv);
+			throw new HTTPError(500, "Unsupported export type: " + export_type);
 		});
 	};
 }
@@ -1260,7 +1287,14 @@ module.exports = {
 				'$get': get_docs_handler
 			},
 			'export': {
-				'$use': export_docs_handler
+				'$get': export_docs_handler,
+				'csv': {'$get': export_docs_handler},
+				'xlsx': {'$get': export_docs_handler},
+				'all': {
+					'$get': export_docs_handler,
+					'csv': {'$get': export_docs_handler},
+					'xlsx': {'$get': export_docs_handler}
+				}
 			},
 			'delete': {
 				'$get': get_del_type_form,

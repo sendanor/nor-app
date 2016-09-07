@@ -4,7 +4,7 @@ var debug = require('nor-debug');
 var angular = require("angular");
 
 /* Tables */
-module.exports = ['$scope', 'norUtils', 'norRouter', '$location', function nor_table_controller($scope, norUtils, norRouter, $location) {
+module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', function nor_table_controller($scope, norUtils, norRouter, $location, $timeout) {
 
 	$scope.settings = false;
 
@@ -93,10 +93,27 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', function nor_t
 		var limit = model.limit;
 
 		$scope.pages = Math.ceil(results/limit);
-		$scope.page = Math.round(offset/results*$scope.pages)+1;
+		$scope.page = Math.floor(offset/results*$scope.pages)+1;
 	};
 
+	$scope.page_moving = false;
+
+	$scope.$watch('page_moving', function() {
+		if($scope.page_moving) {
+			$timeout(function() {
+				$scope.page_moving = false;
+			}, 500);
+		}
+	});
+
 	$scope.prevPage = function() {
+		if($scope.page_moving) {
+			debug.log('Page moving already!');
+			return;
+		}
+
+		$scope.page_moving = true;
+
 		var model = $scope.model;
 		//var results = model.totalResults;
 		var offset = model.offset || 0;
@@ -104,10 +121,18 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', function nor_t
 		var params = $location.search();
 		offset -= limit;
 		params = angular.merge(params, {'_offset':offset});
+
 		return norRouter.go($scope, $location.path(), params);
 	};
 
 	$scope.nextPage = function() {
+		if($scope.page_moving) {
+			debug.log('Page moving already!');
+			return;
+		}
+
+		$scope.page_moving = true;
+
 		var model = $scope.model;
 		//var results = model.totalResults;
 		var offset = model.offset || 0;
