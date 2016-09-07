@@ -11,7 +11,7 @@
 
 	<div class="nor-type-methods-container">
 
-		<div class="nor-type-method-container" ng-repeat="method in methods.content">
+		<div class="nor-type-method-container" ng-repeat="method in methods.content track by $index">
 			<nor-method content="method"></nor-method>
 		</div>
 

@@ -27,7 +27,7 @@
 					>
 
 						<div class="field field-enabled"
-						  ng-repeat="path in enabledFields"
+						  ng-repeat="path in enabledFields track by $index"
 						  ng-init="title = getTitleFromPath(model.type, path)"
 						  >
 							{{title}}<span ng-if="path !== title"> / {{path}}</span>
@@ -49,7 +49,7 @@
 					  ng-model="availableFields">
 
 						<div class="field field-available"
-						  ng-repeat="path in availableFields"
+						  ng-repeat="path in availableFields track by $index"
 						  ng-if="enabledFields.indexOf(path) < 0"
 						  ng-init="title = getTitleFromPath(model.type, path)" 
 						  data-drag="true"
@@ -78,12 +78,12 @@
 	<table>
     <thead>
     <tr>
-        <th ng-repeat="path in listFields" ng-init="title = getTitleFromPath(model.type, path)">{{title}}</th>
+        <th ng-repeat="path in listFields track by $index" ng-init="title = getTitleFromPath(model.type, path)">{{title}}</th>
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="row in model.content">
-        <td ng-repeat="path in listFields" ng-init="data = getDataFromPath(row, path)">
+    <tr ng-repeat="row in model.content track by $index">
+        <td ng-repeat="path in listFields track by $index" ng-init="data = getDataFromPath(row, path)">
 			<span ng-if="$first"><nor-link link="row">{{data}}</nor-link></span>
 			<span ng-if="!$first">{{data}}</span>
 		</td>
