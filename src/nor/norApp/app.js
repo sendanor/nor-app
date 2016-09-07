@@ -14,7 +14,9 @@ var app = module.exports = angular.module('norApp', [
 	'datatables',
 	'ngPrettyJson',
 	'ngRoute',
-	'ui.ace'
+	'ui.ace',
+	'ui.sortable',
+	'ngDragDrop'
 ]);
 
 app.config(function($locationProvider) {

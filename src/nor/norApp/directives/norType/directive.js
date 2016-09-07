@@ -1,6 +1,5 @@
 "use strict";
 
-require('./style.css');
 var template = require('./template.html');
 var controller = require('./controller.js');
 

@@ -1,6 +1,6 @@
 "use strict";
 
-var debug = require('nor-debug');
+//var debug = require('nor-debug');
 
 /* Method */
 module.exports = ['$scope', '$log', 'norRouter', '$timeout', function nor_method_controller($scope, $log, norRouter, $timeout) {

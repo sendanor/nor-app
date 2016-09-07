@@ -1,8 +1,27 @@
 <div class="nor-method">
 
-	<div class="nor-method-name-container pure-g">
-		<div class="nor-method-name-label pure-u-1-12">Method</div>
-		<div class="nor-method-name pure-u-11-12" nor-editable-content="content.$name" on-commit="commit(content)">{{content.$name}}</div>
+	<div class="pure-g">
+
+		<div class="pure-u-1-6 nor-method-field nor-method-title">
+			<div class="label"><i class="fa fa-leaf" aria-hidden="true"></i> Title</div>
+			<div class="value" nor-editable-content="content.title" on-commit="commit(content)">{{conent.title}}</div>
+		</div>
+
+		<div class="pure-u-1-6 nor-method-field nor-method-type">
+			<div class="label"><i class="fa fa-tag" aria-hidden="true"></i> Type</div>
+			<div class="value">method</div>
+		</div>
+
+		<div class="pure-u-1-6 nor-method-field nor-method-name">
+			<div class="label"><i class="fa fa-key" aria-hidden="true"></i> Key</div>
+			<div class="value" nor-editable-content="content.$name" on-commit="commit(content)">{{content.$name}}</div>
+		</div>
+
+		<div class="pure-u-1-2 nor-method-field nor-method-description">
+			<div class="label"><i class="fa fa-comment-o" aria-hidden="true"></i> Description</div>
+			<div class="value" nor-editable-content="content.description" on-commit="commit(content)">{{content.description}}</div>
+		</div>
+
 	</div>
 
 	<div class="nor-method-body-container">

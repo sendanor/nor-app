@@ -14,6 +14,7 @@ module.exports = {
 			'nor-function',
 			'nor-array',
 			'jquery',
+			'jquery-ui/sortable.js',
 			'tv4',
 			'tv4.async-jquery',
 			'datatables.net',
@@ -22,8 +23,10 @@ module.exports = {
 			'angular-sanitize',
 			'angular-route',
 			'angular-ui-router',
+			'angular-ui-sortable',
 			'angular-ui-ace',
 			'angular-datatables',
+			'angular-dragdrop',
 			'ng-prettyjson-js',
 			'ng-prettyjson-css',
 			'ng-prettyjson/src/ng-prettyjson-tmpl.js'
@@ -39,6 +42,7 @@ module.exports = {
 		//	'window.ace': "ace/ace",
 			$: "jquery",
 			jQuery: "jquery"
+		//	angular: "angular"
 		}),
 		new webpack.optimize.CommonsChunkPlugin(/* chunkName= */"vendor", /* filename= */"vendor.bundle.js")
 		/*,
@@ -52,7 +56,9 @@ module.exports = {
 		alias: {
 			'tv4.async-jquery': 'tv4/tv4.async-jquery.js',
 			'ng-prettyjson-js': 'ng-prettyjson/src/ng-prettyjson.js',
-			'ng-prettyjson-css': 'ng-prettyjson/src/ng-prettyjson.css'
+			'ng-prettyjson-css': 'ng-prettyjson/src/ng-prettyjson.css',
+			'jquery-ui': 'jquery-ui/ui/widgets',
+			'jquery-ui-css': 'jquery-ui/../../themes/base'
 		}
 	},
 	module: {
@@ -71,11 +77,33 @@ module.exports = {
 			},
 			{
 				test: /tv4\.async-jquery\.js$/,
-				loader: 'imports-loader?$=jquery,tv4,window'
+				loader: 'imports?$=jquery,tv4,window'
+			},
+			/*
+			{
+				test: require.resolve("jquery-ui/ui/widgets/sortable.js"),
+				loader: 'imports'
+			},
+			*/
+			{
+				test: require.resolve("jquery"),
+				loader: 'expose?jQuery'
+			},
+			{
+				test: require.resolve("angular"),
+				loader: 'imports?window,jQuery=jquery'
+			},
+			{
+				test: require.resolve("angular-ui-sortable"),
+				loader: 'imports?angular'
+			},
+			{
+				test: require.resolve("angular-dragdrop"),
+				loader: 'imports?angular'
 			},
 			{
 				test: /ng-prettyjson\/src\/ng-prettyjson\.js$/,
-				loader: 'imports-loader?this=window'
+				loader: 'imports?this=window'
 			},
 			{ test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "url-loader?limit=10000&minetype=application/font-woff" },
 			{ test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "file-loader" },

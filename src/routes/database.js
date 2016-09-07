@@ -61,6 +61,7 @@ function initialize_types(tr, docs) {
 function prepare_type(req, type) {
 	debug.assert(req).is('object');
 	debug.assert(type).is('object').instanceOf(nopg.Type);
+
 	var tmp;
 	try {
 		tmp = JSON.parse(JSON.stringify(type));
@@ -78,6 +79,7 @@ function prepare_type(req, type) {
 			tmp[key] = meta[key];
 		});
 	}
+
 	return tmp;
 }
 
@@ -526,9 +528,13 @@ function get_docs_handler(opts) {
 		var where;
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchTypes({'$name':type}).then(function(tr) {
+			return tr.searchTypes({'$name':type}).searchMethods(type)({'$active': true}).then(function(tr) {
 				var type_obj = tr.fetchSingle();
 				debug.assert(type_obj).is('object');
+
+				var methods = tr.fetch() || [];
+				debug.assert(methods).is('array');
+
 				var schema = type_obj.$schema || {};
 				debug.assert(schema).is('object');
 				var properties = schema.properties || {};
@@ -541,7 +547,17 @@ function get_docs_handler(opts) {
 					//debug.log('type of limit: ', typeof search_opts.limit);
 					return {
 						'title': 'Documents for '+type,
-						'type': prepare_type(req, type_obj),
+						'type': {
+							'$type': "Type",
+							'$ref': ref(req, 'api/database/types', type_obj.$name),
+							'$title': 'Type '+type_obj.$name,
+							'$name': type_obj.$name,
+							'content': prepare_type(req, type_obj),
+							'methods': {
+								'$ref': ref(req, 'api/database/types', type_obj.$name, 'methods'),
+								'content': prepare_methods(req, methods)
+							}
+						},
 						'$type': 'table',
 						'totalResults': count,
 						'limit': limit,
@@ -1145,11 +1161,11 @@ function post_method_handler(opts) {
 		var name = params.name;
 		debug.assert(name).is('string');
 
-		var body = req.body || {};
-		debug.log('body = ', body);
-		debug.assert(body).is('object');
+		var req_body = req.body || {};
+		debug.log('req_body = ', req_body);
+		debug.assert(req_body).is('object');
 
-		var data = body.content || {};
+		var data = req_body.content || {};
 		debug.assert(data).is('object');
 
 		Object.keys(data).forEach(function(key) {

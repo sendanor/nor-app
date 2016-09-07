@@ -26,4 +26,52 @@
 		margin-right: 6em;
 	}
 
+	.settings-container {
+
+		background-color: #fafafa;
+		padding: 0.5em 1em;
+		margin-bottom: 2em;
+
+		.actions-container {
+			text-align: right;
+		}
+
+		.fields-container {
+			margin: 0.1em;
+			height: 100%;
+
+			.fields {
+				background-color: #f5f5f5;
+				border: 1px solid #f0f0f0;
+				margin: 0.1em;
+				min-height: 15em;
+
+				.field {
+					border: 1px solid #aaaaaa;
+					margin: 0.5em 0.25em;
+					padding: 0.5em 0.25em;
+				}
+
+				.field-enabled {
+					background-color: #aaffaa;
+				}
+
+				.field-available {
+					background-color: #aaaaff;
+				}
+
+				.disable-field {
+					float: right;
+				}
+			}
+
+			.ui-droppable-hover {
+				border: 1px dashed #aaa0a0;
+				background-color: #fff5f5;
+			}
+
+		}
+
+	}
+
 }

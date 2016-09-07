@@ -1,16 +1,91 @@
 <div class="nor-table">
 
+	<div class="settings-container">
+
+		<div class="actions-container">
+			<a href="#" ng-click="enableSettings()" ng-if="!settings"><i class="fa fa-wrench" aria-hidden="true"></i> Change Settings</a>
+		</div>
+
+		<div class="settings" ng-if="settings">
+			
+			<div class="close"><a href="#" ng-click="disableSettings()"><i class="fa fa-times" aria-hidden="true"></i></a></div>
+
+			<h3>Settings</h3>
+
+			<div class="pure-g">
+
+				<div class="pure-u-1-3 fields-container">
+
+					<h4>Fields Enabled</h4>
+
+					<div class="fields fields-enabled"
+					  ui-sortable
+					  ng-model="enabledFields"
+					  data-drop="true"
+					  data-jqyoui-options 
+					  jqyoui-droppable="{onDrop:'delayedNormalizeFields()'}"
+					>
+
+						<div class="field field-enabled"
+						  ng-repeat="path in enabledFields"
+						  ng-init="title = getTitleFromPath(model.type, path)"
+						  >
+							{{title}}<span ng-if="path !== title"> / {{path}}</span>
+							<div class="disable-field"><a href="#" ng-click="disableField(path)" class="times"><i class="fa fa-times" aria-hidden="true"></i></a></div>
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="pure-u-1-3 fields-container" >
+
+					<h4>Fields Available</h4>
+
+					<div class="fields fields-available"
+					  data-drop="true"
+					  data-jqyoui-options
+					  jqyoui-droppable="{onDrop:'delayedNormalizeFields()'}"
+					  ng-model="availableFields">
+
+						<div class="field field-available"
+						  ng-repeat="path in availableFields"
+						  ng-if="enabledFields.indexOf(path) < 0"
+						  ng-init="title = getTitleFromPath(model.type, path)" 
+						  data-drag="true"
+						  data-jqyoui-options="{revert: 'invalid'}"
+						  jqyoui-draggable="{animate:false}"
+						  ng-model="path">
+							{{title}}<span ng-if="path !== title"> / {{path}}</span>
+						</div>
+
+					</div>
+				</div>
+
+				<div class="pure-u-1-3 buttons-container">
+
+					<button class="pure-button pure-button-primary"
+					  ng-if="enabledFields.join(',') !== ( (model && model.type && model.type.content && model.type.content.listFields) ||[]).join(',')"
+					  ng-click="saveTypeListFields(model.type, enabledFields)"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes</button>
+
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+
 	<table>
     <thead>
     <tr>
-        <th ng-repeat="path in paths" ng-init="title = getTitleFromPath(model.type, path)">{{title}}</th>
+        <th ng-repeat="path in listFields" ng-init="title = getTitleFromPath(model.type, path)">{{title}}</th>
     </tr>
     </thead>
     <tbody>
     <tr ng-repeat="row in model.content">
-        <td ng-repeat="path in paths" ng-init="data = getDataFromPath(row, path); key = path.join('.')">
-			<span ng-if="(key === '$name') || (key === '$id')"><nor-link link="row">{{data}}</nor-link></span>
-			<span ng-if="!((key === '$name') || (key === '$id'))">{{data}}</span>
+        <td ng-repeat="path in listFields" ng-init="data = getDataFromPath(row, path)">
+			<span ng-if="$first"><nor-link link="row">{{data}}</nor-link></span>
+			<span ng-if="!$first">{{data}}</span>
 		</td>
     </tr>
     </tbody>

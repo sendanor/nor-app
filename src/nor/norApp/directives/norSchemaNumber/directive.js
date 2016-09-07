@@ -1,6 +1,6 @@
 "use strict";
 
-var debug = require('nor-debug');
+//var debug = require('nor-debug');
 var template = require('./template.html');
 
 /** Element for number JSON schema */
