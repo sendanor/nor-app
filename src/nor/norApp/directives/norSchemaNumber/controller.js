@@ -22,12 +22,12 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 				//if(value !== undefined) {
 
 					// Trigger .onCommit() once when next change
-					$log.debug('norSchemaNumber started listening value');
+					//debug.log('norSchemaNumber started listening value');
 					var listener = $scope.$watch('value', function() {
-						$log.debug('norSchemaNumber stopped listening value');
+						//debug.log('norSchemaNumber stopped listening value');
 						listener();
 						if($scope.onCommit) {
-							$log.debug('Triggering norSchemaNumber.onCommit() #1');
+							//debug.log('Triggering norSchemaNumber.onCommit() #1');
 							return $scope.onCommit();
 						}
 					}, true);
@@ -37,7 +37,7 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 					}
 
 				//} else if($scope.onCommit) {
-				//	$log.debug('Triggering norSchemaNumber.onCommit() #2');
+				//	//debug.log('Triggering norSchemaNumber.onCommit() #2');
 				//	return $scope.onCommit();
 				//}
 			};
@@ -76,14 +76,14 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 			/** Returns document link information */
 			$scope.getDocument = function(path_) {
 				var key_ = path_.join('.');
-				$log.debug("key_ = ", key_);
+				//debug.log("key_ = ", key_);
 				var root = $scope.root;
 				if(!root) {
-					$log.debug("No root");
+					//debug.log("No root");
 					return;
 				}
 				if(!root.hasOwnProperty('documents')) {
-					$log.debug("No documents in root");
+					//debug.log("No documents in root");
 					return {
 						"type": "",
 						"key": key_,
@@ -91,8 +91,8 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 					};
 				}
 				var documents = root.documents;
-				$log.debug('key_ = ', key_);
-				$log.debug('documents = ', documents);
+				//debug.log('key_ = ', key_);
+				//debug.log('documents = ', documents);
 				var results = documents.map(function(line) {
 					var parts = line.split('|');
 					var type_key = parts.shift().split('#');
@@ -100,7 +100,7 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 					var type = type_key.shift();
 					var key = type_key.join('#');
 
-					$log.debug("Key " + key + " has type " + type + " and fields: " + fields);
+					//debug.log("Key " + key + " has type " + type + " and fields: " + fields);
 
 					return {
 						"type": type,
@@ -111,7 +111,7 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 					return doc.key === key_;
 				});
 				var doc = results.shift();
-				$log.debug('doc = ', doc);
+				//debug.log('doc = ', doc);
 				return doc;
 			};
 
@@ -127,8 +127,8 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 				var items = (accepted_fields || []).map(function(item) {
 					return item.key;
 				});
-				$log.debug("field = ", field_);
-				$log.debug("acceptedFields = ", items);
+				//debug.log("field = ", field_);
+				//debug.log("acceptedFields = ", items);
 				return items.indexOf(field_) >= 0;
 			};
 
@@ -149,14 +149,14 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 
 				var key_ = path_.join('.');
 
-				$log.debug("type_ = ", type_);
-				$log.debug("path_ = ", path_);
-				$log.debug("key_ = ", key_);
-				$log.debug("fields_ = ", fields_);
+				//debug.log("type_ = ", type_);
+				//debug.log("path_ = ", path_);
+				//debug.log("key_ = ", key_);
+				//debug.log("fields_ = ", fields_);
 
 				var root = $scope.root;
 
-				$log.debug("root = ", root);
+				//debug.log("root = ", root);
 
 				if(!root) {
 					return false;
@@ -172,8 +172,8 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 					return (''+f).indexOf(',') < 0;
 				}).join(',');
 
-				$log.debug("documents = ", documents);
-				$log.debug("line_ = ", line_);
+				//debug.log("documents = ", documents);
+				//debug.log("line_ = ", line_);
 
 				var changed = false;
 
@@ -186,7 +186,7 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 					/*var type = */type_key.shift();
 					var key = type_key.join('#');
 
-					$log.debug("key = ", key);
+					//debug.log("key = ", key);
 
 					// Assert unique keywords
 					if(seen.hasOwnProperty(key)) {
@@ -212,7 +212,7 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 					root.documents.push(line_);
 				}
 
-				$log.debug("root.documents = ", root.documents);
+				//debug.log("root.documents = ", root.documents);
 
 				return $q.when($scope.commit()).then(function() {
 					$scope.updateLink();
@@ -224,7 +224,7 @@ module.exports = ['$scope', '$log', '$q', function($scope, $log, $q) {
 				$scope.new_field = "";
 				$scope.link = $scope.getDocument($scope.path);
 
-				$log.debug('$scope.link for key ('+$scope.key+') updated as: ', $scope.link);
+				//debug.log('$scope.link for key ('+$scope.key+') updated as: ', $scope.link);
 			};
 
 			$scope.updateLink();

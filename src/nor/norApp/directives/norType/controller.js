@@ -143,4 +143,9 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 				});
 			};
 
+	/** Returns the `$id` property if it exists, for use as an index, otherwise undefined. */
+	$scope.getIndexById = function(item) {
+		return item && item.$id;
+	};
+
 }];

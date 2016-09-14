@@ -13,7 +13,7 @@
 	<div class="nor-type-methods-container">
 		<h3 class="title"><i class="fa fa-terminal" aria-hidden="true"></i> Methods</h3>
 
-		<div class="nor-type-method-container" ng-repeat="method in methods.content track by method.$id">
+		<div class="nor-type-method-container" ng-repeat="method in methods.content track by getIndexById(method)">
 			<nor-method content="method"></nor-method>
 		</div>
 
@@ -34,7 +34,7 @@
 <div class="nor-type-views-container">
 	<h3 class="title"><i class="fa fa-th-list" aria-hidden="true"></i> Views</h3>
 
-	<div class="nor-type-view-container" ng-repeat="view in views.content track by method.$id">
+	<div class="nor-type-view-container" ng-repeat="view in views.content track by getIndexById(method)">
 		<nor-view type="model" ng-model="view"></nor-view>
 	</div>
 
