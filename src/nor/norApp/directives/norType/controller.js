@@ -84,8 +84,13 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 			/** */
 			$scope.addNewMethod = function(data) {
 				$scope.show_add_method_options = false;
+
+				var title = (''+data.name).trim();
+				var name = title.toLowerCase().replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+/g, "").replace(/_+$/, "");
+
 				return norRouter.post($scope.methods.$ref, {'content': {
-					"$name": data.name,
+					'title': title,
+					"$name": name,
 					"$body": data.body
 				}}).then(function(data) {
 					//$scope.content = data.content;
