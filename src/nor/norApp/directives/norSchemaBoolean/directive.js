@@ -1,5 +1,6 @@
 "use strict";
 
+var controller = require('./controller.js');
 var template = require('./template.html');
 
 /** Element for boolean JSON schema */
@@ -9,18 +10,13 @@ module.exports = function nor_schema_boolean_directive() {
 		scope: {
 			key: '=',
 			value: '=',
-			onCommit: '&?'
+			onCommit: '&?',
+			enableBorder: '=?',
+			enableHeader: '=?',
+			enableInner: '=?',
+			enableSourceCode: '=?'
 		},
-		controller: ['$scope', function($scope) {
-
-			/** Action to do on commit */
-			$scope.commit = function() {
-				if($scope.onCommit) {
-					return $scope.onCommit();
-				}
-			};
-
-		}],
+		controller: controller,
 		templateUrl: template
 	};
 };

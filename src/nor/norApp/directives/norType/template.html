@@ -6,10 +6,12 @@
 	</div>
 
 	<div class="nor-type-schema-container">
-		<nor-schema root="content" parent="content" key="'$schema'" value="content.$schema" on-commit="commit(content)"></nor-schema>
+		<h3 class="title"><i class="fa fa-leaf" aria-hidden="true"></i> Properties</h3>
+		<nor-schema-object root="content" enable-header="false" enable-source-code="false" enable-border="false" parent="content" key="'$schema'" value="content.$schema" on-commit="commit(content)"></nor-schema>
 	</div>
 
 	<div class="nor-type-methods-container">
+		<h3 class="title"><i class="fa fa-terminal" aria-hidden="true"></i> Methods</h3>
 
 		<div class="nor-type-method-container" ng-repeat="method in methods.content track by $index">
 			<nor-method content="method"></nor-method>
@@ -29,8 +31,28 @@
 			</form>
 	</div>
 
+<div class="nor-type-views-container">
+	<h3 class="title"><i class="fa fa-th-list" aria-hidden="true"></i> Views</h3>
+
+	<div class="nor-type-view-container" ng-repeat="view in views.content track by $index">
+		<nor-view type="model" ng-model="view"></nor-view>
+	</div>
+
+	<div class="nor-type-add-view">
+		<div ng-if="!show_add_view_options">
+			<button class="pure-button" ng-click="setAddViewOptions(true)"><i class="fa fa-plus" aria-hidden="true"></i> Add view</button>
+		</div>
+
+		<form ng-if="show_add_view_options" class="nor-schema-add-view-form pure-form" name="addView">
+			<fieldset>
+				<input type="text" name="newName" placeholder="Name" ng-model="new_view.$name"  required="">
+				<button type="submit" class="pure-button pure-button-primary" ng-click="addNewView(new_view)">Add</button>
+			</fieldset>
+		</form>
+	</div>
+
 	<div class="nor-type-format-container">
-		<h3 class="title"><i class="fa fa-code" aria-hidden="true"></i> Full Source Code</h3>
+		<h3 class="title"><i class="fa fa-code" aria-hidden="true"></i> Source Code</h3>
 		<pre class="nor-type-format" pretty-json="content" edition="true" on-edit="commit(newJson)"></pre>
 	</div>
 

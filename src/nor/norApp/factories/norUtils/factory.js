@@ -600,7 +600,7 @@ module.exports = function nor_utils_factory($log) {
 				return method.$name === key;
 			}).shift();
 			if(method) {
-				return method.title;
+				return method.title || key;
 			}
 		}
 
@@ -638,7 +638,7 @@ module.exports = function nor_utils_factory($log) {
 				return method.$name === key;
 			}).shift();
 			if(method) {
-				return method.description;
+				return method.description || '';
 			}
 		}
 

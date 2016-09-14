@@ -1,5 +1,11 @@
-<div class="nor-schema nor-schema-object">
-	<div class="pure-g">
+<div class="nor-schema nor-schema-object" ng-class="{
+	'border-enabled': enableBorder,
+	'header-enabled':enableHeader,
+	'inner-enabled': enableInner,
+	'source-code-enabled': enableSourceCode
+}">
+
+	<div class="pure-g" ng-if="enableHeader">
 		<div class="pure-u-1-6 nor-schema-field nor-schema-title">
 			<span class="label"><i class="fa fa-leaf" aria-hidden="true"></i> Title</span>
 			<span class="value" nor-editable-content="value.title" on-commit="commit(value)">{{value.title}}</span>
@@ -18,8 +24,9 @@
 		</div>
 	</div>
 
-	<div class="nor-schema-field nor-schema-properties-container">
-		<div class="label"><i class="fa fa-tags" aria-hidden="true"></i> Properties</div>
+	<div class="nor-schema-field nor-schema-properties-container" ng-if="enableInner">
+
+		<div class="label" ng-if="enableHeader"><i class="fa fa-tags" aria-hidden="true"></i> Properties</div>
 
 		<div ng-repeat="(key2, value2) in value.properties" class="nor-schema-property">
 			<div class="actions">
@@ -66,7 +73,7 @@
 		<label ng-if="!value.hasOwnProperty('additionalProperties')" class="undefined" for="additional_properties"><input type="checkbox" ng-click="value.additionalProperties=false;commit()" id="additional_properties" checked="checked" /> Accept additional properties</label>		
 	</div>
 
-	<div class="nor-schema-field nor-schema-result-code">
+	<div class="nor-schema-field nor-schema-result-code" ng-if="enableSourceCode">
 		<span class="label"><i class="fa fa-code" aria-hidden="true"></i> Source Code
 			<a ng-click="show_result_code = !show_result_code" class="collapse-link">
 				<span ng-if="!show_result_code"><i class="fa fa-plus" aria-hidden="true"></i></span>

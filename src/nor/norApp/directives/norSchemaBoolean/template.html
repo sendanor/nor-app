@@ -1,4 +1,10 @@
-<div class="nor-schema nor-schema-boolean">
+<div class="nor-schema nor-schema-boolean" ng-class="{
+	'border-enabled': enableBorder,
+	'header-enabled':enableHeader,
+	'inner-enabled': enableInner,
+	'source-code-enabled': enableSourceCode
+}">
+
 	<div class="pure-g">
 		<div class="pure-u-1-6 nor-schema-field nor-schema-title">
 			<span class="label"><i class="fa fa-leaf" aria-hidden="true"></i> Title</span>

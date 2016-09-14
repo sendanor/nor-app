@@ -1,18 +1,12 @@
 /* norSchemaObject */
 
-#content .nor-schema-object {
-	background-color: #fcfcfc;
+.nor-schema-object {
 
 	.actions {
 		margin: 0;
 		padding: 0;
 		text-align: right;
 		clear: both;
-	}
-
-	.nor-schema-properties-container {
-		padding: 1em;
-		border-top: 1px solid #e0e0e0;
 	}
 
 	.nor-schema-additional-properties {
@@ -25,7 +19,15 @@
 	}
 
 	.nor-schema-property .nor-schema {
-		margin: 0 0 2em 0;
+		margin: 0 0 1em 0;
 	}
 
+}
+
+.nor-schema-object.border-enabled {
+	background-color: #fcfcfc;
+	.nor-schema-properties-container {
+		padding: 1em;
+		border-top: 1px solid #e0e0e0;
+	}
 }

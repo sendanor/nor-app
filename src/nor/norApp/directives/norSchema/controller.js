@@ -5,6 +5,11 @@
 /* Element for any JSON schema element */
 module.exports = ['$scope', function nor_schema_controller($scope) {
 
+	$scope.enableBorder = ($scope.enableBorder === undefined) ? true : ($scope.enableBorder ? true : false);
+	$scope.enableHeader = ($scope.enableHeader === undefined) ? true : ($scope.enableHeader ? true : false);
+	$scope.enableInner = ($scope.enableInner === undefined) ? true : ($scope.enableInner ? true : false);
+	$scope.enableSourceCode = ($scope.enableSourceCode === undefined) ? true : ($scope.enableSourceCode ? true : false);
+
 	$scope.root = $scope.root || undefined;
 	$scope.parent = $scope.parent || undefined;
 	$scope.key = $scope.key || undefined;

@@ -19,3 +19,4 @@ app.directive('norSelect', require('./norSelect/index.js'));
 app.directive('norTable', require('./norTable/index.js'));
 app.directive('norType', require('./norType/index.js'));
 app.directive('norMethod', require('./norMethod/index.js'));
+app.directive('norView', require('./norView/index.js'));

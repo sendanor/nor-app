@@ -15,7 +15,11 @@ module.exports = function nor_schema_object_directive() {
 			path: '&?',
 			key: '=?',
 			value: '=',
-			onCommit: '&?'
+			onCommit: '&?',
+			enableBorder: '=?',
+			enableHeader: '=?',
+			enableInner: '=?',
+			enableSourceCode: '=?'
 		},
 		controller: controller,
 		templateUrl: template

@@ -109,6 +109,30 @@ function prepare_method(req, method) {
 	return tmp;
 }
 
+/** Prepare views for publification */
+function prepare_view(req, view) {
+	debug.assert(req).is('object');
+	debug.assert(view).is('object').instanceOf(nopg.View);
+	var tmp;
+	try {
+		tmp = JSON.parse(JSON.stringify(view));
+	} catch(e) {
+		debug.log('Failed to copy: ', view);
+		throw e;
+	}
+	var meta = tmp.$meta;
+	delete tmp.$events;
+	delete tmp.$meta;
+	// FIXME: This api/database/views should use configuration paths
+	tmp.$ref = ref(req, 'api/database/types', view.$type, 'views', tmp.$name);
+	if(meta) {
+		ARRAY(Object.keys(meta)).forEach(function(key) {
+			tmp[key] = meta[key];
+		});
+	}
+	return tmp;
+}
+
 /** Prepare types for publification */
 function prepare_types(req, types) {
 	return ARRAY(types).map(prepare_type.bind(undefined, req)).valueOf();
@@ -117,6 +141,35 @@ function prepare_types(req, types) {
 /** Prepare methods for publification */
 function prepare_methods(req, methods) {
 	return ARRAY(methods).map(prepare_method.bind(undefined, req)).valueOf();
+}
+
+/** Prepare views for publification */
+function prepare_views(req, views) {
+	return ARRAY(views).map(prepare_view.bind(undefined, req)).valueOf();
+}
+
+/** Prepare views for publification as a REST resource */
+function prepare_views_resource(req, type, views) {
+	var res = {
+		'content': prepare_views(req, views)
+	};
+	if(type && type.$name) {
+		res.$ref = ref(req, 'api/database/types', type.$name, 'views');
+	}
+
+	var byName = {};
+	ARRAY(res.content).forEach(function(view) {
+		byName[view.$name] = view;
+	});
+	res.byName = byName;
+
+	var byID = {};
+	ARRAY(res.content).forEach(function(view) {
+		byID[view.$id] = view;
+	});
+	res.byID = byID;
+
+	return res;
 }
 
 /** Prepare document for publification */
@@ -319,12 +372,16 @@ function get_type_handler(opts) {
 		]);
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchTypes({'$name': type}).searchMethods(type)({'$active': true}, {'order':'$created'}).then(function(tr) {
+			return tr.searchTypes({'$name': type})
+			  .searchMethods(type)({'$active': true}, {'order':'$created'})
+			  .searchViews(type)(undefined, {'order':'$created'})
+			  .then(function(tr) {
 				var types = tr.fetch();
 				var type = types.shift();
 				if(!type) { throw new HTTPError(404); }
 
 				var methods = tr.fetch() || [];
+				var views = tr.fetch() || [];
 
 				// FIXME: This api/database/:name/items should use configuration paths
 
@@ -353,7 +410,8 @@ function get_type_handler(opts) {
 					'methods': {
 						'$ref': ref(req, 'api/database/types', type.$name, 'methods'),
 						'content': prepare_methods(req, methods)
-					}
+					},
+					'views': prepare_views_resource(req, type, views)
 				};
 			});
 		});
@@ -530,12 +588,18 @@ function get_docs_handler(opts) {
 		var where;
 
 		return nopg.transaction(opts.pg, function(tr) {
-			return tr.searchTypes({'$name':type}).searchMethods(type)({'$active': true}, {'order':'$created'}).then(function(tr) {
+			return tr.searchTypes({'$name':type})
+			  .searchMethods(type)({'$active': true}, {'order':'$created'})
+			  .searchViews(type)(undefined, {'order':'$created'})
+			  .then(function(tr) {
 				var type_obj = tr.fetchSingle();
 				debug.assert(type_obj).is('object');
 
 				var methods = tr.fetch() || [];
 				debug.assert(methods).is('array');
+
+				var views = tr.fetch() || [];
+				debug.assert(views).is('array');
 
 				var schema = type_obj.$schema || {};
 				debug.assert(schema).is('object');
@@ -547,42 +611,12 @@ function get_docs_handler(opts) {
 					var count = tr.fetch();
 					var docs = tr.fetch();
 					//debug.log('type of limit: ', typeof search_opts.limit);
-					return {
-						'title': 'Documents for '+type,
-						'type': {
-							'$type': "Type",
-							'$ref': ref(req, 'api/database/types', type_obj.$name),
-							'$title': 'Type '+type_obj.$name,
-							'$name': type_obj.$name,
-							'content': prepare_type(req, type_obj),
-							'methods': {
-								'$ref': ref(req, 'api/database/types', type_obj.$name, 'methods'),
-								'content': prepare_methods(req, methods)
-							}
-						},
-						'$type': 'table',
-						'totalResults': count,
-						'limit': limit,
-						'offset': offset,
-						'$columns': columns,
-						'content': prepare_docs(req, docs),
-						'links': [
+
+					var links = [
 							{
 								'$ref': ref(req, 'api/database/types', type_obj.$name),
 								'title': 'Type '+type_obj.$name,
 								'icon': 'file-o'
-							},
-							{
-								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export/csv'),
-								'title': 'Export as CSV',
-								'target': '_self',
-								'icon': 'cloud-download'
-							},
-							{
-								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export/xlsx'),
-								'title': 'Export as XLSX',
-								'target': '_self',
-								'icon': 'cloud-download'
 							},
 							{
 								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export/all/csv'),
@@ -596,7 +630,45 @@ function get_docs_handler(opts) {
 								'target': '_self',
 								'icon': 'cloud-download'
 							}
-						]
+						];
+
+					ARRAY(views).forEach(function(view) {
+						links.push({
+								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export', view.$name, 'csv'),
+								'title': '' + (view.title||view.$name) + ' as CSV',
+								'target': '_self',
+								'icon': 'cloud-download'
+							},
+							{
+								'$ref': ref(req, 'api/database/types', type_obj.$name, 'export', view.$name, 'xlsx'),
+								'title': '' + (view.title||view.$name) + ' as XLSX',
+								'target': '_self',
+								'icon': 'cloud-download'
+							});
+					});
+
+					return {
+						'title': 'Documents for '+type,
+						'type': {
+							'$type': "Type",
+							'$ref': ref(req, 'api/database/types', type_obj.$name),
+							'$title': 'Type '+type_obj.$name,
+							'$name': type_obj.$name,
+							'content': prepare_type(req, type_obj),
+							'methods': {
+								'$ref': ref(req, 'api/database/types', type_obj.$name, 'methods'),
+								'content': prepare_methods(req, methods)
+							},
+							'views': prepare_views_resource(req, type_obj, views)
+						},
+						'$type': 'table',
+						'totalResults': count,
+						'limit': limit,
+						'offset': offset,
+						'$columns': columns,
+						'content': prepare_docs(req, docs),
+						'links': links
+
 					};
 				});
 			});
@@ -629,7 +701,8 @@ function export_docs_handler(opts) {
 		debug.assert(type).is('string');
 
 		var export_type = PATH.basename(req.url);
-		var export_all = PATH.basename(PATH.dirname(req.url)) === "all";
+		var export_view = PATH.basename(PATH.dirname(req.url));
+		var export_all = export_view === "all";
 
 		return _Q.when(get_docs(req, res)).then(function export_docs_handler__(body) {
 			debug.log('body = ', body);
@@ -642,7 +715,11 @@ function export_docs_handler(opts) {
 			var content = body.content;
 			debug.assert(content).is('array');
 
-			var keys = ((!export_all) && type_obj && type_obj.content && type_obj.content.listFields) || norUtils.getKeys(content) || [];
+			var view = (!export_all) && type_obj && type_obj.views &&
+				type_obj.views.byName &&
+				type_obj.views.byName[export_view];
+
+			var keys = (view && view.listFields) || norUtils.getKeys(content) || [];
 
 			var data = [];
 
@@ -668,7 +745,7 @@ function export_docs_handler(opts) {
 			});
 
 			if(Object.keys(export_handlers).indexOf(export_type) >= 0) {
-				return export_handlers[export_type](req, res, data, type_obj);
+				return export_handlers[export_type](req, res, data, type_obj, view);
 			}
 
 			throw new HTTPError(500, "Unsupported export type: " + export_type);
@@ -1275,6 +1352,250 @@ function del_method_handler(opts) {
 	};
 }
 
+/** Get views by type
+ * @returns `function(req, res)` which uses promises
+ */
+function get_views_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_types_'+type,
+			'database_types_'+type+'_views'
+		]);
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchViews(type)({'$active': true}, {'order':'$created'}).then(function(tr) {
+				var views = tr.fetch();
+				debug.assert(views).is('array');
+
+				var res = prepare_views_resource(req, undefined, views);
+				res.title = 'Views for '+type;
+				res.$type = 'table';
+				res.links = [
+						/*
+					{
+						'$ref': ref(req, 'api/database/types', type),
+						'title': 'Type '+type,
+						'icon': 'file-o'
+					}
+					*/
+				];
+
+				return res;
+
+			});
+		});
+	};
+}
+
+/** Create a new view
+ * @returns `function(req, res)` which uses promises
+ */
+function post_views_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_create_view',
+			'database_types_'+type+'_create_view'
+		]);
+
+		var data = req.body || {};
+		debug.log('data = ', data);
+
+		debug.assert(data).is('object');
+		debug.assert(data.content).is('object');
+		var content = data.content;
+		debug.assert(content.$name).is('string').minLength(1);
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.declareView(type)(content.$name, content).then(function(tr) {
+				var obj = tr.fetch();
+				return {
+					'title': 'Created a view',
+					'$status': 303,
+					'$type': 'redirect',
+					'content': prepare_view(req, obj),
+					'$ref': ref(req, 'api/database/types', obj.$type, 'views', obj.$name)
+				};
+			});
+		});
+
+	};
+}
+
+/** Get single view
+ * @returns `function(req, res)` which uses promises
+ */
+function get_view_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	debug.assert(opts.pg).is('string');
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+		var type = params.type;
+		var name = params.name;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_types_'+type,
+			'database_types_'+type+'_views'
+		]);
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.searchViews(type)({'$name':name, '$active':true}).then(function(tr) {
+				var views = tr.fetch();
+				var view = views.shift();
+				if(!view) { throw new HTTPError(404); }
+
+				return {
+					'title': 'View ' +view.$type + '.' + view.$name,
+					'$type': 'View',
+					'content': prepare_view(req, view),
+					'links': [
+					/*
+						{
+							'$ref': ref(req, 'api/database/types', view.$type, 'search'),
+							'title': 'Search views',
+							'icon': 'search'
+						},
+						{
+							'$ref': ref(req, 'api/database/types', view.$type, 'views', view.$name, 'delete'),
+							'title': 'Delete this view',
+							'icon': 'trash-o'
+						}
+					*/
+					]
+				};
+			});
+		});
+	};
+}
+
+/** Update a view
+ * @returns `function(req, res)` which uses promises
+ */
+function post_view_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_update_view',
+			'database_types_'+type+'_update_view'
+		]);
+
+		var name = params.name;
+		debug.assert(name).is('string');
+
+		var req_body = req.body || {};
+		debug.log('req_body = ', req_body);
+		debug.assert(req_body).is('object');
+
+		var data = req_body.content || {};
+		debug.assert(data).is('object');
+
+		Object.keys(data).forEach(function(key) {
+			if(key === '$active') {
+				return;
+			}
+			if(key === '$name') {
+				return;
+			}
+			if(key.charAt(0) === '$') {
+				delete data[key];
+			}
+		});
+
+		debug.log('data = ', data);
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.getView(type)(name).then(function(tr) {
+				var view = tr.fetch();
+				debug.assert(view).is('object');
+				return tr.declareView(type)((data && data.$name) || view.$name, data);
+			}).then(function(tr) {
+				var obj = tr.fetch();
+				return {
+					'title': 'Updated a view',
+					'$status': 303,
+					'$type': 'redirect',
+					'content': prepare_view(req, obj),
+					'$ref': ref(req, 'api/database/types', obj.$type, 'views', obj.$name)
+				};
+			});
+		});
+
+	};
+}
+
+/** Delete a view
+ * @returns `function(req, res)` which uses promises
+ */
+function del_view_handler(opts) {
+	debug.assert(opts).ignore(undefined).is('object');
+	opts = opts || {};
+	return function(req/*, res*/) {
+
+		var params = req.params || {};
+		debug.assert(params).is('object');
+
+		var type = params.type;
+		debug.assert(type).is('string');
+
+		assert_logged_in(req, [
+			'admin',
+			'database_delete_view',
+			'database_types_'+type+'_delete_view'
+		]);
+
+		var name = params.name;
+		debug.assert(name).is('string');
+
+		return nopg.transaction(opts.pg, function(tr) {
+			return tr.getView(type)(name).then(function(tr) {
+				var obj = tr.fetch();
+				return tr.deleteView(type)(name).then(function() {
+					return {
+						'title': 'Deleted a view',
+						'$type': 'View',
+						'content': prepare_view(req, obj)
+					};
+				});
+			});
+		});
+
+	};
+}
+
 // Exports
 module.exports = {
 	'$get': get_types_handler,
@@ -1296,7 +1617,7 @@ module.exports = {
 				'$get': export_docs_handler,
 				'csv': {'$get': export_docs_handler},
 				'xlsx': {'$get': export_docs_handler},
-				'all': {
+				':view': {
 					'$get': export_docs_handler,
 					'csv': {'$get': export_docs_handler},
 					'xlsx': {'$get': export_docs_handler}
@@ -1338,6 +1659,22 @@ module.exports = {
 					'delete': {
 						'$post': del_method_handler,
 						'$del': del_method_handler
+					},
+				}
+			},
+			'views': {
+				'$get': get_views_handler,
+				'$post': post_views_handler,
+				'create': {
+					'$post': post_views_handler
+				},
+				':name': {
+					'$get': get_view_handler,
+					'$post': post_view_handler,
+					'$del': del_view_handler,
+					'delete': {
+						'$post': del_view_handler,
+						'$del': del_view_handler
 					},
 				}
 			}

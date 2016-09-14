@@ -1,43 +1,43 @@
-.nor-method-actions {
+.nor-view-actions {
 	margin: 0;
 	padding: 0;
 	text-align: right;
 	clear: both;
 }
 
-.nor-method {
+.nor-view {
 	margin-bottom: 1em;
 	border: 2px solid #e0e0e0;
 	background-color: #f0f0f0;
 
-	.nor-method-title {
+	.nor-view-title {
 		background-color: #f0ffff;
 		border-right: 1px solid #e0e0e0;
 		padding: 1em;
 	}
 
-	.nor-method-type {
+	.nor-view-type {
 		background-color: #f0f0ff;
 		border-right: 1px solid #e0e0e0;
 		padding: 1em;
 		text-align: center;
 	}
 
-	.nor-method-name {
+	.nor-view-name {
 		background-color: #f0fff0;
 		border-right: 1px solid #e0e0e0;
 		padding: 1em;
 		text-align: center;
 	}
 
-	.nor-method-description {
+	.nor-view-description {
 		border-top: 1px solid #e0e0e0;
 		border-right: 1px solid #e0e0e0;
 		background-color: #f0f0f0;
 		padding: 1em;
 	}
 
-	.nor-method-result-code {
+	.nor-view-result-code {
 		border-top: 1px solid #e0e0e0;
 		background-color: #f0f0f0;
 		padding: 1em;
@@ -48,7 +48,7 @@
 
 	}
 
-	.nor-method-field {
+	.nor-view-field {
 		position: relative;
 
 		.label {
@@ -72,12 +72,12 @@
 
 	}
 
-	.nor-method-name-container {
+	.nor-view-name-container {
 
 		margin: 1em;
 		border: 1px solid #e0e0e0;
 
-		.nor-method-name-label {
+		.nor-view-name-label {
 			border-right: 1px solid #e0e0e0;
 			text-align: right;
 			padding-right: 1em;
@@ -90,24 +90,79 @@
 			}
 		}
 
-		.nor-method-name {
+		.nor-view-name {
 			padding-left: 1em;
 		}
 
 	}
 
-	.nor-method-body-container {
+	.nor-view-editing-container {
 		padding: 1em;
 		border-top: 1px solid #e0e0e0;
 	}
 
-	.nor-method-body {
+	.nor-view-editing {
 		/*height: 200px;*/
 		/*height: auto !important;*/
 	}
 
 	.publish-button-container {
 		margin: 0.5em 1em;
+	}
+
+	.fields-container {
+		margin: 0.1em;
+		height: 100%;
+
+		.fields {
+			background-color: #f5f5f5;
+			border: 1px solid #f0f0f0;
+			margin: 0.1em;
+			min-height: 15em;
+
+			.field {
+				border: 1px solid #aaaaaa;
+				margin: 0.5em 0.25em;
+				padding: 0.5em 0.25em;
+			}
+
+			.field-enabled {
+				background-color: #aaffaa;
+			}
+
+			.field-available {
+				background-color: #aaaaff;
+			}
+
+			.disable-field {
+				float: right;
+			}
+		}
+
+		.ui-droppable-hover {
+			border: 1px dashed #aaa0a0;
+			background-color: #fff5f5;
+		}
+
+	}
+
+	.editing-disabled {
+		.fields-enabled {
+			.field {
+				background-color: #ffffff;
+				border: 1px solid #a0a0a0;
+				display: inline-block;
+				padding: 0.10em 0.25em;
+				margin-right: 0.5em;
+				margin-bottom: 0.25em;
+			}
+		}
+		.enable-editing-link {
+			display: inline-block;
+			padding: 0.10em 0.25em;
+			margin-right: 0.5em;
+			margin-bottom: 0.25em;
+		}
 	}
 
 }

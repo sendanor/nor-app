@@ -1,6 +1,6 @@
 "use strict";
 
-//var debug = require('nor-debug');
+var debug = require('nor-debug');
 
 /* Method */
 module.exports = ['$scope', '$log', 'norRouter', '$timeout', function nor_method_controller($scope, $log, norRouter, $timeout) {
@@ -23,19 +23,22 @@ module.exports = ['$scope', '$log', 'norRouter', '$timeout', function nor_method
 	$scope.bodyMaxHeight = $scope.rowHeight*24;
 	$scope.bodyHeight = $scope.lines * $scope.rowHeight;
 	$scope.bodyEditor = undefined;
-	$scope.body = $scope.content.body || $scope.content.$body || 'function() {}';
+	$scope.content.body = $scope.content.body || $scope.content.$body || 'function() {}';
 
 	/** This is use so that recountLines() remembers how many lines last call had */
 	var last_lines = -1;
 
 	/** */
 	$scope.recountLines = function resize_body() {
+		debug.log('recountLines(): ', $scope.content);
+		debug.log('body: ', $scope.content.body);
 
 		if(!($scope.content && $scope.content.$active)) {
+			debug.log("Not active");
 			return;
 		}
 
-		var lines = $scope.body.split('\n').length;
+		var lines = $scope.content.body.split('\n').length;
 		if(lines < 1) {
 			lines = 1;
 		}
@@ -111,8 +114,8 @@ module.exports = ['$scope', '$log', 'norRouter', '$timeout', function nor_method
 		//debug.log('bodyChanged()');
 		$scope.recountLines();
 
-		if( ($scope.content.body !== $scope.body) && (!$scope.commitTriggered) ) {
-			$scope.content.body = $scope.body;
+		if( ($scope.content.body !== $scope.content.body) && (!$scope.commitTriggered) ) {
+			$scope.content.body = $scope.content.body;
 			$timeout(function() {
 				$scope.commit($scope.content);
 				$scope.commitTriggered = false;
@@ -135,7 +138,7 @@ module.exports = ['$scope', '$log', 'norRouter', '$timeout', function nor_method
 		$scope.commit($scope.content);
 	};
 
-	$scope.$watch('body', $scope.recountLines);
+	//$scope.$watch('body', $scope.recountLines);
 
 	$scope.bodyOptions.onLoad = $scope.bodyLoaded;
 	$scope.bodyOptions.onChange = $scope.bodyChanged;

@@ -6,84 +6,41 @@ var angular = require("angular");
 /* Tables */
 module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', function nor_table_controller($scope, norUtils, norRouter, $location, $timeout) {
 
-	$scope.settings = false;
-
-	$scope.enableSettings = function() {
-		$scope.settings = true;
-	};
-
-	$scope.disableSettings = function() {
-		$scope.settings = false;
-	};
-
 	$scope.content = $scope.content || ($scope.model && $scope.model.content) || [];
 
 	$scope.listFields = [];
-	$scope.enabledFields = [];
-	$scope.availableFields = [];
 
+	$scope.currentViewID = $scope.model.type.content.defaultView;
+	if($scope.model.type.views) {
+		$scope.currentView = $scope.model.type.views.byID[$scope.currentViewID];
+		if($scope.currentView) {
+			$scope.listFields = $scope.currentView.listFields;
+		}
+	}
+
+	$scope.$watch('currentViewID', function() {
+		if($scope.model.type.views) {
+			$scope.currentView = $scope.model.type.views.byID[$scope.currentViewID];
+			if($scope.currentView) {
+				$scope.listFields = $scope.currentView.listFields;
+			}
+		}
+	});
+
+	/** */
 	$scope.updatePaths = function() {
 		var model = $scope.model;
 		var columns = model && model.$columns;
 		var type = model && model.type;
-		var methods = type && type.methods;
-		var listFields = type && type.content && type.content.listFields;
+		var listFields;
+		if($scope.currentView) {
+			listFields = $scope.currentView.listFields;
+		}
 
 		$scope.paths = (type && norUtils.getPathsFromType(type)) || columns.map(norUtils.parsePathArray) || [['$id'], ['$created'], ['$modified']];
 
 		$scope.listFields = listFields || $scope.paths.map(function(path) { return path.join('.'); }) || [];
 
-		if($scope.enabledFields.length === 0) {
-			$scope.enabledFields = [].concat( $scope.listFields );
-		}
-
-		$scope.availableFields = [].concat( $scope.paths.map(function(path) {
-			return path.join('.');
-		}) );
-
-		$scope.normalizeFields();
-	};
-
-	$scope.normalizeFields = function() {
-		$scope.normalizeEnabledFields();
-		$scope.normalizeAvailableFields();
-	};
-
-	$scope.delayedNormalizeFields = function() {
-		var listen = $scope.$watch('enabledFields', function() {
-			listen();
-			$scope.normalizeEnabledFields();
-			$scope.normalizeAvailableFields();
-		});
-	};
-
-	$scope.normalizeEnabledFields = function() {
-		debug.log('$scope.enabledFields = ', $scope.enabledFields);
-
-		var paths = $scope.paths.map(function(path) { return path.join('.'); });
-		debug.log('paths = ', paths);
-
-		$scope.enabledFields = $scope.enabledFields.filter(function(field) {
-			return paths.indexOf(field) >= 0;
-		});
-
-		debug.log('after $scope.enabledFields = ', $scope.enabledFields);
-	};
-
-	$scope.normalizeAvailableFields = function() {
-		debug.log('$scope.availableFields = ', $scope.availableFields);
-
-		var paths = $scope.paths.map(function(path) { return path.join('.'); });
-		debug.log('paths = ', paths);
-
-		var enabledFields = $scope.enabledFields;
-		debug.log('enabledFields = ', enabledFields);
-
-		$scope.availableFields = $scope.availableFields.filter(function(field) {
-			return (paths.indexOf(field) >= 0) && (enabledFields.indexOf(field) < 0);
-		});
-
-		debug.log('after $scope.availableFields = ', $scope.availableFields);
 	};
 
 	$scope.updatePages = function() {
@@ -156,34 +113,14 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 	$scope.getTitleFromPath = norUtils.getTitleFromPath;
 	$scope.getDescriptionFromPath = norUtils.getDescriptionFromPath;
 
-	$scope.over_droppable = false;
-
-	$scope.overDroppable = function(value) {
-		$scope.over_droppable = value===true ? true : false;
+	/** */
+	$scope.getViewLabel = function(view) {
+		return view.title || view.$name;
 	};
 
 	/** */
-	$scope.saveTypeListFields = function(type, fields) {
-		debug.log('type = ', type);
-		debug.log('fields = ', fields);
-		debug.assert(type).is('object');
-		debug.assert(type.$ref).is('string');
-		debug.assert(fields).is('array');
-		type.content.listFields = fields;
-		return norRouter.post(type.$ref, {'content': type.content}).then(function(/*data*/) {
-			debug.log('successfully changed type');
-		}, function errorCallback(response) {
-			$log.error("error: ", response);
-		});
-	};
-
-	/** */
-	$scope.disableField = function(field) {
-		$scope.enabledFields = $scope.enabledFields.filter(function(enabled_field) {
-			return field !== enabled_field;
-		});
-		$scope.availableFields.push(field);
-		$scope.normalizeFields();
+	$scope.getFieldIndex = function(field) {
+		return $scope.getTitleFromPath($scope.model.type, field) || field;
 	};
 
 }];

@@ -166,6 +166,15 @@ module.exports = ['$http', '$log', '$location', '$q', function($http, $log, $loc
 		});
 	}
 
+	/** */
+	function do_del(path) {
+		path = parse_path_name(path);
+		$log.debug("DELETing: path = /api" + path);
+		return $http.delete('/api' + path).then(function successCallback(response) {
+			return response.data || {};
+		});
+	}
+
 	// Return interface to access functions
 	return {
 		'initialize': initialize,
@@ -174,7 +183,8 @@ module.exports = ['$http', '$log', '$location', '$q', function($http, $log, $loc
 		//'reset': reset_scopes,
 		'resetModel': reset_model,
 		'get': do_get,
-		'post': do_post
+		'post': do_post,
+		'del': do_del
 	};
 
 }];

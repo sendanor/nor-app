@@ -1,9 +1,5 @@
 /* norSchema */
-
-#content .nor-schema {
-	border: 2px solid #e0e0e0;
-	background-color: #f0f0f0;
-	margin: 1em 0 2em 0;
+.nor-schema {
 
 	.nor-schema-title {
 		background-color: #f0ffff;
@@ -51,9 +47,11 @@
 		background-color: #f0f0f0;
 		padding: 1em;
 
+		/*
 		.value {
 			white-space: pre;
 		}
+		*/
 
 	}
 
@@ -76,9 +74,15 @@
 
 		.value {
 			width: 100%;
-			margin-top: 1em;
+			margin-top: 0;
 		}
 
 	}
 
+}
+
+.nor-schema.border-enabled {
+	border: 2px solid #e0e0e0;
+	background-color: #f0f0f0;
+	margin: 1em 0 2em 0;
 }

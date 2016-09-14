@@ -5,12 +5,28 @@ var debug = require('nor-debug');
 /* Types */
 module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($scope, $log, norRouter) {
 
-			$scope.methods                    = $scope.methods || {};
-			$scope.content                    = $scope.content || {};
-			$scope.content.$name              = $scope.content.$name || '';
-			$scope.content.$schema            = $scope.content.$schema || {};
-			$scope.content.$schema.properties = $scope.content.$schema.properties || {};
-			$scope.keys = Object.keys($scope.content.$schema.properties);
+			var defaultMethods = $scope.methods;
+			var defaultViews = $scope.views;
+			var defaultContent = $scope.content;
+
+			//$scope.ngModel = $scope.ngModel;
+
+			$scope.updateScope = function() {
+				$scope.methods                    = defaultMethods || $scope.ngModel.methods || {};
+				$scope.views                      = defaultViews || $scope.ngModel.views || {};
+				$scope.content                    = defaultContent || $scope.ngModel.content || {};
+				$scope.content.$name              = $scope.content.$name || '';
+				$scope.content.$schema            = $scope.content.$schema || {};
+				$scope.content.$schema.properties = $scope.content.$schema.properties || {};
+				$scope.keys = Object.keys($scope.content.$schema.properties);
+				$scope.model = $scope.ngModel;
+			};
+
+			$scope.updateScope();
+
+			$scope.$watch('ngModel', function() {
+				$scope.updateScope();
+			}, true);
 
 			/** If true, the JSON editor for the type is enabled */
 			$scope.editor = false;
@@ -81,6 +97,40 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 						$scope.content = data2.content;
 						$scope.methods = data2.methods;
 						$scope.show_add_method_options = false;
+					});
+
+				}, function errorCallback(response) {
+					$log.error("error: ", response);
+				});
+			};
+
+			/** */
+			$scope.setAddViewOptions = function(value) {
+				$scope.new_view = {
+					'$name': '',
+					'listFields': ['$id']
+				};
+				$scope.show_add_view_options = value ? true : false;
+			};
+
+			/** */
+			$scope.addNewView = function(data) {
+				$scope.show_add_view_options = false;
+				debug.assert($scope.views).is('object');
+				debug.assert($scope.views.$ref).is('url');
+				return norRouter.post($scope.views.$ref, {'content': data}).then(function(data) {
+					debug.assert($scope.content).is('object');
+					debug.assert($scope.content.$ref).is('url');
+
+					//$scope.content = data.content;
+					debug.log('data = ', data);
+					debug.log('$ref = ', $scope.content.$ref);
+
+					return norRouter.get($scope.content.$ref).then(function(data2) {
+						debug.log('data2 = ', data2);
+						$scope.content = data2.content;
+						$scope.views = data2.views;
+						$scope.show_add_view_options = false;
 					});
 
 				}, function errorCallback(response) {

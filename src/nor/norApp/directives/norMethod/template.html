@@ -1,8 +1,7 @@
+<div class="nor-actions nor-method-actions">
+	<nor-action click="unpublish(content)" title="Remove method" icon="trash-o" dangerous-icon="trash" safety="enabled">Remove method {{content.$name}}?</nor-action>
+</div>
 <div class="nor-method" ng-if="content.$active">
-
-	<div class="actions">
-		<nor-action click="unpublish(content)" title="Remove method" icon="trash-o" dangerous-icon="trash" safety="enabled">Remove method {{content.$name}}?</nor-action>
-	</div>
 
 	<div class="pure-g">
 
@@ -11,7 +10,7 @@
 			<div class="value" nor-editable-content="content.title" on-commit="commit(content)">{{conent.title}}</div>
 		</div>
 
-		<div class="pure-u-1-6 nor-method-field nor-method-type">
+		<div class="pure-u-1-12 nor-method-field nor-method-type">
 			<div class="label"><i class="fa fa-tag" aria-hidden="true"></i> Type</div>
 			<div class="value">method</div>
 		</div>
@@ -21,7 +20,7 @@
 			<div class="value" nor-editable-content="content.$name" on-commit="commit(content)">{{content.$name}}</div>
 		</div>
 
-		<div class="pure-u-1-2 nor-method-field nor-method-description">
+		<div class="pure-u-7-12 nor-method-field nor-method-description">
 			<div class="label"><i class="fa fa-comment-o" aria-hidden="true"></i> Description</div>
 			<div class="value" nor-editable-content="content.description" on-commit="commit(content)">{{content.description}}</div>
 		</div>
@@ -29,10 +28,10 @@
 	</div>
 
 	<div class="nor-method-body-container">
-		<div class="nor-method-body" ng-model="body" ui-ace="bodyOptions" ng-style="{'height': ''+bodyHeight+'px'}"></div>
+		<div class="nor-method-body" ng-model="content.body" ui-ace="bodyOptions" ng-style="{'height': ''+bodyHeight+'px'}"></div>
 	</div>
 
-	<div class="publish-button-container" ng-if="content.body != content.$body">
+	<div class="publish-button-container" ng-if="content.body !== content.$body">
 		<button ng-click="publish()"><i class="fa fa-floppy-o" aria-hidden="true"></i> Publish changes</button>
 	</div>
 
