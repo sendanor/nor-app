@@ -1,19 +1,22 @@
 <div class="nor-table">
 
-	<div class="settings-container" ng-if="model.type">
+	<div class="settings-container" ng-if="ngModel.type">
+		Current View ID: {{currentViewID}}<br>
+		Current View: {{currentView}}<br>
+		listFields: {{listFields}}<br>
+		<br>
 		View:
-		<select ng-model="currentViewID" ng-options="view.$id as getViewLabel(view) for view in model.type.views.content">
-		</select>
+		<select ng-model="currentViewID" ng-options="view.$id as getViewLabel(view) for view in ngModel.type.views.content"></select>
 	</div>
 
 	<table>
     <thead>
     <tr>
-        <th ng-repeat="path in listFields track by getFieldIndex(path)" ng-init="title = getTitleFromPath(model.type, path)">{{title}}</th>
+        <th ng-repeat="path in listFields track by getFieldIndex(path)" ng-init="title = getTitleFromPath(ngModel.type, path)">{{title}}</th>
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="row in model.content track by $index">
+    <tr ng-repeat="row in ngModel.content track by $index">
         <td ng-repeat="path in listFields track by getFieldIndex(path)" ng-init="data = getDataFromPath(row, path)">
 			<span ng-if="$first"><nor-link link="row">{{data}}</nor-link></span>
 			<span ng-if="!$first">{{data}}</span>
@@ -23,7 +26,7 @@
 	</table>
 
 	<div class="results">
-		<span class="results-rows">Rows {{model.offset+1}}-{{model.offset + model.content.length}} of {{model.totalResults}} total</span>
+		<span class="results-rows">Rows {{ngModel.offset+1}}-{{ngModel.offset + ngModel.content.length}} of {{ngModel.totalResults}} total</span>
 		<span class="prev-page">
 			<a href="#" 
 			  ng-if="(!page_moving) && (page !== 1)"

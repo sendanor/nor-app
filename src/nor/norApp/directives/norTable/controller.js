@@ -6,34 +6,14 @@ var angular = require("angular");
 /* Tables */
 module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', function nor_table_controller($scope, norUtils, norRouter, $location, $timeout) {
 
-	$scope.content = $scope.content || ($scope.model && $scope.model.content) || [];
-
 	$scope.listFields = [];
-
-	if($scope.model.type) {
-		$scope.currentViewID = $scope.model.type.content.defaultView;
-		if($scope.model.type.views) {
-			$scope.currentView = $scope.model.type.views.byID[$scope.currentViewID];
-			if($scope.currentView) {
-				$scope.listFields = $scope.currentView.listFields;
-			}
-		}
-	}
-
-	$scope.$watch('currentViewID', function() {
-		if($scope.model.type && $scope.model.type.views) {
-			$scope.currentView = $scope.model.type.views.byID[$scope.currentViewID];
-			if($scope.currentView) {
-				$scope.listFields = $scope.currentView.listFields;
-			}
-		}
-	});
+	$scope.page_moving = false;
 
 	/** */
 	$scope.updatePaths = function() {
-		var model = $scope.model;
-		var columns = model && model.$columns;
-		var type = model && model.type;
+		var ngModel = $scope.ngModel;
+		var columns = ngModel && ngModel.$columns;
+		var type = ngModel && ngModel.type;
 		var listFields;
 		if($scope.currentView) {
 			listFields = $scope.currentView.listFields;
@@ -45,26 +25,18 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 	};
 
+	/** */
 	$scope.updatePages = function() {
-		var model = $scope.model;
-		var results = model.totalResults;
-		var offset = model.offset || 0;
-		var limit = model.limit;
+		var ngModel = $scope.ngModel;
+		var results = ngModel.totalResults;
+		var offset = ngModel.offset || 0;
+		var limit = ngModel.limit;
 
 		$scope.pages = Math.ceil(results/limit);
 		$scope.page = Math.floor(offset/results*$scope.pages)+1;
 	};
 
-	$scope.page_moving = false;
-
-	$scope.$watch('page_moving', function() {
-		if($scope.page_moving) {
-			$timeout(function() {
-				$scope.page_moving = false;
-			}, 500);
-		}
-	});
-
+	/** */
 	$scope.prevPage = function() {
 		if($scope.page_moving) {
 			debug.log('Page moving already!');
@@ -73,10 +45,10 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 		$scope.page_moving = true;
 
-		var model = $scope.model;
-		//var results = model.totalResults;
-		var offset = model.offset || 0;
-		var limit = model.limit;
+		var ngModel = $scope.ngModel;
+		//var results = ngModel.totalResults;
+		var offset = ngModel.offset || 0;
+		var limit = ngModel.limit;
 		var params = $location.search();
 		offset -= limit;
 		params = angular.merge(params, {'_offset':offset});
@@ -84,6 +56,7 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 		return norRouter.go($scope, $location.path(), params);
 	};
 
+	/** */
 	$scope.nextPage = function() {
 		if($scope.page_moving) {
 			debug.log('Page moving already!');
@@ -92,23 +65,16 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 		$scope.page_moving = true;
 
-		var model = $scope.model;
-		//var results = model.totalResults;
-		var offset = model.offset || 0;
-		var limit = model.limit;
+		var ngModel = $scope.ngModel;
+		//var results = ngModel.totalResults;
+		var offset = ngModel.offset || 0;
+		var limit = ngModel.limit;
 		var params = $location.search();
 		offset += limit;
 		return norRouter.go($scope, $location.path(), angular.merge(params, {'_offset':offset}));
 	};
 
-	$scope.updatePaths();
-	$scope.updatePages();
-
-	$scope.$watch('model', function() {
-		$scope.updatePaths();
-		$scope.updatePages();
-	}, true);
-
+	// Expose some functions
 	$scope.parsePathArray = norUtils.parsePathArray;
 	$scope.getDataFromPath = norUtils.getDataFromPath;
 	$scope.getSchemaFromPath = norUtils.getSchemaFromPath;
@@ -122,7 +88,50 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 	/** */
 	$scope.getFieldIndex = function(field) {
-		return $scope.getTitleFromPath($scope.model.type, field) || field;
+		return $scope.getTitleFromPath($scope.ngModel.type, field) || field;
 	};
+
+	// Watch our model
+	$scope.$watch('ngModel', function() {
+		debug.log('model changed: ', $scope.ngModel);
+
+		//$scope.content = ($scope.ngModel && $scope.ngModel.content) || [];
+
+		debug.log('$scope.ngModel.type = ', $scope.ngModel.type);
+
+		if($scope.ngModel && $scope.ngModel.type) {
+			$scope.currentViewID = ''+$scope.ngModel.type.content.defaultView;
+		} else {
+			$scope.currentViewID = '';
+		}
+
+		debug.log('$scope.currentViewID = ', $scope.currentViewID);
+
+		$scope.updatePaths();
+		$scope.updatePages();
+	}, true);
+
+	// Watch changes to currentViewID
+	$scope.$watch('currentViewID', function() {
+		debug.log('currentViewID changed: ', $scope.currentViewID);
+
+		if((!$scope.ngModel.type && $scope.ngModel.type.views)) {
+			return;
+		}
+
+		$scope.currentView = $scope.ngModel.type.views.byID[$scope.currentViewID];
+		if($scope.currentView) {
+			$scope.listFields = $scope.currentView.listFields;
+		}
+	});
+
+	// Watch changes to page_moving
+	$scope.$watch('page_moving', function() {
+		if($scope.page_moving) {
+			$timeout(function() {
+				$scope.page_moving = false;
+			}, 500);
+		}
+	});
 
 }];

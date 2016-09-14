@@ -9,8 +9,7 @@ module.exports = function nor_table_directive() {
 	return {
 		restrict: 'E',
 		scope: {
-			model: '=',
-			content: '=?',
+			ngModel: '=',
 			onCommit: '&?'
 		},
 		controller: controller,
