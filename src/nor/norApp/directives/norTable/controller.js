@@ -10,16 +10,18 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 	$scope.listFields = [];
 
-	$scope.currentViewID = $scope.model.type.content.defaultView;
-	if($scope.model.type.views) {
-		$scope.currentView = $scope.model.type.views.byID[$scope.currentViewID];
-		if($scope.currentView) {
-			$scope.listFields = $scope.currentView.listFields;
+	if($scope.model.type) {
+		$scope.currentViewID = $scope.model.type.content.defaultView;
+		if($scope.model.type.views) {
+			$scope.currentView = $scope.model.type.views.byID[$scope.currentViewID];
+			if($scope.currentView) {
+				$scope.listFields = $scope.currentView.listFields;
+			}
 		}
 	}
 
 	$scope.$watch('currentViewID', function() {
-		if($scope.model.type.views) {
+		if($scope.model.type && $scope.model.type.views) {
 			$scope.currentView = $scope.model.type.views.byID[$scope.currentViewID];
 			if($scope.currentView) {
 				$scope.listFields = $scope.currentView.listFields;

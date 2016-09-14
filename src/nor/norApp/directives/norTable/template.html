@@ -1,6 +1,6 @@
 <div class="nor-table">
 
-	<div class="settings-container">
+	<div class="settings-container" ng-if="model.type">
 		View:
 		<select ng-model="currentViewID" ng-options="view.$id as getViewLabel(view) for view in model.type.views.content">
 		</select>
