@@ -81,32 +81,32 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 	};
 
 	$scope.normalizeEnabledFields = function() {
-		debug.log('before $scope.enabledFields = ', $scope.enabledFields);
+		//debug.log('before $scope.enabledFields = ', $scope.enabledFields);
 
 		var paths = $scope.paths.map(function(path) { return path.join('.'); });
-		debug.log('paths = ', paths);
+		//debug.log('paths = ', paths);
 
 		$scope.enabledFields = remove_duplicates($scope.enabledFields.filter(function(field) {
 			return paths.indexOf(field) >= 0;
 		}));
 
-		debug.log('after $scope.enabledFields = ', $scope.enabledFields);
+		//debug.log('after $scope.enabledFields = ', $scope.enabledFields);
 	};
 
 	$scope.normalizeAvailableFields = function() {
-		debug.log('before $scope.availableFields = ', $scope.availableFields);
+		//debug.log('before $scope.availableFields = ', $scope.availableFields);
 
 		var paths = $scope.paths.map(function(path) { return path.join('.'); });
-		debug.log('paths = ', paths);
+		//debug.log('paths = ', paths);
 
 		var enabledFields = $scope.enabledFields;
-		debug.log('enabledFields = ', enabledFields);
+		//debug.log('enabledFields = ', enabledFields);
 
 		$scope.availableFields = remove_duplicates($scope.availableFields.filter(function(field) {
 			return (paths.indexOf(field) >= 0) && (enabledFields.indexOf(field) < 0);
 		}));
 
-		debug.log('after $scope.availableFields = ', $scope.availableFields);
+		//debug.log('after $scope.availableFields = ', $scope.availableFields);
 	};
 
 	$scope.updatePaths();
@@ -123,16 +123,16 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 	/** */
 	$scope.saveChanges = function(view, fields) {
-		debug.log('view = ', view);
+		//debug.log('view = ', view);
 		debug.assert(view).is('object');
 		debug.assert(view.$ref).is('string');
 		if(fields !== undefined) {
-			debug.log('fields = ', fields);
+			//debug.log('fields = ', fields);
 			debug.assert(fields).is('array');
 			view.listFields = fields;
 		}
 		return norRouter.post(view.$ref, {'content': view}).then(function(/*data*/) {
-			debug.log('successfully changed view');
+			//debug.log('successfully changed view');
 			if(fields) {
 				$scope.editing = false;
 			}
@@ -152,11 +152,11 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 	/** */
 	$scope.removeView = function nor_remove_view(view) {
-		debug.log('view = ', view);
+		//debug.log('view = ', view);
 		debug.assert(view).is('object');
 		debug.assert(view.$ref).is('string');
 		return norRouter.del(view.$ref).then(function(/*data*/) {
-			debug.log('successfully removed view');
+			//debug.log('successfully removed view');
 			$scope.deleted = true;
 		}, function errorCallback(response) {
 			debug.error("error: ", response);
@@ -165,15 +165,15 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 	/** */
 	$scope.setAsDefaultView = function(type, view) {
-		debug.log('view = ', view);
+		//debug.log('view = ', view);
 		debug.assert(view).is('object');
 		debug.assert(view.$id).is('uuid');
-		debug.log('type = ', type);
+		//debug.log('type = ', type);
 		debug.assert(type).is('object');
 		debug.assert(type.$ref).is('string');
 		type.content.defaultView = view.$id;
 		return norRouter.post(type.$ref, {'content': type.content}).then(function(/*data*/) {
-			debug.log('successfully changed type\'s default view');
+			//debug.log('successfully changed type\'s default view');
 		}, function errorCallback(response) {
 			debug.error("error: ", response);
 		});
@@ -199,11 +199,11 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 					debug.assert($scope.type.$ref).is('url');
 
 					//$scope.content = data.content;
-					debug.log('data = ', data);
-					debug.log('$ref = ', $scope.type.$ref);
+					//debug.log('data = ', data);
+					//debug.log('$ref = ', $scope.type.$ref);
 
 					return norRouter.get($scope.type.$ref).then(function(data2) {
-						debug.log('data2 = ', data2);
+						//debug.log('data2 = ', data2);
 						$scope.type = data2;
 						$scope.show_clone_view_options = false;
 					});

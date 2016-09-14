@@ -94,11 +94,11 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 					"$body": data.body
 				}}).then(function(data) {
 					//$scope.content = data.content;
-					debug.log('data = ', data);
-					debug.log('$ref = ', $scope.content.$ref);
+					//debug.log('data = ', data);
+					//debug.log('$ref = ', $scope.content.$ref);
 
 					return norRouter.get($scope.content.$ref).then(function(data2) {
-						debug.log('data2 = ', data2);
+						//debug.log('data2 = ', data2);
 						$scope.content = data2.content;
 						$scope.methods = data2.methods;
 						$scope.show_add_method_options = false;
@@ -128,11 +128,11 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 					debug.assert($scope.content.$ref).is('url');
 
 					//$scope.content = data.content;
-					debug.log('data = ', data);
-					debug.log('$ref = ', $scope.content.$ref);
+					//debug.log('data = ', data);
+					//debug.log('$ref = ', $scope.content.$ref);
 
 					return norRouter.get($scope.content.$ref).then(function(data2) {
-						debug.log('data2 = ', data2);
+						//debug.log('data2 = ', data2);
 						$scope.content = data2.content;
 						$scope.views = data2.views;
 						$scope.show_add_view_options = false;
