@@ -123,6 +123,10 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 				$scope.show_add_view_options = false;
 				debug.assert($scope.views).is('object');
 				debug.assert($scope.views.$ref).is('url');
+
+				data.title = (''+data.$name).trim();
+				data.$name = data.title.toLowerCase().replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+/g, "").replace(/_+$/, "");
+
 				return norRouter.post($scope.views.$ref, {'content': data}).then(function(data) {
 					debug.assert($scope.content).is('object');
 					debug.assert($scope.content.$ref).is('url');
