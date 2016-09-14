@@ -1,12 +1,8 @@
 <div class="nor-table">
 
 	<div class="settings-container" ng-if="ngModel.type">
-		Current View ID: {{currentViewID}}<br>
-		Current View: {{currentView}}<br>
-		listFields: {{listFields}}<br>
-		<br>
 		View:
-		<select ng-model="currentViewID" ng-options="view.$id as getViewLabel(view) for view in ngModel.type.views.content"></select>
+		<select ng-model="$parent.currentViewID" ng-options="view.$id as getViewLabel(view) for view in $parent.ngModel.type.views.content"></select>
 	</div>
 
 	<table>

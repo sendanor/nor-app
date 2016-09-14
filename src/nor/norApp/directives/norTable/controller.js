@@ -22,6 +22,7 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 		$scope.paths = (type && norUtils.getPathsFromType(type)) || columns.map(norUtils.parsePathArray) || [['$id'], ['$created'], ['$modified']];
 
 		$scope.listFields = listFields || $scope.paths.map(function(path) { return path.join('.'); }) || [];
+		debug.log('$scope.listFields as ', $scope.listFields);
 
 	};
 
@@ -115,14 +116,20 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 	$scope.$watch('currentViewID', function() {
 		debug.log('currentViewID changed: ', $scope.currentViewID);
 
-		if((!$scope.ngModel.type && $scope.ngModel.type.views)) {
-			return;
+		if($scope.ngModel.type && $scope.ngModel.type.views) {
+			$scope.currentView = $scope.ngModel.type.views.byID[$scope.currentViewID];
+		} else {
+			$scope.currentView = undefined;
 		}
 
-		$scope.currentView = $scope.ngModel.type.views.byID[$scope.currentViewID];
 		if($scope.currentView) {
 			$scope.listFields = $scope.currentView.listFields;
+			debug.log('$scope.listFields as ', $scope.listFields);
+		} else {
+			$scope.listFields = [];
 		}
+
+		$scope.updatePaths();
 	});
 
 	// Watch changes to page_moving
