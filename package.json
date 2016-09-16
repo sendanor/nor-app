@@ -1,6 +1,6 @@
 {
   "name": "nor-app",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Sendanor Hypermedia App Server",
   "main": "src/index.js",
   "scripts": {
