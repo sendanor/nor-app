@@ -8,64 +8,15 @@
 </head>
 <body>
 
-<div class="nor-loader" ng-if="false">
-	<i class="fa fa-spinner fa-spin"></i> Loading...
-</div>
+	<nor-loader></nor-loader>
+	<nor-header id="header" ng-model="model.$app"></nor-header>
+	<nor-content id="content" ng-model="model"></nor-content>
+	<nor-footer id="header" ng-model="model.$app"></nor-header>
 
-<div id="header">
-	<div class="main-menu pure-menu pure-menu-horizontal">
-	    <a href="/" class="pure-menu-heading pure-menu-link ng-cloak">{{model.$app.name}}</a>
-	    <ul class="pure-menu-list">
-	        <li class="ng-cloak pure-menu-item" ng-repeat="link in model.$app.menu">
-				<nor-link link="link" class="pure-menu-link">{{link.title}}</nor-link>
-			</li>
-	    </ul>
-	</div>
-</div>
-
-<div id="content">
-
- <h1 class="ng-cloak">{{model.title}}</h1>
-
- <div class="links-menu pure-menu pure-menu-horizontal" ng-if="model.links && (model.links.length >= 1)">
-    <ul class="pure-menu-list">
-        <li class="pure-menu-item ng-cloak" ng-repeat="link in model.links"><nor-link link="link" class="pure-menu-link">{{link.title}}</a></li>
-    </ul>
- </div>
-
- <div ng-switch="getContentType()">
-
-  <div ng-switch-when="form">
-	<nor-form model="model"></nor-form>
-  </div>
-
-  <div ng-switch-when="table">
-	<nor-table ng-model="model"></nor-table>
-  </div>
-
-  <div ng-switch-when="record">
-	<nor-record content="model.content" type="model.type"></nor-record>
-  </div>
-
-  <div ng-switch-when="Type">
-	<nor-type ng-model="model"></nor-type>
-  </div>
-
-  <div ng-switch-default>
-    <p class="ng-cloak">{{model.content}}</p>
-  </div>
-
- </div>
-
-</div>
-
-<div id="footer">
-</div>
-
-<!-- Scripts -->
-<script src="/_libs/ace/ace.js"></script>
-<script src="/vendor.bundle.js"></script>
-<script src="/app.bundle.js"></script>
+	<!-- Scripts -->
+	<script src="/_libs/ace/ace.js"></script>
+	<script src="/vendor.bundle.js"></script>
+	<script src="/app.bundle.js"></script>
 
 </body>
 </html>

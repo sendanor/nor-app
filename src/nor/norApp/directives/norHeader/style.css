@@ -1,0 +1,13 @@
+.nor-header {
+	background-color: #c0e0e0;
+
+	.main-menu {
+		background-color: #c0e0e0;
+	}
+
+	.main-menu li {
+	    background-color: #e0f0f0;
+		border-left: 0.25em solid #c0e0e0;
+	}
+
+}

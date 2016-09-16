@@ -1,0 +1,11 @@
+<div class="nor-header">
+	<div class="main-menu pure-menu pure-menu-horizontal">
+	    <a href="/" class="pure-menu-heading pure-menu-link ng-cloak">{{ngModel.name}}</a>
+	    <ul class="pure-menu-list">
+	        <li class="ng-cloak pure-menu-item" ng-repeat="link in ngModel.menu">
+				<nor-link link="link" class="pure-menu-link">{{link.title}}</nor-link>
+			</li>
+	    </ul>
+	</div>
+</div>
+

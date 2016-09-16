@@ -1,17 +1,17 @@
 "use strict";
 
+require('./style.css');
 var template = require('./template.html');
 var controller = require('./controller.js');
 
-/* Forms */
-module.exports = function norForm_directive() {
+/* Types */
+module.exports = [function nor_content_directive() {
 	return {
 		restrict: 'E',
 		scope: {
-			model: '=',
-			content: '=?',
+			ngModel: '='
 		},
 		controller: controller,
 		templateUrl: template
 	};
-};
+}];

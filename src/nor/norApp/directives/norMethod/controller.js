@@ -1,7 +1,7 @@
 "use strict";
 
 var merge = require('merge');
-var debug = require('nor-debug');
+//var debug = require('nor-debug');
 
 /* Method */
 module.exports = ['$scope', '$log', 'norRouter', '$timeout', function nor_method_controller($scope, $log, norRouter, $timeout) {
@@ -13,7 +13,13 @@ module.exports = ['$scope', '$log', 'norRouter', '$timeout', function nor_method
 		mode: 'javascript',
 		useWrapMode : false,
 		highlightActiveLine: true,
-		enableVerticalScrollbar: true
+		enableVerticalScrollbar: true,
+		onLoad: function (_editor) {
+			// This is to remove following warning message on console:
+			// Automatically scrolling cursor into view after selection change this will be disabled in the next version
+			// set editor.$blockScrolling = Infinity to disable this message
+			_editor.$blockScrolling = Infinity;
+		}
 	};
 
 	$scope.rowHeight = 16;

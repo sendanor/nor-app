@@ -11,39 +11,3 @@ body {
 	margin: 0;
 	background-color: #ffffff;
 }
-
-#header {
-	background-color: #c0e0e0;
-}
-
-#header .main-menu {
-	background-color: #c0e0e0;
-}
-
-#header .main-menu li {
-    background-color: #e0f0f0;
-	border-left: 0.25em solid #c0e0e0;
-}
-
-#content {
-	padding-left: 2em;
-	padding-right: 2em;
-	min-width: 100%;
-	overflow: auto;
-}
-
-#content .links-menu {
-    background-color: #c0e0e0;
-	margin-bottom: 2em;
-}
-
-#content .links-menu li {
-    background-color: #e0f0f0;
-	border-left: 0.25em solid #c0e0e0;
-}
-
-#footer {
-	height: 2em;
-	margin-top: 2em;
-	background-color: #c0e0e0;
-}

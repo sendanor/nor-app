@@ -1,6 +1,6 @@
 "use strict";
 
-var debug = require('nor-debug');
+//var debug = require('nor-debug');
 
 /** Element for string JSON schema */
 module.exports = ['$scope', '$q', function($scope, $q) {

@@ -92,7 +92,7 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 					'title': title,
 					"$name": name,
 					"$body": data.body
-				}}).then(function(data) {
+				}}).then(function(/*data*/) {
 					//$scope.content = data.content;
 					//debug.log('data = ', data);
 					//debug.log('$ref = ', $scope.content.$ref);
@@ -127,7 +127,7 @@ module.exports = ['$scope', '$log', 'norRouter', function nor_type_controller($s
 				data.title = (''+data.$name).trim();
 				data.$name = data.title.toLowerCase().replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+/g, "").replace(/_+$/, "");
 
-				return norRouter.post($scope.views.$ref, {'content': data}).then(function(data) {
+				return norRouter.post($scope.views.$ref, {'content': data}).then(function(/*data*/) {
 					debug.assert($scope.content).is('object');
 					debug.assert($scope.content.$ref).is('url');
 

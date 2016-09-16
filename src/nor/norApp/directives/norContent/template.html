@@ -1,0 +1,35 @@
+<div class="nor-content">
+
+ <h1 class="ng-cloak">{{ngModel.title}}</h1>
+
+ <div class="links-menu pure-menu pure-menu-horizontal" ng-if="ngModel.links && (ngModel.links.length >= 1)">
+    <ul class="pure-menu-list">
+        <li class="pure-menu-item ng-cloak" ng-repeat="link in ngModel.links"><nor-link link="link" class="pure-menu-link">{{link.title}}</a></li>
+    </ul>
+ </div>
+
+ <div ng-switch="getContentType(ngModel)">
+
+  <div ng-switch-when="form">
+	<nor-form model="ngModel"></nor-form>
+  </div>
+
+  <div ng-switch-when="table">
+	<nor-table ng-model="ngModel"></nor-table>
+  </div>
+
+  <div ng-switch-when="record">
+	<nor-record content="ngModel.content" type="ngModel.type"></nor-record>
+  </div>
+
+  <div ng-switch-when="Type">
+	<nor-type ng-model="ngModel"></nor-type>
+  </div>
+
+  <div ng-switch-default>
+    <p class="ng-cloak">{{ngModel.content}}</p>
+  </div>
+
+ </div>
+
+</div>

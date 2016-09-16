@@ -1,5 +1,6 @@
 "use strict";
 
+var debug = require('nor-debug');
 var angular = require("angular");
 
 /** Returns the resource suffix part of an API URL */
@@ -105,7 +106,10 @@ module.exports = ['$http', '$log', '$location', '$q', function($http, $log, $loc
 	}
 
 	/** Go to page */
-	function do_go($scope, path, params) {
+	function do_go(key) {
+	  key = key || 'model';
+	  debug.assert(key).is('string');
+	  return function do_go_($scope, path, params) {
 		if(!$scope) { throw new TypeError("!$scope"); }
 		if(!path) { throw new TypeError("!path"); }
 		if(params) {
@@ -118,8 +122,8 @@ module.exports = ['$http', '$log', '$location', '$q', function($http, $log, $loc
 			}
 			reset_search_params(params||{});
 			//change_scope_data($scope, data);
-			if($scope.model) {
-				reset_model($scope.model, data);
+			if($scope[key]) {
+				reset_model($scope[key], data);
 			}
 			return data;
 		}, function errorCallback(data) {
@@ -129,23 +133,26 @@ module.exports = ['$http', '$log', '$location', '$q', function($http, $log, $loc
 			}
 			reset_search_params(params||{});
 			//change_scope_data($scope, data);
-			if($scope.model) {
-				reset_model($scope.model, data);
+			if($scope[key]) {
+				reset_model($scope[key], data);
 			}
 			return data;
 		});
+	  };
 	}
 
 	/** */
-	function initialize($scope) {
+	function initialize($scope, key) {
 		if(!$scope) { throw new TypeError("!$scope"); }
+		key = key || 'model';
+		debug.assert(key).is('string');
 
-		$scope.model = {};
+		$scope[key] = {};
 
 		$scope.$on('$locationChangeSuccess', function() {
 			var path = $location.path();
 			//$log.debug("path = " + path);
-			do_go($scope, path, $location.search());
+			do_go(key)($scope, path, $location.search());
 		});
 
 	}
@@ -178,7 +185,7 @@ module.exports = ['$http', '$log', '$location', '$q', function($http, $log, $loc
 	// Return interface to access functions
 	return {
 		'initialize': initialize,
-		'go': do_go,
+		'go': do_go('model'),
 		//'addResetAction': add_reset_action,
 		//'reset': reset_scopes,
 		'resetModel': reset_model,

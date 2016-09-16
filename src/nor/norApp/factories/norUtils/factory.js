@@ -445,7 +445,7 @@ module.exports = function nor_utils_factory($log) {
 		}
 
 		if(!schema) {
-			$log.debug("schema does not exist");
+			//$log.debug("schema does not exist");
 			return;
 		}
 

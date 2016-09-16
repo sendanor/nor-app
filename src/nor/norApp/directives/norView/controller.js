@@ -11,7 +11,7 @@ function remove_duplicates(a) {
 }
 
 /* Tables */
-module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', function nor_table_controller($scope, norUtils, norRouter, $location, $timeout) {
+module.exports = ['$scope', 'norUtils', 'norRouter', function nor_table_controller($scope, norUtils, norRouter) {
 
 	/** True if element has been removed */
 	$scope.deleted = false;
@@ -194,7 +194,7 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 				$scope.show_clone_view_options = false;
 				debug.assert($scope.type.views).is('object');
 				debug.assert($scope.type.views.$ref).is('url');
-				return norRouter.post($scope.type.views.$ref, {'content': data}).then(function(data) {
+				return norRouter.post($scope.type.views.$ref, {'content': data}).then(function(/*data*/) {
 					debug.assert($scope.type).is('object');
 					debug.assert($scope.type.$ref).is('url');
 
