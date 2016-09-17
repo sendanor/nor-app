@@ -2,9 +2,10 @@
 
 //var parse_path_name = require('../../lib/parse_path_name.js');
 
-module.exports = function($scope, $http, $log, $location, norRouter) {
+module.exports = function($scope, norRouter) {
 
-	norRouter.initialize($scope);
+	// Initializes $scope.model from REST service based on the current location
+	norRouter.initialize($scope, 'model');
 
 	//$scope.keys = Object.keys;
 

@@ -22,7 +22,7 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 		$scope.paths = (type && norUtils.getPathsFromType(type)) || columns.map(norUtils.parsePathArray) || [['$id'], ['$created'], ['$modified']];
 
 		$scope.listFields = listFields || $scope.paths.map(function(path) { return path.join('.'); }) || [];
-		debug.log('$scope.listFields as ', $scope.listFields);
+		//debug.log('$scope.listFields as ', $scope.listFields);
 
 	};
 
@@ -40,7 +40,7 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 	/** */
 	$scope.prevPage = function() {
 		if($scope.page_moving) {
-			debug.log('Page moving already!');
+			//debug.log('Page moving already!');
 			return;
 		}
 
@@ -60,7 +60,7 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 	/** */
 	$scope.nextPage = function() {
 		if($scope.page_moving) {
-			debug.log('Page moving already!');
+			//debug.log('Page moving already!');
 			return;
 		}
 
@@ -94,11 +94,11 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 	// Watch our model
 	$scope.$watch('ngModel', function() {
-		debug.log('model changed: ', $scope.ngModel);
+		//debug.log('model changed: ', $scope.ngModel);
 
 		//$scope.content = ($scope.ngModel && $scope.ngModel.content) || [];
 
-		debug.log('$scope.ngModel.type = ', $scope.ngModel.type);
+		//debug.log('$scope.ngModel.type = ', $scope.ngModel.type);
 
 		if($scope.ngModel && $scope.ngModel.type) {
 			$scope.currentViewID = ''+$scope.ngModel.type.content.defaultView;
@@ -106,7 +106,7 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 			$scope.currentViewID = '';
 		}
 
-		debug.log('$scope.currentViewID = ', $scope.currentViewID);
+		//debug.log('$scope.currentViewID = ', $scope.currentViewID);
 
 		$scope.updatePaths();
 		$scope.updatePages();
@@ -114,7 +114,7 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 	// Watch changes to currentViewID
 	$scope.$watch('currentViewID', function() {
-		debug.log('currentViewID changed: ', $scope.currentViewID);
+		//debug.log('currentViewID changed: ', $scope.currentViewID);
 
 		if($scope.ngModel.type && $scope.ngModel.type.views) {
 			$scope.currentView = $scope.ngModel.type.views.byID[$scope.currentViewID];
@@ -124,7 +124,7 @@ module.exports = ['$scope', 'norUtils', 'norRouter', '$location', '$timeout', fu
 
 		if($scope.currentView) {
 			$scope.listFields = $scope.currentView.listFields;
-			debug.log('$scope.listFields as ', $scope.listFields);
+			//debug.log('$scope.listFields as ', $scope.listFields);
 		} else {
 			$scope.listFields = [];
 		}
