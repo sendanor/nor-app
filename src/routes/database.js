@@ -13,6 +13,7 @@ var PATH = require('path');
 var _Q = require('q');
 
 var export_handlers = require('../lib/exports/');
+var forms = require('../lib/forms/');
 
 /** Default limit of data in a collection searches */
 var DEFAULT_SEARCH_LIMIT = 20;
@@ -896,26 +897,6 @@ function del_type_handler(opts) {
 	};
 }
 
-/** Returns form fields based on type object */
-function get_form_fields(type) {
-	debug.assert(type).is('object');
-	var schema = type.$schema || {};
-	var properties = schema.properties || {};
-
-	var fields = [
-	];
-
-	ARRAY(Object.keys(properties)).forEach(function(key) {
-		var prop = properties[key];
-
-		if(prop.type === 'string') {
-			fields.push({'type':'text','name':key, 'label':prop.title||key, 'description':prop.description||''});
-		}
-	});
-
-	return fields;
-}
-
 /** Get a form to create a document
  * @returns `function(req, res)` which uses promises
  */
@@ -924,7 +905,7 @@ function get_create_doc_form(opts) {
 	opts = opts || {};
 	debug.assert(opts.pg).is('string');
 
-	return function(req/*, res*/) {
+	return function get_create_doc_form_(req/*, res*/) {
 
 		var params = req.params || {};
 		debug.assert(params).is('object');
@@ -940,15 +921,15 @@ function get_create_doc_form(opts) {
 
 		return nopg.transaction(opts.pg, function(tr) {
 			return tr.searchTypes({'$name':type}).then(function(tr) {
-				var obj = tr.fetchSingle();
-
-				var fields = get_form_fields(obj);
+				var type_obj = tr.fetchSingle();
+				var fields = forms.getFormFields(type_obj);
 
 				return {
 					'title': 'Create a new document',
 					'$type': 'form',
 					'$target': ref(req, 'api/database/types', type, 'documents/create'),
-					'content': fields
+					'content': fields,
+					'type': prepare_type(req, type_obj)
 				};
 			});
 		});

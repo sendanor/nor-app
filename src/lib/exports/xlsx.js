@@ -26,8 +26,8 @@ function datenum(v, date1904) {
 function sheet_from_array_of_arrays(data/*, opts*/) {
 	var ws = {};
 	var range = {s: {c:10000000, r:10000000}, e: {c:0, r:0 }};
-	for(var R = 0; R !== data.length; ++R) {
-		for(var C = 0; C !== data[R].length; ++C) {
+	for(var R = 0; R !== data.length; R+=1) {
+		for(var C = 0; C !== data[R].length; C+=1) {
 			if(range.s.r > R) { range.s.r = R; }
 			if(range.s.c > C) { range.s.c = C; }
 			if(range.e.r < R) { range.e.r = R; }
