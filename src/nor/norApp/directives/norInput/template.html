@@ -1,0 +1,5 @@
+<div ng-switch="type">
+	<nor-input-array    name="name" label="label" placeholder="placeholder" ng-model="ngModel" ng-switch-when="array" on-commit="commit(ngModel)"></nor-input-array>
+	<nor-input-checkbox name="name" label="label" placeholder="placeholder" ng-model="ngModel" ng-switch-when="checkbox" on-commit="commit(ngModel)"></nor-input-checkbox>
+	<nor-input-text     name="name" label="label" placeholder="placeholder" ng-model="ngModel" ng-switch-default on-commit="commit(ngModel)"></nor-input-text>
+</div>

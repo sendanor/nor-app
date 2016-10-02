@@ -8,10 +8,13 @@
 			</div>
 		</div>
 
-        <div class="pure-control-group" ng-repeat="field in content">
-            <label for="field-{{field.name}}">{{field.label||field.name}}</label>
-            <input id="field-{{field.name}}" ng-model="data[field.name]" name="{{field.name}}" type="{{field.type}}" placeholder="{{field.placeholder||''}}">
-        </div>
+		<nor-input
+		 ng-repeat="field in content"
+		 ngModel="data[field.name]"
+		 label="field.label"
+		 name="field.name"
+		 type="field.type"
+		 placeholder="field.placeholder"></nor-input>
 
         <div class="pure-controls">
             <button name="submit" type="submit" class="pure-button pure-button-primary">Submit</button>

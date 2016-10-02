@@ -24,3 +24,7 @@ app.directive('norHeader', require('./norHeader/index.js'));
 app.directive('norContent', require('./norContent/index.js'));
 app.directive('norFooter', require('./norFooter/index.js'));
 app.directive('norLoader', require('./norLoader/index.js'));
+app.directive('norInput', require('./norInput/index.js'));
+app.directive('norInputCheckbox', require('./norInputCheckbox/index.js'));
+app.directive('norInputText', require('./norInputText/index.js'));
+app.directive('norInputArray', require('./norInputArray/index.js'));
