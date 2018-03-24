@@ -1,9 +1,9 @@
-[![view on npm](http://img.shields.io/npm/v/nor-nopg.svg)](https://www.npmjs.org/package/nor-nopg)
-[![npm module downloads](http://img.shields.io/npm/dt/nor-nopg.svg)](https://www.npmjs.org/package/nor-nopg)
-[![Dependency Status](https://david-dm.org/sendanor/nor-nopg.svg)](https://david-dm.org/sendanor/nor-nopg)
+[![view on npm](http://img.shields.io/npm/v/nor-app.svg)](https://www.npmjs.org/package/nor-app)
+[![npm module downloads](http://img.shields.io/npm/dt/nor-app.svg)](https://www.npmjs.org/package/nor-app)
+[![Dependency Status](https://david-dm.org/sendanor/nor-app.svg)](https://david-dm.org/sendanor/nor-app)
 <!---
-[![Build Status](https://travis-ci.org/sendanor/nor-nopg.svg?branch=master)](https://travis-ci.org/sendanor/nor-nopg)
-[![Coverage Status](https://coveralls.io/repos/github/sendanor/nor-nopg/badge.svg?branch=master)](https://coveralls.io/github/sendanor/nor-nopg?branch=master)
+[![Build Status](https://travis-ci.org/sendanor/nor-app.svg?branch=master)](https://travis-ci.org/sendanor/nor-app)
+[![Coverage Status](https://coveralls.io/repos/github/sendanor/nor-app/badge.svg?branch=master)](https://coveralls.io/github/sendanor/nor-app?branch=master)
 -->
 
 nor-app -- Hypermedia App Server
